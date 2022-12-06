@@ -1,0 +1,27 @@
+{
+  "name": "de-node",
+  "version": "1.0.0",
+  "description": "Run NodeJS with logging options needed by Deopt Explorer",
+  "bin": {
+    "de-node": "bin/de-node"
+  },
+  "keywords": [
+    "deopt",
+    "explorer",
+    "nodejs",
+    "v8"
+  ],
+  "author": "Ron Buckton <ron.buckton@microsoft.com>",
+  "license": "MIT",
+  "dependencies": {
+    "semver": "^7.3.8"
+  },
+  "devDependencies": {
+    "@types/semver": "^7.3.13"
+  },
+  "scripts": {
+    "compile": "tsc -b",
+    "prestart": "npm run compile",
+    "start": "node bin/de-node"
+  }
+}

@@ -1,0 +1,18 @@
+{
+	"compilerOptions": {
+		"module": "commonjs",
+		"target": "es2018",
+		"lib": ["esnext"],
+		"outDir": "out",
+		"rootDir": "src",
+		"sourceMap": true,
+		"strict": true,
+		"skipLibCheck": true,
+		"removeComments": true,
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true,
+		"experimentalDecorators": true,
+	},
+	"include": ["src"],
+	"exclude": ["node_modules", ".vscode-test"]
+}

@@ -1,0 +1,272 @@
+# [PackageDev] target_format: plist, ext: tmLanguage
+---
+name: V8 Map
+scopeName: source.v8-map
+fileTypes: [v8-map]
+uuid: 2b39fbd1-0479-496b-a908-a04d1ca9f99f
+
+variables:
+  startOfIdentifier: (?<![_$[:alnum:]])(?:(?<=\.\.\.)|(?<!\.))
+  endOfIdentifier: (?![_$[:alnum:]])(?:(?=\.\.\.)|(?!\.))
+  identifier: '[_$[:alpha:]][_$[:alnum:]]*'
+  constantIdentifier: '[[:upper:]][_$[:digit:][:upper:]]*'
+  propertyIdentifier: '\#?{{identifier}}'
+  constantPropertyIdentifier: '\#?{{constantIdentifier}}'
+  quotedStrings: (\'([^\'\\]|\\.)*\')|(\"([^\"\\]|\\.)*\")|(\`([^\`\\]|\\.)*\`)
+  nonIdentifierPropertyName: '{{quotedStrings}}|(\[([^\[\]]|\[[^\[\]]*\])+\])'
+  hexDigits: '[0-9a-fA-F][0-9a-fA-F_]*'
+  hexNumber: \b(?<!\$)0(?:x|X){{hexDigits}}(n)?\b(?!\$)
+  binaryNumber: \b(?<!\$)0(?:b|B)[01][01_]*(n)?\b(?!\$)
+  octalNumber: \b(?<!\$)0(?:o|O)?[0-7][0-7_]*(n)?\b(?!\$)
+  decimalNumber: |-
+    (?<!\$)(?:
+      (?:\b[0-9][0-9_]*(\.)[0-9][0-9_]*[eE][+-]?[0-9][0-9_]*(n)?\b)| # 1.1E+3
+      (?:\b[0-9][0-9_]*(\.)[eE][+-]?[0-9][0-9_]*(n)?\b)|             # 1.E+3
+      (?:\B(\.)[0-9][0-9_]*[eE][+-]?[0-9][0-9_]*(n)?\b)|             # .1E+3
+      (?:\b[0-9][0-9_]*[eE][+-]?[0-9][0-9_]*(n)?\b)|                 # 1E+3
+      (?:\b[0-9][0-9_]*(\.)[0-9][0-9_]*(n)?\b)|                      # 1.1
+      (?:\b[0-9][0-9_]*(\.)(n)?\B)|                                  # 1.
+      (?:\B(\.)[0-9][0-9_]*(n)?\b)|                                  # .1
+      (?:\b[0-9][0-9_]*(n)?\b(?!\.))                                 # 1
+    )(?!\$)
+  anyNumber: ({{hexNumber}})|({{binaryNumber}})|({{octalNumber}})|({{decimalNumber}})
+  propertyName: ({{anyNumber}}|({{identifier}})|{{nonIdentifierPropertyName}})
+  constantVar: ({{constantIdentifier}})(?![_$[:alnum:]])
+  matchingParenthesis: (\(([^\(\)]|(\(([^\(\)]|\([^\(\)]*\))*\)))*\))
+  matchingBraces: (\{([^\{\}]|(\{([^\{\}]|\{[^\{\}]*\})*\}))*\})
+  matchingBrackets: (\[([^\[\]]|(\[([^\[\]]|\[[^\[\]]*\])*\]))*\])
+  inlineComment: \/\*([^\*]|(\*[^\/]))*\*\/
+  startOfDeclaration: '{{startOfIdentifier}}'
+  
+patterns:
+- include: '#comment'
+- include: '#map'
+
+repository:
+  comment:
+    patterns:
+    - name: comment.block.v8-map
+      begin: /\*
+      beginCaptures:
+        '0': { name: punctuation.definition.comment.v8-map }
+      end: \*/
+      endCaptures:
+        '0': { name: punctuation.definition.comment.v8-map }
+    - name: comment.line.v8-map
+      begin: //
+      beginCaptures:
+        '0': { name: punctuation.definition.comment.v8-map }
+      end: (?=$)
+
+  punctuation-comma:
+    name: punctuation.separator.comma.v8-map
+    match: ','
+
+  punctuation-semicolon:
+    name: punctuation.separator.semicolon.v8-map
+    match: ';'
+
+  string:
+    patterns:
+    - include: '#qstring-single'
+    - include: '#qstring-double'
+
+  qstring-double:
+    name: string.quoted.double.v8-map
+    begin: '"'
+    beginCaptures:
+      '0': { name: punctuation.definition.string.begin.v8-map }
+    end: '(")|((?:[^\\\n])$)'
+    endCaptures:
+      '1': { name: punctuation.definition.string.end.v8-map }
+      '2': { name: invalid.illegal.newline.v8-map }
+    patterns:
+    - include: '#string-character-escape'
+
+  qstring-single:
+    name: string.quoted.single.v8-map
+    begin: "'"
+    beginCaptures:
+      '0': { name: punctuation.definition.string.begin.v8-map }
+    end: (\')|((?:[^\\\n])$)
+    endCaptures:
+      '1': { name: punctuation.definition.string.end.v8-map }
+      '2': { name: invalid.illegal.newline.v8-map }
+    patterns:
+    - include: '#string-character-escape'
+
+  string-character-escape:
+    name: constant.character.escape.v8-map
+    match: \\(x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|u\{[0-9A-Fa-f]+\}|[0-2][0-7]{0,2}|3[0-6][0-7]?|37[0-7]?|[4-7][0-7]?|.|$)
+
+  numeric-literal:
+    patterns:
+    - name: constant.numeric.hex.v8-map
+      match: '{{hexNumber}}'
+      captures:
+        '1': { name: storage.type.numeric.bigint.v8-map }
+    - name: constant.numeric.binary.v8-map
+      match: '{{binaryNumber}}'
+      captures:
+        '1': { name: storage.type.numeric.bigint.v8-map }
+    - name: constant.numeric.octal.v8-map
+      match: '{{octalNumber}}'
+      captures:
+        '1': { name: storage.type.numeric.bigint.v8-map }
+    - match: |-
+        (?x)
+        {{decimalNumber}}
+      captures:
+        '0': { name: constant.numeric.decimal.v8-map }
+        '1': { name: meta.delimiter.decimal.period.v8-map }
+        '2': { name: storage.type.numeric.bigint.v8-map }
+        '3': { name: meta.delimiter.decimal.period.v8-map }
+        '4': { name: storage.type.numeric.bigint.v8-map }
+        '5': { name: meta.delimiter.decimal.period.v8-map }
+        '6': { name: storage.type.numeric.bigint.v8-map }
+        '7': { name: storage.type.numeric.bigint.v8-map }
+        '8': { name: meta.delimiter.decimal.period.v8-map }
+        '9': { name: storage.type.numeric.bigint.v8-map }
+        '10': { name: meta.delimiter.decimal.period.v8-map }
+        '11': { name: storage.type.numeric.bigint.v8-map }
+        '12': { name: meta.delimiter.decimal.period.v8-map }
+        '13': { name: storage.type.numeric.bigint.v8-map }
+        '14': { name: storage.type.numeric.bigint.v8-map }
+
+  map:
+    name: meta.interface.v8-map
+    begin: '{{startOfDeclaration}}\b(map)\b(?=\s+|/[/*])'
+    beginCaptures:
+      '1': { name: storage.type.interface.v8-map }
+    end: (?<=\})
+    patterns:
+    - include: '#comment'
+    - include: '#map-heritage'
+    - include: '#numeric-literal'
+    - match: '{{identifier}}'
+      captures:
+        '0': { name: entity.name.type.interface.v8-map }
+    - include: '#map-body'
+
+  map-heritage:
+    begin: '{{startOfIdentifier}}(?:\b(extends)\b){{endOfIdentifier}}'
+    beginCaptures:
+      '1': { name: storage.modifier.v8-map }
+    end: (?=\{)
+    patterns:
+      - include: '#comment'
+      - include: '#map-heritage'
+      - include: '#numeric-literal'
+      - match: '{{identifier}}'
+        captures:
+          '0': { name: entity.other.inherited-class.v8-map }
+      - include: '#punctuation-comma'
+
+  map-body:
+    begin: \{
+    beginCaptures:
+      '0': { name: punctuation.definition.block.v8-map }
+    end: \}
+    endCaptures:
+      '0': { name: punctuation.definition.block.v8-map }
+    patterns:
+    - include: '#comment'
+    - include: '#decorator'
+    - include: '#field-declaration'
+    - include: '#type-annotation'
+    - include: '#modifier'
+    - include: '#punctuation-semicolon'
+
+  modifier:
+    name: storage.modifier.v8-map
+    match: '{{startOfIdentifier}}(nonconfigurable|nonenumerable|readonly){{endOfIdentifier}}'
+
+  field-declaration:
+    name: meta.field.declaration.v8-map
+    begin: (?x)(?=\s*{{propertyName}}\s*(?::|;|,|\}|$))
+    end: (?x)(?=\}|;|,|$|(^(?!\s*{{propertyName}}\s*(?::|;|,|$))))|(?<=\})
+    patterns:
+    - include: '#comment'
+    - include: '#type-annotation'
+    - include: '#string'
+    - include: '#numeric-literal'
+    - include: '#property-name'
+
+  identifier:
+    name: meta.definition.property.identifier.v8-map variable.object.property.v8-map
+    match: '{{propertyIdentifier}}'
+
+  symbol-hash:
+    name: meta.definition.property.symbol.v8-map
+    match: '{{startOfIdentifier}}(hash) ({{hexDigits}})'
+    captures:
+      '1': { name: storage.modifier.v8-map }
+      '2': { name: constant.numeric.hex.v8-map }
+
+  symbol:
+    name: meta.definition.property.symbol.v8-map
+    begin: '{{startOfIdentifier}}(symbol)\('
+    beginCaptures:
+      '1': { name: storage.primitive.v8-map }
+    end: \)
+    patterns:
+    - include: '#string'
+    - include: '#symbol-hash'
+
+  property-name:
+    name: meta.property.v8-map
+    patterns:
+    - include: '#computed-property-name'
+    - include: '#identifier'
+
+  computed-property-name:
+    name: meta.property.computed.v8-map
+    begin: \[
+    end: \]
+    patterns:
+    - include: '#symbol'
+    - include: '#identifier'
+    - include: '#string'
+    - include: '#numeric-literal'
+
+  type-annotation:
+    patterns:
+    # if type starts on same line use end of line as end
+    - name: meta.type.annotation.v8-map
+      begin: (:)(?=\s*\S)
+      beginCaptures:
+        '1': { name: keyword.operator.type.annotation.v8-map }
+      end: (?<![:|&])((?=$|^|[,);\}\]]|//)|(?==[^>])|((?<=[\}>\]\)]|[_$[:alpha:]])\s*(?=\{)))
+      patterns:
+      - include: '#type'
+    # if type starts on next line use modified line endings as end of type annotation eg. complete empty line
+    - name: meta.type.annotation.v8-map
+      begin: (:)
+      beginCaptures:
+        '1': { name: keyword.operator.type.annotation.v8-map }
+      end: (?<![:|&])((?=[,);\}\]]|//)|(?==[^>])|(?=^\s*$)|((?<=\S)(?=\s*$))|((?<=[\}>\]\)]|[_$[:alpha:]])\s*(?=\{)))
+      patterns:
+      - include: '#type'
+
+  type:
+    patterns:
+    - include: '#comment'
+    - include: '#numeric-literal'
+    - include: '#type-primitive'
+    - include: '#type-map'
+
+  type-primitive:
+    name: support.type.primitive.v8-map
+    match: '{{startOfIdentifier}}(none|tagged|smi|double|heap|unknown){{endOfIdentifier}}'
+
+  type-map:
+    name: meta.type.map.v8-map
+    begin: '{{startOfIdentifier}}(map)\b(?=\s*0[xX])'
+    beginCaptures:
+      '1': { name: storage.modifier.v8-map }
+    end: '(?=;)'
+    patterns:
+    - include: '#comment'
+    - include: '#numeric-literal'
+    - include: '#string'
+...

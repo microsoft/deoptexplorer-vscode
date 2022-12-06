@@ -1,0 +1,93 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import { Comparer, Equaler } from "@esfx/equatable";
+import { ref } from "@esfx/ref";
+import { Location, Position, Uri } from "vscode";
+import { KnownSerializedType, RegisteredSerializer, registerKnownSerializer } from "../../core/serializer";
+import { UriComparer, UriEqualer, uriExtname, UriSerializer } from "../../core/uri";
+import { compareNullable, equateNullable, hashNullable } from "../../core/utils";
+import { formatRange, RangeComparer, RangeEqualer, RangeSerializer, tryParseTrailingRange } from "./range";
+import { formatUri, FormatUriOptions, pathOrUriStringToUri, UNKNOWN_URI } from "./uri";
+
+export const UNKNOWN_LOCATION = new Location(UNKNOWN_URI, new Position(0, 0));
+
+/**
+ * Parses {@link text} as a {@link Location}.
+ * @param text The text to parse
+ * @param strict When `true`, the {@link text} must be a URI. When `false` or not specified, absolute paths like `/foo` or `C:\foo` are 
+ * converted to a URI via {@link Uri.file}.
+ */
+export function parseLocation(text: string, strict?: boolean) {
+    const out_prefixLength = ref.out<number>();
+    const range = tryParseTrailingRange(text, out_prefixLength);
+    if (range) {
+        const uri = text.slice(0, out_prefixLength.value);
+        return new Location(strict ? Uri.parse(uri, /*strict*/ true) : pathOrUriStringToUri(uri), range);
+    }
+    return new Location(strict ? Uri.parse(text, /*strict*/ true) : pathOrUriStringToUri(text), new Position(0, 0));
+}
+
+export interface FormatLocationOptions extends FormatUriOptions {
+    /**
+     * Indicates how the range should be formatted (default `"position-or-range"`):
+     * 
+     * - `"none"` - Do not include the range.
+     * - `"line"` - Only write the line number from of the {@link Range.start}.
+     * - `"position"` - Only write the line and character of the {@link Range.start}.
+     * - `"range"` - Write the line and character of both {@link Range.start} and {@link Range.end}. 
+     * - `"position-or-range"` - If the range is empty (i.e., {@link Range.start} and {@link Range.end} are the same), acts like `"position"`; otherwise, acts like `"range"`.
+     */
+    include?: "none" | "line" | "position" | "position-or-range" | "range";
+}
+
+/**
+ * Formats a {@link Location} as a string.
+ * @param location The {@link Location} to format.
+ */
+export function formatLocation(location: Location | undefined, { as = "uri", skipEncoding, include = "position-or-range" }: FormatLocationOptions = { }) {
+    if (!location) return "";
+    let text = formatUri(location.uri, { as, skipEncoding });
+    if (include !== "none") {
+        const extname = uriExtname(location.uri);
+        if (!(/^\.?(exe|dll|so|dylib)$/i.test(extname) && location.range.isEmpty && location.range.start.line === 0 && location.range.start.character === 0)) {
+            text += formatRange(location.range, { include, prefix: true });
+        }
+    }
+    return text;
+}
+
+/**
+ * An object that can be used to test the equality between two {@link Location} objects.
+ */
+export const LocationEqualer: Equaler<Location> = Equaler.create(
+    (x, y) => equateNullable(x.uri, y.uri, UriEqualer) && equateNullable(x.range, y.range, RangeEqualer),
+    (x) => hashNullable(x.uri, UriEqualer) ^ hashNullable(x.range, RangeEqualer)
+);
+
+/**
+ * An object that can be used to perform a relational comparison between two {@link Location} objects.
+ */
+export const LocationComparer: Comparer<Location> = Comparer.create(
+    (x, y) => compareNullable(x.uri, y.uri, UriComparer) || compareNullable(x.range, y.range, RangeComparer)
+);
+
+export const LocationSerializer = registerKnownSerializer("Location", {
+    canSerialize: obj => obj instanceof Location,
+    canDeserialize: obj => obj.$type === "Location",
+    serialize: (obj, serialize) => ({
+        $type: "Location",
+        uri: UriSerializer.serialize(obj.uri, serialize),
+        range: RangeSerializer.serialize(obj.range, serialize)
+    }),
+    deserialize: (obj, deserialize) => new Location(
+        UriSerializer.deserialize(obj.uri, deserialize),
+        RangeSerializer.deserialize(obj.range, deserialize)
+    ),
+    builtin: true
+});
+
+declare global { interface KnownSerializers {
+    Location: RegisteredSerializer<Location, { $type: "Location", uri: KnownSerializedType<"Uri">, range: KnownSerializedType<"Range"> }>;
+} }
+

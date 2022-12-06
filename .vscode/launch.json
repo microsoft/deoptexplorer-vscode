@@ -1,0 +1,35 @@
+// A launch configuration that compiles the extension and then opens it inside a new window
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "extensionHost",
+			"request": "launch",
+			"name": "Launch Client",
+			"runtimeExecutable": "${execPath}",
+			"args": ["--extensionDevelopmentPath=${workspaceRoot}"],
+			"sourceMaps": true,
+			"smartStep": true,
+			"outFiles": ["${workspaceRoot}/dist/**/*.js"],
+			"skipFiles": ["<node_internals>/**"],
+			"preLaunchTask": "npm: webpack"
+		},
+		{
+			"type": "extensionHost",
+			"request": "launch",
+			"name": "Run Extension Tests",
+			"runtimeExecutable": "${execPath}",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--extensionTestsPath=${workspaceFolder}/out/test/start"
+			],
+			"env": {
+				"VSCODE_ALLOW_IO": "true"
+			},
+			"outFiles": ["${workspaceFolder}/out/**/*.js"],
+			"smartStep": true,
+			"skipFiles": ["<node_internals>/**"],
+			"preLaunchTask": "npm: compile"
+		},
+	]
+}

@@ -1,3 +1,12 @@
+dist
+out
+node_modules
+.vscode-test/
+.archive/
+*.vsix
+*.log
+*.log.json
+
 # Logs
 logs
 *.log
