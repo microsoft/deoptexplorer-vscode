@@ -72,7 +72,10 @@ export async function setSortMaps(value: MapSortMode) {
         }
         sortMaps = value;
         if (currentContext) {
-            await setContext(contextKeys.sortMaps, value);
+            await Promise.all([
+                storage.setSortMaps(value),
+                setContext(contextKeys.sortMaps, value)
+            ]);
             emitters.didSortMapsChange(value);
         }
     }
@@ -90,9 +93,10 @@ export async function setGroupMaps(value: readonly GroupMaps[]) {
             groupMaps = value;
             if (currentContext) {
                 await Promise.all([
-                    await setContext(contextKeys.groupMaps, groupMaps.length === 0 ? undefined : groupMaps),
-                    await setContext(contextKeys.maps.groupByFile, groupMaps.includes(GroupMaps.ByFile)),
-                    await setContext(contextKeys.maps.groupByFunction, groupMaps.includes(GroupMaps.ByFunction)),
+                    storage.setGroupMaps(value),
+                    setContext(contextKeys.groupMaps, groupMaps.length === 0 ? undefined : groupMaps),
+                    setContext(contextKeys.maps.groupByFile, groupMaps.includes(GroupMaps.ByFile)),
+                    setContext(contextKeys.maps.groupByFunction, groupMaps.includes(GroupMaps.ByFunction)),
                 ]);
                 emitters.didGroupMapsChange(value);
             }
@@ -112,6 +116,7 @@ export async function setShowMaps(value: readonly ShowMaps[]) {
             showMaps = value;
             if (currentContext) {
                 await Promise.all([
+                    storage.setShowMaps(value),
                     setContext(contextKeys.showMaps, value.length === 0 ? undefined : value),
                     setContext(contextKeys.maps.showUnreferenced, showMaps.includes(ShowMaps.Unreferenced)),
                     setContext(contextKeys.maps.showNonUserCode, showMaps.includes(ShowMaps.NonUserCode)),
@@ -248,6 +253,9 @@ export async function activateContextService(context: ExtensionContext) {
     showNativeCodeProfileNodes = storage.getShowNativeCodeProfileNodes();
     showNodeJsProfileNodes = storage.getShowNodeJsProfileNodes();
     showNodeModulesProfileNodes = storage.getShowNodeModulesProfileNodes();
+    groupMaps = storage.getGroupMaps();
+    showMaps = storage.getShowMaps();
+    sortMaps = storage.getSortMaps();
     await Promise.all([
         setContext(contextKeys.decorations.showDeopts, showDecorations.includes(ShowDecorations.Deopts)),
         setContext(contextKeys.decorations.showICs, showDecorations.includes(ShowDecorations.ICs)),
@@ -277,6 +285,7 @@ export async function activateContextService(context: ExtensionContext) {
         sortMaps = kDefaultMapSortMode;
         groupMaps = kDefaultGroupMaps;
         showMaps = kDefaultShowMaps;
+        sortMaps = kDefaultMapSortMode;
         sortProfile = kDefaultProfileSortMode;
         showProfile = kDefaultProfileShowMode;
         showJustMyCode = kDefaultShowJustMyCode;

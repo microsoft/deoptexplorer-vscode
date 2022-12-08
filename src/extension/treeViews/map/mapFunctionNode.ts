@@ -2,15 +2,18 @@
 // Licensed under the MIT License.
 
 import { HashSet } from "@esfx/collections-hashset";
+import { Comparable, Comparer, Equaler, Equatable } from "@esfx/equatable";
 import { identity, selectMany, sum } from "@esfx/iter-fn";
 import { from } from "@esfx/iter-query";
-import { CancellationToken, Location, ProviderResult, SymbolKind, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
-import { markdown } from "../../../core/markdown";
-import { UriEqualer } from "../../../core/uri";
+import { CancellationToken, Location, Position, ProviderResult, SymbolKind, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
+import { markdown, MarkdownString } from "../../../core/markdown";
+import { UriComparer, UriEqualer } from "../../../core/uri";
+import { compareNullable, equateNullable, hashNullable } from "../../../core/utils";
 import * as constants from "../../constants";
 import { MapId } from "../../model/mapEntry";
-import { formatLocation } from "../../vscode/location";
-import { formatUri } from "../../vscode/uri";
+import { formatLocationMarkdown } from "../../vscode/location";
+import { PositionComparer, PositionEqualer } from "../../vscode/position";
+import { formatUriMarkdown } from "../../vscode/uri";
 import { BaseNode } from "../common/baseNode";
 import { PageNode } from "../common/pageNode";
 import { createTreeItem } from "../createTreeItem";
@@ -26,9 +29,7 @@ import type { MapsTreeDataProvider } from "./mapsTreeDataProvider";
     constructor(
         provider: MapsTreeDataProvider,
         parent: MapConstructorNode | MapFileNode | undefined,
-        readonly functionName: string | undefined,
-        readonly file: Uri | undefined,
-        readonly symbolKind: SymbolKind | undefined,
+        readonly key: MapFunctionKey,
         readonly entries: MapNodeEntries
     ) {
         super(provider, parent, { description: entries.describePage });
@@ -45,7 +46,7 @@ import type { MapsTreeDataProvider } from "./mapsTreeDataProvider";
     get parent() { return super.parent as MapConstructorNode | MapFileNode | undefined; }
 
     protected createTreeItem() {
-        return createTreeItem(this.functionName ?? "(unknown)", TreeItemCollapsibleState.Collapsed, {
+        return createTreeItem(this.key.functionName ?? "(unknown)", TreeItemCollapsibleState.Collapsed, {
             contextValue: "map-function",
             iconPath: this.getIconPath(),
             description: `${this.entries.countLeaves()}`
@@ -53,15 +54,28 @@ import type { MapsTreeDataProvider } from "./mapsTreeDataProvider";
     }
 
     override resolveTreeItem(treeItem: TreeItem, token: CancellationToken): ProviderResult<TreeItem> {
+        const lines: MarkdownString[] = [];
+
+        const relativeTo = this.provider.log && { log: this.provider.log, ignoreIfBasename: true };
+        const file =
+            this.key.file && this.key.position ? formatLocationMarkdown(new Location(this.key.file, this.key.position), { as: "file", relativeTo }) :
+            this.key.file ? formatUriMarkdown(this.key.file, { as: "file", relativeTo }) :
+            undefined;
+
+        if (file) {
+            lines.push(markdown`**file:** ${file}  \n`);
+        }
+
         treeItem.tooltip = markdown`${[
-            markdown`${this.functionName ?? "(unknown)"}\n\n`,
-            markdown`**file:** ${formatUri(this.file, { as: "file" })}  \n`
+            markdown`${this.key.functionName ?? "(unknown)"}\n\n`,
+            ...lines
         ]}`;
+
         return treeItem;
     }
 
     private getIconPath() {
-        switch (this.symbolKind) {
+        switch (this.key.symbolKind) {
             case SymbolKind.Function: return new ThemeIcon("symbol-function");
             case SymbolKind.Class: return new ThemeIcon("symbol-class");
             case SymbolKind.Namespace: return new ThemeIcon("symbol-namespace");
@@ -109,14 +123,14 @@ import type { MapsTreeDataProvider } from "./mapsTreeDataProvider";
 
     private static _byNameSorter(query: Iterable<MapFunctionNode>): Iterable<MapFunctionNode> {
         return from(query)
-            .orderBy(node => node.functionName ?? "(unknown)")
+            .orderBy(node => node.key, MapFunctionKey.comparer)
             .thenByDescending(MapFunctionNodeBuilder.countImmediateLeaves);
     }
 
     private static _byCountSorter(query: Iterable<MapFunctionNode>): Iterable<MapFunctionNode> {
         return from(query)
             .orderByDescending(MapFunctionNodeBuilder.countImmediateLeaves)
-            .thenBy(node => node.functionName ?? "(unknown)");
+            .thenBy(node => node.key, MapFunctionKey.comparer);
     }
 }
 
@@ -131,7 +145,7 @@ export class MapFunctionNodeEntries {
         const last = page[page.length - 1];
         if (!(first instanceof MapFunctionNode)) throw new TypeError();
         if (!(last instanceof MapFunctionNode)) throw new TypeError();
-        return `[${first.functionName ?? "(unknown)"}..${last.functionName ?? "(unknown)"}]`;
+        return `[${first.key.functionName ?? "(unknown)"}..${last.key.functionName ?? "(unknown)"}]`;
     };
 
     constructor(
@@ -156,7 +170,7 @@ export class MapFunctionNodeEntries {
     groupIntoFiles() {
         return new MapFileNodeEntries(from(this.functions)
             .groupBy(
-                ({ file }) => file,
+                ({ key: { file } }) => file,
                 identity,
                 (key, items) => new MapFileNodeBuilder(key, new MapFunctionNodeEntries(items.toArray())), UriEqualer)
             .toArray());
@@ -165,9 +179,7 @@ export class MapFunctionNodeEntries {
 
 export class MapFunctionNodeBuilder {
     constructor(
-        readonly functionName: string | undefined,
-        readonly file: Uri | undefined,
-        readonly symbolKind: SymbolKind | undefined,
+        readonly key: MapFunctionKey,
         readonly entries: MapNodeEntries,
     ) {}
 
@@ -180,6 +192,52 @@ export class MapFunctionNodeBuilder {
     }
 
     build(provider: MapsTreeDataProvider, parent: MapConstructorNode | MapFileNode | undefined) {
-        return new MapFunctionNode(provider, parent, this.functionName, this.file, this.symbolKind, this.entries);
+        return new MapFunctionNode(provider, parent, this.key, this.entries);
+    }
+}
+
+export class MapFunctionKey implements Equatable {
+    static readonly equaler = Equaler.create<MapFunctionKey>(
+        (left, right) =>
+            left.functionName === right.functionName &&
+            equateNullable(left.file, right.file, UriEqualer) &&
+            equateNullable(left.position, right.position, PositionEqualer) &&
+            left.symbolKind === right.symbolKind,
+        (value) => {
+            let hc = 0;
+            hc = Equaler.combineHashes(hc, Equaler.defaultEqualer.hash(value.functionName));
+            hc = Equaler.combineHashes(hc, hashNullable(value.file, UriEqualer));
+            hc = Equaler.combineHashes(hc, hashNullable(value.position, PositionEqualer));
+            hc = Equaler.combineHashes(hc, Equaler.defaultEqualer.hash(value.symbolKind));
+            return hc;
+        }
+    );
+
+    static readonly comparer = Comparer.create<MapFunctionKey>(
+        (left, right) =>
+            Comparer.defaultComparer.compare(left.functionName, right.functionName) ||
+            compareNullable(left.file, right.file, UriComparer) ||
+            compareNullable(left.position, right.position, PositionComparer) ||
+            Comparer.defaultComparer.compare(left.symbolKind, right.symbolKind)
+    );
+
+    constructor(
+        readonly functionName: string | undefined,
+        readonly file: Uri | undefined,
+        readonly position: Position | undefined,
+        readonly symbolKind: SymbolKind | undefined,
+    ) {
+    }
+
+    [Equatable.equals](other: unknown): boolean {
+        return other instanceof MapFunctionKey && MapFunctionKey.equaler.equals(this, other);
+    }
+
+    [Equatable.hash](): number {
+        return MapFunctionKey.equaler.hash(this);
+    }
+
+    [Comparable.compareTo](other: unknown): number {
+        return other instanceof MapFunctionKey ? MapFunctionKey.comparer.compare(this, other) : 0;
     }
 }

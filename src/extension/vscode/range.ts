@@ -117,13 +117,15 @@ export interface FormatRangeOptions {
      * Whether to include the leading `":"` prefix in the result (default `true`).
      */
     prefix?: boolean;
+
+    delimiter?: ":" | ",";
 }
 
 /**
  * Formats the provided {@link Range} as a string.
  * @param range The {@link Range} to format.
  */
-export function formatRange(range: Range | undefined, { include = "range", prefix = true }: FormatRangeOptions = {}) {
+export function formatRange(range: Range | undefined, { include = "range", prefix = true, delimiter = ":" }: FormatRangeOptions = {}) {
     if (!range) return "";
     let text = "";
     const start = range.start;
@@ -131,13 +133,13 @@ export function formatRange(range: Range | undefined, { include = "range", prefi
         text += `${prefix ? ":" : ""}${start.line + 1}`;
         if (include === "range" || include === "position-or-range" || include === "position") {
             if (!isNaN(start.character)) {
-                text += `:${start.character + 1}`;
+                text += `${delimiter}${start.character + 1}`;
                 const end = range.end;
                 if (include === "range" || include === "position-or-range" && !end.isEqual(start)) {
                     if (!isNaN(end.line)) {
-                        text += `:${end.line + 1}`;
+                        text += `${delimiter}${end.line + 1}`;
                         if (!isNaN(end.character)) {
-                            text += `:${end.character + 1}`;
+                            text += `${delimiter}${end.character + 1}`;
                         }
                     }
                 }

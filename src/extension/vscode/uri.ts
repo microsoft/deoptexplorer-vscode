@@ -2,8 +2,10 @@
 // Licensed under the MIT License.
 
 import { Uri } from "vscode";
+import { markdown } from "../../core/markdown";
 import { isDosPath, normalizePathPosix, normalizePathWindows } from "../../core/paths";
-import { isUriString, resolveUri } from "../../core/uri";
+import { isUriString, relativeUriFragment, resolveUri } from "../../core/uri";
+import { LogFile } from "../model/logFile";
 import { CanonicalPath, CanonicalUri, CanonicalUriString, getCanonicalPath, getCanonicalUri } from "../services/canonicalPaths";
 
 export const UNKNOWN_URI = Uri.parse("unknown:");
@@ -84,10 +86,53 @@ export function uriToPathOrUriString(uri: Uri, canonicalize?: boolean) {
 export interface FormatUriOptions {
     as?: "uri" | "file";
     skipEncoding?: boolean;
+    relativeTo?: Uri | { log: LogFile, ignoreIfBasename?: boolean };
 }
 
 export function formatUri(uri: CanonicalUri, options?: { as?: "uri", skipEncoding?: false }): CanonicalUriString;
 export function formatUri(uri: Uri | undefined, options?: FormatUriOptions): string;
-export function formatUri(uri: Uri | undefined, { as = "uri", skipEncoding }: FormatUriOptions = {}) {
-    return uri ? as === "uri" || uri.scheme !== "file" ? uri.toString(skipEncoding) : fileUriToPath(uri) : "";
+export function formatUri(uri: Uri | undefined, { as = "uri", skipEncoding, relativeTo }: FormatUriOptions = {}) {
+    if (!uri) {
+        return "";
+    }
+
+    const asFile = as === "file" && uri.scheme === "file";
+    if (relativeTo instanceof Uri) {
+        const fragment = relativeUriFragment(relativeTo, uri);
+        return asFile && isWindows ? fragment.replaceAll("/", "\\") : fragment;
+    }
+
+    if (relativeTo?.log) {
+        const fragment = relativeTo.log.tryGetRelativeUriFragment(uri, { ignoreIfBasename: relativeTo.ignoreIfBasename });
+        if (fragment) {
+            return asFile && isWindows ? fragment.replaceAll("/", "\\") : fragment;
+        }
+    }
+
+    return asFile ? fileUriToPath(uri) : uri.toString(skipEncoding);
+}
+
+export interface FormatUriMarkdownOptions extends FormatUriOptions {
+    trusted?: boolean;
+    label?: string;
+    title?: string;
+    schemes?: { allow?: string[], deny?: string[] };
+}
+
+const defaultSchemes = { deny: ["node"] };
+
+export function formatUriMarkdown(uri: Uri | undefined, { as = "uri", skipEncoding, trusted = false, label, title, schemes = defaultSchemes, relativeTo }: FormatUriMarkdownOptions = {}) {
+    const md = trusted ? markdown.trusted : markdown;
+    if (!uri) {
+        return md``;
+    }
+
+    label ??= formatUri(uri, { as, skipEncoding, relativeTo });
+    if (schemes.deny?.includes(uri.scheme) || schemes.allow && !schemes.allow.includes(uri.scheme)) {
+        return md`${label}`;
+    }
+
+    const link = formatUri(uri, { as: "uri" });
+    title ??= formatUri(uri, { as: "file", skipEncoding: true });
+    return md`[${label}](${link}${title ? md` "${title}"`: ""})`;
 }

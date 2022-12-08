@@ -193,6 +193,9 @@ export namespace storage {
     export const showNativeCodeProfileNodes = `${extensionName}.showNativeCodeProfileNodes` as const;
     export const showNodeJsProfileNodes = `${extensionName}.showNodeJsProfileNodes` as const;
     export const showNodeModulesProfileNodes = `${extensionName}.showNodeModulesProfileNodes` as const;
+    export const groupMaps = `${extensionName}.groupMaps` as const;
+    export const showMaps = `${extensionName}.showMaps` as const;
+    export const sortMaps = `${extensionName}.sortMaps` as const;
 }
 
 export namespace colors {

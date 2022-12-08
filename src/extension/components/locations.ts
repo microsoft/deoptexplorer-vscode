@@ -361,12 +361,21 @@ function tryResolveFunctionLocationsInTypeScript(locationKind: LocationKind, ent
         const sourceMap = entry.getSourceMap();
         if (sourceMap) {
             let changed = false;
-            if (setReferenceLocation(locationKind, entry, sourceMap.toSourceLocation(entry.generatedReferenceLocation))) changed = true;
-            if (setExtentLocation(locationKind, entry, sourceMap.toSourceLocation(entry.generatedExtentLocation))) changed = true;
-            return changed;
+            const sourceReferenceLocation = sourceMap.toSourceLocation(entry.generatedReferenceLocation);
+            const sourceExtentLocation = sourceMap.toSourceLocation(entry.generatedExtentLocation);
+            if (sourceReferenceLocation?.range.isEmpty || sourceExtentLocation?.range.isEmpty) {
+                if (tryResolveFunctionLocationsFallback(locationKind, entry, filePosition, document, sourceFile)) {
+                    return true;
+                }
+            }
+            if (setReferenceLocation(locationKind, entry, sourceReferenceLocation)) changed = true;
+            if (setExtentLocation(locationKind, entry, sourceExtentLocation)) changed = true;
+            if (changed) {
+                return true;
+            }
         }
     }
-    return tryResolveFunctionLocationsFallback("source", entry, filePosition, document, sourceFile);
+    return tryResolveFunctionLocationsFallback(locationKind, entry, filePosition, document, sourceFile);
 }
 
 function tryResolveSymbolInfo(entry: FunctionEntry, fileUri: Uri, sourceFile: ts.SourceFile, resolveName: boolean) {
@@ -1148,7 +1157,15 @@ function tryResolveIcLocationInTypeScript(locationKind: LocationKind, entry: IcE
     if (entry.generatedReferenceLocation) {
         const sourceMap = entry.getSourceMap();
         if (sourceMap) {
-            return setReferenceLocation(locationKind, entry, sourceMap.toSourceLocation(entry.generatedReferenceLocation));
+            const location = sourceMap.toSourceLocation(entry.generatedReferenceLocation);
+            if (location) {
+                if (location.range.isEmpty) {
+                    if (tryResolveIcLocationInJavaScript(locationKind, entry, filePosition, document, sourceFile)) {
+                        return true;
+                    }
+                }
+                return setReferenceLocation(locationKind, entry, location);
+            }
         }
     }
     return false;
@@ -1325,7 +1342,15 @@ function tryResolveDeoptLocationInTypeScript(locationKind: LocationKind, entry: 
     if (entry.generatedReferenceLocation) {
         const sourceMap = entry.getSourceMap();
         if (sourceMap) {
-            return setReferenceLocation(locationKind, entry, sourceMap.toSourceLocation(entry.generatedReferenceLocation));
+            const location = sourceMap.toSourceLocation(entry.generatedReferenceLocation);
+            if (location) {
+                if (location.range.isEmpty) {
+                    if (tryResolveDeoptLocationInJavaScript(locationKind, entry, filePosition, document, sourceFile)) {
+                        return true;
+                    }
+                }
+                return setReferenceLocation(locationKind, entry, location);
+            }
         }
     }
     return false;

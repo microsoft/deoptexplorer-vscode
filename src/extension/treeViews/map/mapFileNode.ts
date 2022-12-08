@@ -2,12 +2,13 @@
 // Licensed under the MIT License.
 
 import { HashSet } from "@esfx/collections-hashset";
-import { select, selectMany, sum } from "@esfx/iter-fn";
+import { selectMany, sum } from "@esfx/iter-fn";
 import { from } from "@esfx/iter-query";
-import { ThemeIcon, TreeItemCollapsibleState, Uri } from "vscode";
+import { CancellationToken, ProviderResult, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
 import { UriComparer } from "../../../core/uri";
 import * as constants from "../../constants";
 import { MapId } from "../../model/mapEntry";
+import { formatUriMarkdown } from "../../vscode/uri";
 import { BaseNode } from "../common/baseNode";
 import { PageNode } from "../common/pageNode";
 import { createTreeItem } from "../createTreeItem";
@@ -45,6 +46,11 @@ import type { MapsTreeDataProvider } from "./mapsTreeDataProvider";
             iconPath: ThemeIcon.File,
             description: `${this.entries.countLeaves()}`
         });
+    }
+
+    resolveTreeItem(treeItem: TreeItem, token: CancellationToken): ProviderResult<TreeItem> {
+        treeItem.tooltip = formatUriMarkdown(this.file ?? undefined, { as: "file" });
+        return treeItem;
     }
 
     protected getChildren(): Iterable<MapFunctionNode | MapNode> {

@@ -4,6 +4,7 @@
 import { Comparer, Equaler } from "@esfx/equatable";
 import { ref } from "@esfx/ref";
 import { Location, Position, Uri } from "vscode";
+import { markdown } from "../../core/markdown";
 import { KnownSerializedType, RegisteredSerializer, registerKnownSerializer } from "../../core/serializer";
 import { UriComparer, UriEqualer, uriExtname, UriSerializer } from "../../core/uri";
 import { compareNullable, equateNullable, hashNullable } from "../../core/utils";
@@ -15,7 +16,7 @@ export const UNKNOWN_LOCATION = new Location(UNKNOWN_URI, new Position(0, 0));
 /**
  * Parses {@link text} as a {@link Location}.
  * @param text The text to parse
- * @param strict When `true`, the {@link text} must be a URI. When `false` or not specified, absolute paths like `/foo` or `C:\foo` are 
+ * @param strict When `true`, the {@link text} must be a URI. When `false` or not specified, absolute paths like `/foo` or `C:\foo` are
  * converted to a URI via {@link Uri.file}.
  */
 export function parseLocation(text: string, strict?: boolean) {
@@ -31,11 +32,11 @@ export function parseLocation(text: string, strict?: boolean) {
 export interface FormatLocationOptions extends FormatUriOptions {
     /**
      * Indicates how the range should be formatted (default `"position-or-range"`):
-     * 
+     *
      * - `"none"` - Do not include the range.
      * - `"line"` - Only write the line number from of the {@link Range.start}.
      * - `"position"` - Only write the line and character of the {@link Range.start}.
-     * - `"range"` - Write the line and character of both {@link Range.start} and {@link Range.end}. 
+     * - `"range"` - Write the line and character of both {@link Range.start} and {@link Range.end}.
      * - `"position-or-range"` - If the range is empty (i.e., {@link Range.start} and {@link Range.end} are the same), acts like `"position"`; otherwise, acts like `"range"`.
      */
     include?: "none" | "line" | "position" | "position-or-range" | "range";
@@ -45,9 +46,9 @@ export interface FormatLocationOptions extends FormatUriOptions {
  * Formats a {@link Location} as a string.
  * @param location The {@link Location} to format.
  */
-export function formatLocation(location: Location | undefined, { as = "uri", skipEncoding, include = "position-or-range" }: FormatLocationOptions = { }) {
+export function formatLocation(location: Location | undefined, { as = "uri", skipEncoding, include = "position-or-range", relativeTo }: FormatLocationOptions = { }) {
     if (!location) return "";
-    let text = formatUri(location.uri, { as, skipEncoding });
+    let text = formatUri(location.uri, { as, skipEncoding, relativeTo });
     if (include !== "none") {
         const extname = uriExtname(location.uri);
         if (!(/^\.?(exe|dll|so|dylib)$/i.test(extname) && location.range.isEmpty && location.range.start.line === 0 && location.range.start.character === 0)) {
@@ -55,6 +56,37 @@ export function formatLocation(location: Location | undefined, { as = "uri", ski
         }
     }
     return text;
+}
+
+export interface FormatLocationMarkdownOptions extends FormatUriOptions {
+    trusted?: boolean;
+    include?: FormatLocationOptions["include"] | { label?: FormatLocationOptions["include"], link?: FormatLocationOptions["include"], title?: FormatLocationOptions["include"] }
+    label?: string;
+    title?: string;
+    schemes?: { allow?: string[], deny?: string[] };
+}
+
+const defaultSchemes = { deny: ["node"] };
+
+export function formatLocationMarkdown(location: Location | undefined, { as = "uri", skipEncoding, relativeTo, include = "position-or-range", trusted = false, label, title, schemes = defaultSchemes }: FormatLocationMarkdownOptions = { }) {
+    const md = trusted ? markdown.trusted : markdown;
+    if (!location) {
+        return md``;
+    }
+
+    const labelInclude = typeof include === "object" ? include.label ?? "position-or-range" : include;
+    label ??= formatLocation(location, { as, skipEncoding, include: labelInclude, relativeTo });
+    if (schemes.deny?.includes(location.uri.scheme) || schemes.allow && !schemes.allow.includes(location.uri.scheme)) {
+        return md`${label}`;
+    }
+
+    const linkInclude = typeof include === "object" ? include.link ?? labelInclude : include;
+    const link = linkInclude === "none" ? formatLocation(location, { as: "uri", include: linkInclude }) :
+        formatUri(location.uri.with({ fragment: formatRange(location.range, { include: linkInclude, delimiter: ",", prefix: false })}), { as: "uri"})
+
+    const titleInclude = typeof include === "object" ? include.title ?? linkInclude : include;
+    title ??= formatLocation(location, { as: "file", skipEncoding: true, include: titleInclude });
+    return md`[${label}](${link}${title ? md` "${title}"` : ""})`;
 }
 
 /**

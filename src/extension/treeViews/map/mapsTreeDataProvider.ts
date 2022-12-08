@@ -7,7 +7,7 @@ import type { LogFile } from "../../model/logFile";
 import { MapId, MapReference } from "../../model/mapEntry";
 import { BaseNodeProvider } from "../common/baseNodeProvider";
 import { PageNode } from "../common/pageNode";
-import { MapConstructorNode, MapConstructorNodeBuilder, MapConstructorNodeEntries } from "./mapConstructorNode";
+import { MapConstructorKey, MapConstructorNode, MapConstructorNodeBuilder, MapConstructorNodeEntries } from "./mapConstructorNode";
 import { MapFileNodeEntries } from "./mapFileNode";
 import { MapFunctionNodeEntries } from "./mapFunctionNode";
 import { MapNodeBuilder, MapNodeEntries } from "./mapNode";
@@ -114,24 +114,33 @@ export class MapsTreeDataProvider extends BaseNodeProvider {
     private applyGroupAndSort(maps: MapReference[]) {
         const groupByFile = this.groupBy.includes(constants.GroupMaps.ByFile);
         const groupByFunction = this.groupBy.includes(constants.GroupMaps.ByFunction);
+
+        // collect constructors by name that have more than one entry with the same name (i.e., across different files).
         const ambiguousGroups = from(maps)
             .select(({ map }) => [map.constructorName, map.constructorEntry] as const)
             .where(([constructorName]) => !!constructorName)
             .groupBy(([constructorName]) => constructorName, ([, constructorEntry]) => constructorEntry, (name, group) => [name, from(group).distinct().toArray()] as const)
             .where(([, constructorEntries]) => constructorEntries.length > 1)
             .toMap(([constructorName]) => constructorName, ([, constructorEntries]) => constructorEntries);
-        const entries = new MapConstructorNodeEntries(from(maps)
+
+        const entries = new MapConstructorNodeEntries(
+            from(maps)
             .groupBy(
-                ({ map }) => map.constructorName && ambiguousGroups.has(map.constructorName) ? `${map.constructorName} @ ${map.constructorEntry?.lastSfiAddress ?? `#${ambiguousGroups.get(map.constructorName)?.indexOf(map.constructorEntry)}`}` :
-                    map.constructorName || map.mapType || "(unknown)",
+                ({ map }) => new MapConstructorKey(
+                    map.constructorName,
+                    map.constructorEntry,
+                    map.mapType,
+                    ambiguousGroups.get(map.constructorName)?.indexOf(map.constructorEntry)),
                 ({ mapId, map }) => new MapNodeBuilder(mapId, map),
                 (key, group) => {
                     let entries: MapNodeEntries | MapFunctionNodeEntries | MapFileNodeEntries = new MapNodeEntries(group.toArray());
                     if (groupByFunction) entries = this.groupIntoFunctions(entries);
                     if (groupByFile) entries = this.groupIntoFiles(entries);
                     return new MapConstructorNodeBuilder(key, entries);
-                })
+                },
+                MapConstructorKey.equaler)
             .toArray());
+
         return entries.buildAll(this, /*parent*/ undefined);
     }
 }

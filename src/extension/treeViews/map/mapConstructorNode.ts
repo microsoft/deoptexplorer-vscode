@@ -2,11 +2,18 @@
 // Licensed under the MIT License.
 
 import { HashSet } from "@esfx/collections-hashset";
+import { Comparable, Comparer, Equaler, Equatable } from "@esfx/equatable";
 import { selectMany, sum } from "@esfx/iter-fn";
 import { from, Query } from "@esfx/iter-query";
-import { ThemeIcon, TreeItemCollapsibleState } from "vscode";
+import { CancellationToken, ProviderResult, ThemeIcon, TreeItem, TreeItemCollapsibleState } from "vscode";
+import { formatAddress } from "../../../core/address";
+import { markdown, MarkdownString } from "../../../core/markdown";
+import { UriComparer } from "../../../core/uri";
+import { compareNullable } from "../../../core/utils";
+import { FunctionEntry } from "../../../third-party-derived/deoptigate/functionEntry";
 import * as constants from "../../constants";
 import { MapId } from "../../model/mapEntry";
+import { formatLocation, formatLocationMarkdown, LocationComparer } from "../../vscode/location";
 import { BaseNode } from "../common/baseNode";
 import { PageNode } from "../common/pageNode";
 import { createTreeItem } from "../createTreeItem";
@@ -21,7 +28,7 @@ import type { MapsTreeDataProvider } from "./mapsTreeDataProvider";
 export class MapConstructorNode extends BaseNode {
     constructor(
         provider: MapsTreeDataProvider,
-        readonly constructorName: string,
+        readonly key: MapConstructorKey,
         readonly entries: MapFileNodeEntries | MapFunctionNodeEntries | MapNodeEntries
     ) {
         super(provider, /*parent*/ undefined, { description: entries.describePage });
@@ -38,11 +45,25 @@ export class MapConstructorNode extends BaseNode {
     get parent(): undefined { return undefined; }
 
     protected createTreeItem() {
-        return createTreeItem(this.constructorName, TreeItemCollapsibleState.Collapsed, {
+        return createTreeItem(this.key.toString(), TreeItemCollapsibleState.Collapsed, {
             contextValue: "map-constructor",
             iconPath: new ThemeIcon("symbol-class"),
             description: `${this.entries.countLeaves()}`
         });
+    }
+
+    resolveTreeItem(treeItem: TreeItem, token: CancellationToken): ProviderResult<TreeItem> {
+        const lines: MarkdownString[] = [];
+        if (this.key.constructorEntry) {
+            lines.push(markdown`**File:** ${formatLocationMarkdown(this.key.constructorEntry?.filePosition, { as: "file", relativeTo: this.provider.log && { log: this.provider.log, ignoreIfBasename: true } })}`);
+        }
+
+        treeItem.tooltip = markdown`${[
+            markdown`${this.key.constructorName || this.key.mapType || "(unknown)"}\n\n`,
+            ...lines
+        ]}`;
+
+        return treeItem;
     }
 
     protected getChildren(): Iterable<MapFileNode | MapFunctionNode | MapNode> {
@@ -80,14 +101,14 @@ export class MapConstructorNode extends BaseNode {
 
     private static _byNameSorter(query: Query<MapConstructorNode>): Iterable<MapConstructorNode> {
         return query
-            .orderBy(entry => entry.constructorName)
+            .orderBy(entry => entry.key, MapConstructorKey.comparer)
             .thenByDescending(entry => entry.entries.countLeaves());
     }
 
     private static _byCountSorter(query: Query<MapConstructorNode>): Iterable<MapConstructorNode> {
         return query
             .orderByDescending(entry => entry.entries.countLeaves())
-            .thenBy(entry => entry.constructorName);
+            .thenBy(entry => entry.key, MapConstructorKey.comparer);
     }
 }
 
@@ -127,20 +148,82 @@ export class MapConstructorNodeEntries {
 
 export class MapConstructorNodeBuilder {
     constructor(
-        readonly constructorName: string,
+        readonly key: MapConstructorKey,
         readonly entries: MapFileNodeEntries | MapFunctionNodeEntries | MapNodeEntries
     ) {
     }
 
+    /**
+     * Counts the number of leaf nodes produced by a builder or node.
+     */
     static countImmediateLeaves(builder: MapConstructorNodeBuilder | MapConstructorNode) {
         return builder.entries.countLeaves();
     }
 
+    /**
+     * Counts the number of leaf nodes produced by multiple builders or nodes.
+     */
     static countLeaves(entries: readonly (MapConstructorNodeBuilder | MapConstructorNode)[]) {
         return sum(entries, MapConstructorNodeBuilder.countImmediateLeaves);
     }
 
+    /**
+     * Builds a node.
+     */
     build(provider: MapsTreeDataProvider, parent: undefined) {
-        return new MapConstructorNode(provider, this.constructorName, this.entries);
+        return new MapConstructorNode(provider, this.key, this.entries);
+    }
+}
+
+export class MapConstructorKey {
+    static readonly equaler = Equaler.create<MapConstructorKey>(
+        (left, right) =>
+            left.constructorName === right.constructorName &&
+            left.constructorEntry === right.constructorEntry &&
+            left.mapType === right.mapType &&
+            left.disambiguator === right.disambiguator,
+        (value) => {
+            let hc = 0;
+            hc = Equaler.combineHashes(hc, Equaler.defaultEqualer.hash(value.constructorName));
+            hc = Equaler.combineHashes(hc, Equaler.defaultEqualer.hash(value.constructorEntry));
+            hc = Equaler.combineHashes(hc, Equaler.defaultEqualer.hash(value.mapType));
+            hc = Equaler.combineHashes(hc, Equaler.defaultEqualer.hash(value.disambiguator));
+            return hc;
+        });
+
+    static readonly comparer = Comparer.create<MapConstructorKey>(
+        (left, right) =>
+            Comparer.defaultComparer.compare(left.constructorName, right.constructorName) ||
+            compareNullable(left.constructorEntry?.filePosition, right.constructorEntry?.filePosition, LocationComparer) ||
+            Comparer.defaultComparer.compare(left.constructorEntry?.functionName, right.constructorEntry?.functionName) ||
+            Comparer.defaultComparer.compare(left.mapType, right.mapType) ||
+            Comparer.defaultComparer.compare(left.disambiguator, right.disambiguator)
+    );
+
+    constructor(
+        readonly constructorName: string,
+        readonly constructorEntry: FunctionEntry | undefined,
+        readonly mapType: string | undefined,
+        readonly disambiguator: number | undefined,
+    ) {}
+
+    toString() {
+        if (this.constructorName && this.disambiguator !== undefined) {
+            const disambiguator = this.constructorEntry?.lastSfiAddress ? formatAddress(this.constructorEntry.lastSfiAddress) : `#${this.disambiguator}`;
+            return `${this.constructorName} @ ${disambiguator}`;
+        }
+        return this.constructorName || this.mapType || "(unknown)";
+    }
+
+    [Equatable.equals](other: unknown) {
+        return other instanceof MapConstructorKey && MapConstructorKey.equaler.equals(this, other);
+    }
+
+    [Equatable.hash]() {
+        return MapConstructorKey.equaler.hash(this);
+    }
+
+    [Comparable.compareTo](other: unknown) {
+        return other instanceof MapConstructorKey ? MapConstructorKey.comparer.compare(this, other) : 0;
     }
 }

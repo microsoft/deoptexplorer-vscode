@@ -11,12 +11,12 @@ import { UriEqualer } from "../../../core/uri";
 import { MapEntry, MapId } from "../../model/mapEntry";
 import { openedLog } from "../../services/currentLogFile";
 import { getUriForMap } from "../../textDocumentContentProviders/map";
-import { formatLocation } from "../../vscode/location";
+import { formatLocation, formatLocationMarkdown } from "../../vscode/location";
 import { BaseNode } from "../common/baseNode";
 import { createTreeItem } from "../createTreeItem";
 import { MapConstructorNode } from "./mapConstructorNode";
 import { MapFileNode, MapFileNodeBuilder, MapFileNodeEntries } from "./mapFileNode";
-import { MapFunctionNode, MapFunctionNodeBuilder, MapFunctionNodeEntries } from "./mapFunctionNode";
+import { MapFunctionKey, MapFunctionNode, MapFunctionNodeBuilder, MapFunctionNodeEntries } from "./mapFunctionNode";
 import type { MapsTreeDataProvider } from "./mapsTreeDataProvider";
 
 /**
@@ -70,9 +70,10 @@ export class MapNode extends BaseNode {
 
             const lines: MarkdownString[] = [];
             if (source) {
+                const relativeTo = this.provider.log && { log: this.provider.log, ignoreIfBasename: true };
                 lines.push(
                     markdown`**function:** ${source.functionName}  \n`,
-                    markdown`**file:** ${formatLocation(map.getMapFilePosition(), { as: "file", include: "none" })}  \n`
+                    markdown`**file:** ${formatLocationMarkdown(map.getMapFilePosition(), { as: "file", relativeTo })}  \n`
                 );
             }
 
@@ -133,10 +134,16 @@ export class MapNodeEntries {
 
     groupIntoFunctions() {
         return new MapFunctionNodeEntries(from(this.maps)
-            .groupBy(({ map }) => {
-                const source = map.getMapSource();
-                return new MapFunctionKey(source?.functionName, map.getMapFilePosition()?.uri, source?.symbolKind);
-            }, identity, (key, items) => new MapFunctionNodeBuilder(key.functionName, key.file, key.symbolKind, new MapNodeEntries(items.toArray())))
+            .groupBy(
+                ({ map }) => {
+                    const source = map.getMapSource();
+                    const filePos = map.getMapFilePosition();
+                    const position = source && filePos && UriEqualer.equals(filePos.uri, source.filePosition.uri) ? source.filePosition.range.start : undefined;
+                    return new MapFunctionKey(source?.functionName, filePos?.uri, position, source?.symbolKind);
+                },
+                identity,
+                (key, items) => new MapFunctionNodeBuilder(key, new MapNodeEntries(items.toArray())),
+                MapFunctionKey.equaler)
             .toArray());
     }
 
@@ -144,28 +151,6 @@ export class MapNodeEntries {
         return new MapFileNodeEntries(from(this.maps)
             .groupBy(({ map }) => map.getMapFilePosition()?.uri, identity, (key, items) => new MapFileNodeBuilder(key, new MapNodeEntries(items.toArray())), UriEqualer)
             .toArray());
-    }
-}
-
-class MapFunctionKey implements Equatable {
-    constructor(
-        readonly functionName: string | undefined,
-        readonly file: Uri | undefined,
-        readonly symbolKind: SymbolKind | undefined,
-    ) {
-    }
-    [Equatable.equals](other: unknown): boolean {
-        return other instanceof MapFunctionKey &&
-            this.functionName === other.functionName &&
-            UriEqualer.equals(this.file, other.file) &&
-            this.symbolKind === other.symbolKind;
-    }
-    [Equatable.hash](): number {
-        return Equaler.combineHashes(
-            Equaler.defaultEqualer.hash(this.functionName),
-            UriEqualer.hash(this.file),
-            Equaler.defaultEqualer.hash(this.symbolKind)
-        );
     }
 }
 
