@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Location, Position, TextDocumentShowOptions, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
-import { uriBasename } from "../../../core/uri";
-import { LogFile } from "../../model/logFile";
+import { TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
 import { FileLineTick } from "../../../third-party-derived/v8/tools/types";
 import { formatMilliseconds } from "../../formatting/numbers";
+import { LogFile } from "../../model/logFile";
 import { openedLog } from "../../services/currentLogFile";
+import { formatLocation } from "../../vscode/location";
 import { BaseNode } from "../common/baseNode";
 import { createTreeItem } from "../createTreeItem";
 import { LineTickTreeDataProvider } from "./lineTickTreeDataProvider";
@@ -24,10 +24,9 @@ export class LineTickNode extends BaseNode {
     get provider(): LineTickTreeDataProvider { return super.provider as LineTickTreeDataProvider; }
 
     protected createTreeItem(): TreeItem {
-        const relative = this.log?.tryGetRelativeUriFragment(this.lineTick.file) ?? uriBasename(this.lineTick.file);
-
-        // NOTE: LineTick.line is 1-based, Position is 0-based.
-        const location = new Location(this.lineTick.file, new Position(this.lineTick.line - 1, 0));
+        const location = this.lineTick.toLocation();
+        const relativeTo = this.log && { log: this.log, ignoreIfBasename: true };
+        const relative = formatLocation(location, { as: "file", include: "line", skipEncoding: true, relativeTo });
         const avgDuration = openedLog?.profile.averageSampleDuration.inMillisecondsF() ?? 0;
         const parentTime = this.provider.node?.selfTime ?? 1;
         const selfTime = this.lineTick.hitCount * avgDuration;
@@ -38,7 +37,7 @@ export class LineTickNode extends BaseNode {
             command: {
                 title: "open",
                 command: "vscode.open",
-                arguments: [location.uri, { preview: true, selection: location.range } as TextDocumentShowOptions]
+                arguments: [location.uri, { preview: true, selection: location.range }]
             }
         });
     }

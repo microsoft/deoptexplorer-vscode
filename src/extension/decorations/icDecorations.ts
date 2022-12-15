@@ -15,7 +15,7 @@ import { VSDisposableStack } from "../vscode/disposable";
 import { createDecorationType, getTextEditors } from "./utils";
 
 export class ICDecorations {
-    private _showDecorations: "active" | "visible" | "none" = showDecorations.includes(ShowDecorations.ICs) ? "visible" : "none";
+    private _showDecorations: "active" | "visible" | "none" = showDecorations.has(ShowDecorations.ICs) ? "visible" : "none";
     private _maxDecorations = 10_000;
     private _disposables: VSDisposableStack;
     private _noFeedbackIcDecorationType: TextEditorDecorationType;
@@ -64,7 +64,7 @@ export class ICDecorations {
     }
 
     private _onDidShowDecorationsChange() {
-        this.showDecorations = showDecorations.includes(ShowDecorations.ICs) ? "visible" : "none";
+        this.showDecorations = showDecorations.has(ShowDecorations.ICs) ? "visible" : "none";
     }
 
     private _hide() {

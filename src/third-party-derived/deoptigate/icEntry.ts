@@ -19,6 +19,7 @@ import type { MapEntry, MapId } from "../../extension/model/mapEntry";
 import { FunctionState } from "../v8/enums/functionState";
 import { IcState } from "../v8/enums/icState";
 import { IcType } from "../v8/enums/icType";
+import { FunctionEntry } from "./functionEntry";
 
 /**
  * Represents an inline cache at a particular file position.
@@ -49,6 +50,11 @@ export class IcEntry extends ReferenceableEntryBase {
         this.functionName = functionName;
     }
 
+    getWorstUpdate() {
+        return from(this.updates)
+            .maxBy(update => update.newState);
+    }
+
     getWorstIcState() {
         return from(this.updates)
                .select(update => update.newState)
@@ -68,6 +74,7 @@ IcEntry.prototype.kind = "ic";
  * Represents an update to an inline cache
  */
 export class IcEntryUpdate {
+    functionEntry?: FunctionEntry;
     constructor(
         public timestamp: TimeTicks,
         public type: IcType,

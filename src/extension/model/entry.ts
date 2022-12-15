@@ -172,8 +172,13 @@ export abstract class ReferenceableEntryBase extends EntryBase {
      * If an entry is not source-mapped, this points to a reference location derived from the location of 
      * the entry reported by the log.
      */
-    get referenceLocation() { return this._referenceLocation; }
-    set referenceLocation(value) { this._referenceLocation = value; }
+    get referenceLocation() {
+        this.resolveLocations();
+        return this._referenceLocation;
+    }
+    set referenceLocation(value) {
+        this._referenceLocation = value;
+    }
 
     /**
      * When finding references to an entry, this points to the location of the entry's reference.
@@ -181,8 +186,13 @@ export abstract class ReferenceableEntryBase extends EntryBase {
      * If an entry is source-mapped, this points to the reference location of the entry in the generated file
      * as reported by the log.
      */
-    get generatedReferenceLocation() { return this._generatedReferenceLocation; }
-    set generatedReferenceLocation(value) { this._generatedReferenceLocation = value; }
+    get generatedReferenceLocation() {
+        this.resolveLocations();
+        return this._generatedReferenceLocation;
+    }
+    set generatedReferenceLocation(value) {
+        this._generatedReferenceLocation = value;
+    }
 
     getLocation(kind: "source"): Location;
     getLocation(kind: LocationKind): Location | undefined;
@@ -206,7 +216,6 @@ export abstract class ReferenceableEntryBase extends EntryBase {
     getReferenceLocation(kind: "source"): Location;
     getReferenceLocation(kind: LocationKind): Location | undefined;
     getReferenceLocation(kind: LocationKind): Location | undefined {
-        this.resolveLocations();
         switch (kind) {
             case "source": return this.referenceLocation ?? this.filePosition;
             case "generated": return this.generatedReferenceLocation ?? this.generatedFilePosition;

@@ -39,12 +39,33 @@ export function binarySearchKey<T, K>(array: readonly T[], key: K, keySelector: 
     return ~low;
 }
 
+const weakNullableEqualers = new WeakMap<Equaler<any>, Equaler<any>>();
+
+export function getNullableEqualer<T>(equaler: Equaler<T>): Equaler<T | null | undefined> {
+    let nullableEqualer = weakNullableEqualers.get(equaler);
+    if (!nullableEqualer) weakNullableEqualers.set(equaler, nullableEqualer = Equaler.create(
+        (left, right) => equateNullable(left, right, equaler),
+        (value) => hashNullable(value, equaler)
+    ));
+    return nullableEqualer;
+}
+
 export function equateNullable<T>(a: T | null | undefined, b: T | null | undefined, equaler?: Equaler<T>): boolean {
     return a === b || a !== undefined && a !== null && b !== null && b !== undefined && (equaler ?? Equaler.defaultEqualer).equals(a, b);
 }
 
 export function hashNullable<T>(a: T | null | undefined, equaler?: Equaler<T>): number {
     return a === undefined || a === null ? Equaler.defaultEqualer.hash(a) : (equaler || Equaler.defaultEqualer).hash(a);
+}
+
+const weakNullableComparers = new WeakMap<Comparer<any>, Comparer<any>>();
+
+export function getNullableComparer<T>(comparer: Comparer<T>): Comparer<T | null | undefined> {
+    let nullableComparer = weakNullableComparers.get(comparer);
+    if (!nullableComparer) weakNullableComparers.set(comparer, nullableComparer = Comparer.create(
+        (left, right) => compareNullable(left, right, comparer),
+    ));
+    return nullableComparer;
 }
 
 export function compareNullable<T>(a: T | null | undefined, b: T | null | undefined, comparer?: Comparer<T>): number {

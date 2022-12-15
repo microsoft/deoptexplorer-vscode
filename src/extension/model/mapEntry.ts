@@ -17,6 +17,22 @@ import { EntryBase } from "./entry";
 export class MapId implements ToMarkdownString {
     private _text: string | undefined;
 
+    static readonly equaler = Equaler.create<MapId>(
+        (left, right) =>
+            left.address === right.address &&
+            left.index === right.index,
+        (value) => Equaler.combineHashes(
+            Equaler.defaultEqualer.hash(value.address),
+            Equaler.defaultEqualer.hash(value.index)
+        )
+    );
+
+    static readonly comparer = Comparer.create<MapId>(
+        (left, right) =>
+            Comparer.defaultComparer.compare(left.address, right.address) ||
+            Comparer.defaultComparer.compare(left.index, right.index)
+    );
+
     static readonly NONE = new MapId(kNullAddress, 0);
 
     constructor(
@@ -42,23 +58,6 @@ export class MapId implements ToMarkdownString {
         return result;
     }
 
-    static equals(left: MapId, right: MapId) {
-        return left.address === right.address
-            && left.index === right.index;
-    }
-
-    static hash(value: MapId) {
-        return Equaler.combineHashes(
-            Equaler.defaultEqualer.hash(value.address),
-            Equaler.defaultEqualer.hash(value.index)
-        );
-    }
-
-    static compare(left: MapId, right: MapId) {
-        return Comparer.defaultComparer.compare(left.address, right.address)
-            || Comparer.defaultComparer.compare(left.index, right.index);
-    }
-
     toString() {
         return this._text ??= this.index ? `${formatAddress(this.address)}_${this.index}` : formatAddress(this.address);
     }
@@ -68,15 +67,15 @@ export class MapId implements ToMarkdownString {
     }
 
     equals(other: MapId) {
-        return MapId.equals(this, other);
+        return MapId.equaler.equals(this, other);
     }
 
     hash() {
-        return MapId.hash(this);
+        return MapId.equaler.hash(this);
     }
 
     compareTo(other: MapId) {
-        return MapId.compare(this, other);
+        return MapId.comparer.compare(this, other);
     }
 
     [Equatable.equals](other: unknown) {
@@ -108,10 +107,10 @@ export class MapEntry {
     elementsKind?: string;
     instanceSize?: number;
     inobjectPropertiesCount?: number;
-    referencedBy?: MapReferencedBy[];
 
     readonly updates: MapEntryUpdate[] = [];
     readonly properties: MapProperty[] = [];
+    readonly referencedBy: MapReferencedBy[] = [];
 
     constructor(
         readonly timestamp: TimeTicks,
@@ -129,7 +128,7 @@ export class MapEntry {
     }
 
     isReferencedByIC() {
-        return this.referencedBy?.some(ref => ref.kind === "ic") ?? false;
+        return this.referencedBy.some(ref => ref.kind === "ic");
     }
 
     isNonUserCode() {
@@ -140,8 +139,8 @@ export class MapEntry {
     }
 
     isIntermediateTransition() {
-        const references = this.referencedBy?.filter(ref => ref.kind === "map") as MapReferencedByMap[] | undefined;
-        if (!references?.length) return false;
+        const references = this.referencedBy.filter(ref => ref.kind === "map") as MapReferencedByMap[];
+        if (!references.length) return false;
         const thisSource = this.getMapSource();
         for (const { map } of references) {
             const source = map.map.getMapSource();

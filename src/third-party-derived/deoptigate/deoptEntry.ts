@@ -16,6 +16,7 @@ import { DeoptimizeKind } from "../v8/enums/deoptimizeKind";
 import { ReferenceableEntryBase } from "../../extension/model/entry";
 import { FunctionState } from "../v8/enums/functionState";
 import { TimeTicks } from "../../core/time";
+import { FunctionEntry } from "./functionEntry";
 
 /**
  * Represents a deoptimization at a specific file location.
@@ -59,6 +60,7 @@ DeoptEntry.prototype.kind = "deopt";
  * Represents an update to a {@link DeoptEntry} in its timeline.
  */
 export class DeoptEntryUpdate {
+    functionEntry?: FunctionEntry;
     /**
      * @param timestamp The timestamp at which the update occurred.
      * @param bailoutType The type of bailout that caused the deoptimization.

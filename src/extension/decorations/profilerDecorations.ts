@@ -24,8 +24,8 @@ import { VSDisposableStack } from "../vscode/disposable";
 import { createDecorationType, getTextEditors } from "./utils";
 
 export class ProfilerDecorations {
-    private _showProfilerDecorations: "active" | "visible" | "none" = showDecorations.includes(ShowDecorations.Profiler) ? "visible" : "none";
-    private _showLineTickDecorations: "active" | "visible" | "none" = showDecorations.includes(ShowDecorations.LineTicks) ? "visible" : "none";
+    private _showProfilerDecorations: "active" | "visible" | "none" = showDecorations.has(ShowDecorations.Profiler) ? "visible" : "none";
+    private _showLineTickDecorations: "active" | "visible" | "none" = showDecorations.has(ShowDecorations.LineTicks) ? "visible" : "none";
     private _maxDecorations = 2_000;
     private _disposables: VSDisposableStack;
     private _profileHeavyDecorationType: TextEditorDecorationType;
@@ -79,8 +79,8 @@ export class ProfilerDecorations {
     }
 
     private _onDidShowDecorationsChange() {
-        const showProfilerDecorations = showDecorations.includes(ShowDecorations.Profiler) ? "visible" : "none";
-        const showLineTickDecorations = showDecorations.includes(ShowDecorations.LineTicks) ? "visible" : "none";
+        const showProfilerDecorations = showDecorations.has(ShowDecorations.Profiler) ? "visible" : "none";
+        const showLineTickDecorations = showDecorations.has(ShowDecorations.LineTicks) ? "visible" : "none";
         if (showProfilerDecorations !== this._showProfilerDecorations ||
             showLineTickDecorations !== this._showLineTickDecorations) {
             this._hide();

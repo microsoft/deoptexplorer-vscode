@@ -254,20 +254,18 @@ class MapDocumentContentProvider implements TextDocumentContentProvider, Definit
             locations.push(getReferenceLocationForMapName(mapId));
         }
 
-        if (map.referencedBy) {
-            for (const ref of map.referencedBy) {
-                if (ref.kind === "ic") {
-                    const location = ref.entry.getReferenceLocation("source");
-                    if (location) locations.push(location);
-                }
-                else if (ref.kind === "property") {
-                    const location = getReferenceLocationForMapPropertyType(ref.property);
-                    if (location) locations.push(location);
-                }
-                else if (ref.kind === "map") {
-                    const location = getReferenceLocationForBaseMapInExtendsClause(mapId, ref.map);
-                    if (location) locations.push(location);
-                }
+        for (const ref of map.referencedBy) {
+            if (ref.kind === "ic") {
+                const location = ref.entry.getReferenceLocation("source");
+                if (location) locations.push(location);
+            }
+            else if (ref.kind === "property") {
+                const location = getReferenceLocationForMapPropertyType(ref.property);
+                if (location) locations.push(location);
+            }
+            else if (ref.kind === "map") {
+                const location = getReferenceLocationForBaseMapInExtendsClause(mapId, ref.map);
+                if (location) locations.push(location);
             }
         }
 

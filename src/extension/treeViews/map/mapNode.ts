@@ -1,22 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { HashSet } from "@esfx/collections-hashset";
-import { Equaler, Equatable } from "@esfx/equatable";
-import { identity, select } from "@esfx/iter-fn";
-import { from } from "@esfx/iter-query";
-import { CancellationToken, MarkdownString, ProviderResult, SymbolKind, TextDocumentShowOptions, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
+import { count } from "@esfx/iter-fn";
+import { CancellationToken, MarkdownString, ProviderResult, TextDocumentShowOptions, ThemeIcon, TreeItem, TreeItemCollapsibleState } from "vscode";
 import { markdown } from "../../../core/markdown";
-import { UriEqualer } from "../../../core/uri";
-import { MapEntry, MapId } from "../../model/mapEntry";
-import { openedLog } from "../../services/currentLogFile";
+import { GroupMaps } from "../../constants";
+import { MapReference } from "../../model/mapEntry";
 import { getUriForMap } from "../../textDocumentContentProviders/map";
 import { formatLocation, formatLocationMarkdown } from "../../vscode/location";
+import { formatUriMarkdown } from "../../vscode/uri";
 import { BaseNode } from "../common/baseNode";
 import { createTreeItem } from "../createTreeItem";
-import { MapConstructorNode } from "./mapConstructorNode";
-import { MapFileNode, MapFileNodeBuilder, MapFileNodeEntries } from "./mapFileNode";
-import { MapFunctionKey, MapFunctionNode, MapFunctionNodeBuilder, MapFunctionNodeEntries } from "./mapFunctionNode";
 import type { MapsTreeDataProvider } from "./mapsTreeDataProvider";
 
 /**
@@ -25,27 +19,22 @@ import type { MapsTreeDataProvider } from "./mapsTreeDataProvider";
 export class MapNode extends BaseNode {
     constructor(
         provider: MapsTreeDataProvider,
-        parent: MapConstructorNode | MapFileNode | MapFunctionNode | undefined,
-        readonly mapId: MapId
+        parent: BaseNode | undefined,
+        readonly mapRef: MapReference,
     ) {
         super(provider, parent);
     }
 
-    /**
-     * Gets the provider that provides this node.
-     */
     get provider() { return super.provider as MapsTreeDataProvider; }
-
-    /**
-     * Gets the parent of the this node.
-     */
-    get parent() { return super.parent as MapConstructorNode | MapFileNode | MapFunctionNode | undefined; }
+    get mapId() { return this.mapRef.mapId; }
+    get map() { return this.mapRef.map; }
 
     protected createTreeItem() {
+        const groupByFunction = this.provider.groupBy.has(GroupMaps.ByFunction);
         return createTreeItem(this.mapId.toString(), TreeItemCollapsibleState.None, {
             contextValue: "map",
-            description: openedLog?.maps.get(this.mapId)?.getMapSource()?.functionName,
-            iconPath: new ThemeIcon("symbol-object"),
+            description: !groupByFunction ? this.map?.getMapSource()?.functionName : undefined,
+            iconPath: new ThemeIcon((this.map.mapType && mapTypeToThemeIcon[this.map.mapType]) ?? "symbol-misc"),
             command: {
                 title: "",
                 command: "vscode.open",
@@ -61,116 +50,29 @@ export class MapNode extends BaseNode {
     }
 
     override resolveTreeItem(treeItem: TreeItem, token: CancellationToken): ProviderResult<TreeItem> {
-        const map = openedLog?.maps.get(this.mapId);
-        if (map) {
-            const source = map.getMapSource();
-            if (source) {
-                treeItem.description = `${source.functionName} (${formatLocation(map.getMapFilePosition(), { as: "file", include: "none" })})`;
-            }
-
-            const lines: MarkdownString[] = [];
-            if (source) {
-                const relativeTo = this.provider.log && { log: this.provider.log, ignoreIfBasename: true };
-                lines.push(
-                    markdown`**function:** ${source.functionName}  \n`,
-                    markdown`**file:** ${formatLocationMarkdown(map.getMapFilePosition(), { as: "file", relativeTo })}  \n`
-                );
-            }
-
-            if (map.mapType) lines.push(markdown`**type:** ${map.mapType}  \n`);
-            if (map.elementsKind) lines.push(markdown`**elements:** ${map.elementsKind}  \n`);
-            if (map.instanceSize) lines.push(markdown`**instance size:** ${map.instanceSize}  \n`);
-            if (map.inobjectPropertiesCount) lines.push(markdown`**inobject properties:** ${map.inobjectPropertiesCount}  \n`);
-            if (lines) lines.unshift(markdown`\n\n`);
-
-            treeItem.iconPath = new ThemeIcon((map.mapType && mapTypeToThemeIcon[map.mapType]) ?? "symbol-misc");
-            treeItem.tooltip = markdown`${this.mapId}${lines}`;
+        const source = this.map.getMapSource();
+        if (source) {
+            treeItem.description = `${source.functionName} (${formatLocation(this.map.getMapFilePosition(), { as: "file", include: "none" })})`;
         }
+
+        const lines: MarkdownString[] = [];
+        if (source) {
+            const relativeTo = this.provider.log && { log: this.provider.log, ignoreIfBasename: true };
+            lines.push(
+                markdown`**function:** ${source.functionName}  \n`,
+                markdown`**file:** ${formatLocationMarkdown(this.map.getMapFilePosition(), { as: "file", relativeTo })}  \n`
+            );
+        }
+
+        if (this.map.mapType) lines.push(markdown`**type:** ${this.map.mapType}  \n`);
+        if (this.map.elementsKind) lines.push(markdown`**elements:** ${this.map.elementsKind}  \n`);
+        if (this.map.instanceSize) lines.push(markdown`**instance size:** ${this.map.instanceSize}  \n`);
+        if (this.map.inobjectPropertiesCount) lines.push(markdown`**inobject properties:** ${this.map.inobjectPropertiesCount}  \n`);
+        lines.push(markdown`**ics:** ${count(this.map.referencedBy, ref => ref.kind === "ic")}  \n`);
+
+        const header = formatUriMarkdown(getUriForMap(this.mapId), { label: `${this.mapId}`, title: `${this.mapId}` });
+        treeItem.tooltip = markdown`${header}\n\n${lines}`;
         return treeItem;
-    }
-
-    /**
-     * Finds the conceptual tree node corresponding to the provided address.
-     */
-    findNode(mapId: MapId): MapNode | undefined {
-        if (this.mapId.equals(mapId)) {
-            return this;
-        }
-    }
-}
-
-export class MapNodeEntries {
-    private _mapIdSet: HashSet<MapId> | undefined;
-    private _count: number | undefined;
-
-    readonly kind = "maps";
-
-    readonly describePage = (pageNumber: number, page: readonly BaseNode[]) => {
-        const first = page[0];
-        const last = page[page.length - 1];
-        if (!(first instanceof MapNode)) throw new TypeError();
-        if (!(last instanceof MapNode)) throw new TypeError();
-        return `[${first.mapId}..${last.mapId}]`;
-    };
-
-    constructor(
-        readonly maps: MapNodeBuilder[]
-    ) {
-    }
-
-    get mapIds(): ReadonlySet<MapId> {
-        return this._mapIdSet ??= new HashSet(select(this.maps, map => map.mapId), MapId);
-    }
-
-    countLeaves() {
-        return this._count ??= MapNodeBuilder.countLeaves(this.maps);
-    }
-
-    buildAll(provider: MapsTreeDataProvider, parent: MapConstructorNode | MapFunctionNode | MapFileNode | undefined) {
-        return from(this.maps)
-            .select(map => map.build(provider, parent))
-            .orderBy(map => map.mapId, MapId.compare);
-    }
-
-    groupIntoFunctions() {
-        return new MapFunctionNodeEntries(from(this.maps)
-            .groupBy(
-                ({ map }) => {
-                    const source = map.getMapSource();
-                    const filePos = map.getMapFilePosition();
-                    const position = source && filePos && UriEqualer.equals(filePos.uri, source.filePosition.uri) ? source.filePosition.range.start : undefined;
-                    return new MapFunctionKey(source?.functionName, filePos?.uri, position, source?.symbolKind);
-                },
-                identity,
-                (key, items) => new MapFunctionNodeBuilder(key, new MapNodeEntries(items.toArray())),
-                MapFunctionKey.equaler)
-            .toArray());
-    }
-
-    groupIntoFiles() {
-        return new MapFileNodeEntries(from(this.maps)
-            .groupBy(({ map }) => map.getMapFilePosition()?.uri, identity, (key, items) => new MapFileNodeBuilder(key, new MapNodeEntries(items.toArray())), UriEqualer)
-            .toArray());
-    }
-}
-
-export class MapNodeBuilder {
-    constructor(
-        readonly mapId: MapId,
-        readonly map: MapEntry
-    ) {
-    }
-
-    static countImmediateLeaves(entry: MapNodeBuilder | MapNode) {
-        return 1;
-    }
-
-    static countLeaves(entries: readonly (MapNodeBuilder | MapNode)[]) {
-        return entries.length;
-    }
-
-    build(provider: MapsTreeDataProvider, parent: MapConstructorNode | MapFunctionNode | MapFileNode | undefined) {
-        return new MapNode(provider, parent, this.mapId);
     }
 }
 

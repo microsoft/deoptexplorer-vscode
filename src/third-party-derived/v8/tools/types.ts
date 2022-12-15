@@ -12,6 +12,7 @@
 import { CanonicalUri } from "../../../extension/services/canonicalPaths";
 import { CallTreeNode } from "./calltree";
 import { TimeTicks } from "../../../core/time";
+import { Location, Position } from "vscode";
 
 export class LineTick {
     constructor(
@@ -36,6 +37,11 @@ export class FileLineTick extends LineTick {
         hitCount: number
     ) {
         super(line, hitCount);
+    }
+
+    toLocation() {
+        // NOTE: LineTick.line is 1-based, Position is 0-based.
+        return new Location(this.file, new Position(this.line - 1, 0));
     }
 }
 

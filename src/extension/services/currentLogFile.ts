@@ -20,6 +20,7 @@ import { cancelPendingOperations, cancelPendingUIOperation } from "./operationMa
 import * as storage from "./storage";
 import { UriEqualer } from "../../core/uri";
 import { delay } from "@esfx/async-delay";
+import { ImmutableEnumSet } from "../../core/collections/enumSet";
 
 export let openedFile: Uri | undefined;
 export let openedLog: LogFile | undefined;
@@ -51,7 +52,7 @@ export async function openLogFile(uri: Uri | undefined, force: boolean) {
         closeLogFile();
         await Promise.all([
             setLogStatus(constants.LogStatus.Opening),
-            setShowDecorations([])
+            setShowDecorations(ImmutableEnumSet.empty())
         ]);
         emitters.willOpenLogFile({ uri });
         await delay(100);

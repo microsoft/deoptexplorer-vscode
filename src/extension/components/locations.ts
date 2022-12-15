@@ -1273,6 +1273,17 @@ function tryResolveDeoptLocationInJavaScript(locationKind: LocationKind, entry: 
         if (ts.isElementAccessExpression(node)) {
             return setReferenceLocationFromNode(locationKind, entry, document, node.argumentExpression);
         }
+        if (ts.isNewExpression(node)) {
+            if (ts.isPropertyAccessExpression(node.expression)) {
+                return setReferenceLocationFromNode(locationKind, entry, document, node.expression.name);
+            }
+            if (ts.isElementAccessExpression(node.expression)) {
+                return setReferenceLocationFromNode(locationKind, entry, document, node.expression.argumentExpression);
+            }
+            if (ts.isIdentifier(node.expression)) {
+                return setReferenceLocationFromNode(locationKind, entry, document, node.expression);
+            }
+        }
         node = node.parent;
     }
 

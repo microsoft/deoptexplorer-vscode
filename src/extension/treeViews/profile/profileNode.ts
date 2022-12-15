@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { CancellationToken, ThemeIcon, TreeItem, TreeItemCollapsibleState, window } from "vscode";
+import { CancellationToken, SymbolKind, ThemeIcon, TreeItem, TreeItemCollapsibleState, window } from "vscode";
 import { ProfileViewNodeSnapshot } from "../../model/profileViewNodeSnapshot";
 import type { ProfileViewNode } from "../../../third-party-derived/v8/tools/profile_view";
 import * as constants from "../../constants";
@@ -48,11 +48,31 @@ export class ProfileNode extends BaseNode {
         return createTreeItem(functionName.name, collapsibleState, {
             contextValue: location && !isIgnoredFile(location.uri) && this.node.lineTicks.length ? "profile-node+ticks" : "profile-node",
             resourceUri: getUriForProfileNode(this.node),
+            iconPath: this.getIconPath(),
             description:
                 this.provider.sortBy === constants.ProfileSortMode.BySelfTime ? `${formatMilliseconds(this.node.selfTime)} (${this.node.selfPercent.toFixed(1)}%)` :
                 this.provider.sortBy === constants.ProfileSortMode.ByTotalTime ? `${formatMilliseconds(this.node.totalTime)} (${this.node.totalPercent.toFixed(1)}%)` :
                 `${formatMilliseconds(this.node.selfTime)} self, ${formatMilliseconds(this.node.totalTime)} total`
         });
+    }
+
+    private getIconPath() {
+        if (this.node.entry instanceof DynamicFuncCodeEntry && this.node.entry.state === FunctionState.Inlined) {
+            return new ThemeIcon("combine");
+        }
+
+        const functionEntry = this.provider.log?.findFunctionEntryByFunctionName(this.node.functionName);
+        switch (functionEntry?.symbolKind) {
+            case SymbolKind.Function: return new ThemeIcon("symbol-function");
+            case SymbolKind.Class: return new ThemeIcon("symbol-class");
+            case SymbolKind.Namespace: return new ThemeIcon("symbol-namespace");
+            case SymbolKind.Enum: return new ThemeIcon("symbol-enum");
+            case SymbolKind.Method: return new ThemeIcon("symbol-method");
+            case SymbolKind.Property: return new ThemeIcon("symbol-property");
+            case SymbolKind.Field: return new ThemeIcon("symbol-field");
+            case SymbolKind.Constructor: return new ThemeIcon("symbol-constructor");
+            default: return new ThemeIcon("symbol-misc");
+        }
     }
 
     async onCommand(commandName: string) {
@@ -65,7 +85,7 @@ export class ProfileNode extends BaseNode {
                 setShowLineTicks(true),
 
                 // show line tick decorations
-                setShowDecorations([...showDecorations, constants.ShowDecorations.LineTicks]),
+                setShowDecorations(showDecorations.add(constants.ShowDecorations.LineTicks)),
 
                 // open the function in the editor
                 window.showTextDocument(location.uri, { preview: true, selection: location.range }),

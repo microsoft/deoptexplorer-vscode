@@ -10,7 +10,7 @@ import * as constants from "./constants";
 import { MapId } from "./model/mapEntry";
 import { log } from "./outputChannel";
 import { CanonicalUri } from "./services/canonicalPaths";
-import { setShowDecorations, setShowProfileJustMyCode, setShowLineTicks, setShowMaps, setShowNativeCodeProfileNodes, setShowNodeJsProfileNodes, setShowNodeModulesProfileNodes, setShowProfile, setSortMaps, setSortProfile, showDecorations, showMaps, setGroupMaps, groupMaps } from "./services/context";
+import { setShowDecorations, setShowProfileJustMyCode, setShowLineTicks, setShowMaps, setShowNativeCodeProfileNodes, setShowNodeJsProfileNodes, setShowNodeModulesProfileNodes, setShowProfile, setSortMaps, setSortProfile, showDecorations, showMaps, setGroupMaps, groupMaps, setGroupDeopts, groupDeopts, setSortDeopts, setSortICs, showICStates, setShowICStates } from "./services/context";
 import { closeLogFile, openedFile, openedLog, openLogFile } from "./services/currentLogFile";
 import { cancelPendingOperations, diskOperationToken } from "./services/operationManager";
 import { showMapAsReference } from "./textDocumentContentProviders/map";
@@ -31,9 +31,28 @@ declare global {
         [constants.commands.log.open]: (uri?: Uri) => void;
         [constants.commands.log.reload]: () => void;
         [constants.commands.log.close]: () => void;
-        [constants.commands.maps.showMap]: (mapIds: string[], file: CanonicalUri, line: number, character: number) => void;
-        [constants.commands.functions.showFunctionHistory]: (filePosition: Location) => void;
         [constants.commands.log.showReport]: () => void;
+        [constants.commands.functions.showFunctionHistory]: (filePosition: Location) => void;
+        [constants.commands.ics.sortByLocation]: () => void;
+        [constants.commands.ics.sortByState]: () => void;
+        [constants.commands.ics.showStateMegamorphic]: () => void;
+        [constants.commands.ics.showStatePolymorphic]: () => void;
+        [constants.commands.ics.showStateMonomorphic]: () => void;
+        [constants.commands.ics.showStateOther]: () => void;
+        [constants.commands.ics.hideStateMegamorphic]: () => void;
+        [constants.commands.ics.hideStatePolymorphic]: () => void;
+        [constants.commands.ics.hideStateMonomorphic]: () => void;
+        [constants.commands.ics.hideStateOther]: () => void;
+        [constants.commands.deopts.sortByLocation]: () => void;
+        [constants.commands.deopts.sortByKind]: () => void;
+        [constants.commands.deopts.sortByCount]: () => void;
+        [constants.commands.deopts.groupByFile]: () => void;
+        [constants.commands.deopts.groupByFunction]: () => void;
+        [constants.commands.deopts.groupByKind]: () => void;
+        [constants.commands.deopts.ungroupByFile]: () => void;
+        [constants.commands.deopts.ungroupByFunction]: () => void;
+        [constants.commands.deopts.ungroupByKind]: () => void;
+        [constants.commands.maps.showMap]: (mapIds: string[], file: CanonicalUri, line: number, character: number) => void;
         [constants.commands.maps.sortByName]: () => void;
         [constants.commands.maps.sortByCount]: () => void;
         [constants.commands.maps.showUnreferenced]: () => void;
@@ -141,6 +160,67 @@ export function activateCommands(context: ExtensionContext) {
             showReportView();
         }),
 
+        // ICs
+        typeSafeRegisterCommand(constants.commands.ics.sortByLocation, async () => {
+            await setSortICs(constants.SortICs.ByLocation);
+        }),
+        typeSafeRegisterCommand(constants.commands.ics.sortByState, async () => {
+            await setSortICs(constants.SortICs.ByState);
+        }),
+        typeSafeRegisterCommand(constants.commands.ics.showStateMegamorphic, async () => {
+            await setShowICStates(showICStates.add(constants.ShowICStates.Megamorphic));
+        }),
+        typeSafeRegisterCommand(constants.commands.ics.showStatePolymorphic, async () => {
+            await setShowICStates(showICStates.add(constants.ShowICStates.Polymorphic));
+        }),
+        typeSafeRegisterCommand(constants.commands.ics.showStateMonomorphic, async () => {
+            await setShowICStates(showICStates.add(constants.ShowICStates.Monomorphic));
+        }),
+        typeSafeRegisterCommand(constants.commands.ics.showStateOther, async () => {
+            await setShowICStates(showICStates.add(constants.ShowICStates.Other));
+        }),
+        typeSafeRegisterCommand(constants.commands.ics.hideStateMegamorphic, async () => {
+            await setShowICStates(showICStates.delete(constants.ShowICStates.Megamorphic));
+        }),
+        typeSafeRegisterCommand(constants.commands.ics.hideStatePolymorphic, async () => {
+            await setShowICStates(showICStates.delete(constants.ShowICStates.Polymorphic));
+        }),
+        typeSafeRegisterCommand(constants.commands.ics.hideStateMonomorphic, async () => {
+            await setShowICStates(showICStates.delete(constants.ShowICStates.Monomorphic));
+        }),
+        typeSafeRegisterCommand(constants.commands.ics.hideStateOther, async () => {
+            await setShowICStates(showICStates.delete(constants.ShowICStates.Other));
+        }),
+
+        // Deopts
+        typeSafeRegisterCommand(constants.commands.deopts.sortByLocation, async () => {
+            await setSortDeopts(constants.SortDeopts.ByLocation);
+        }),
+        typeSafeRegisterCommand(constants.commands.deopts.sortByKind, async () => {
+            await setSortDeopts(constants.SortDeopts.ByKind);
+        }),
+        typeSafeRegisterCommand(constants.commands.deopts.sortByCount, async () => {
+            await setSortDeopts(constants.SortDeopts.ByCount);
+        }),
+        typeSafeRegisterCommand(constants.commands.deopts.groupByFile, async () => {
+            await setGroupDeopts(groupDeopts.add(constants.GroupDeopts.ByFile));
+        }),
+        typeSafeRegisterCommand(constants.commands.deopts.groupByFunction, async () => {
+            await setGroupDeopts(groupDeopts.add(constants.GroupDeopts.ByFunction));
+        }),
+        typeSafeRegisterCommand(constants.commands.deopts.groupByKind, async () => {
+            await setGroupDeopts(groupDeopts.add(constants.GroupDeopts.ByKind));
+        }),
+        typeSafeRegisterCommand(constants.commands.deopts.ungroupByFile, async () => {
+            await setGroupDeopts(groupDeopts.delete(constants.GroupDeopts.ByFile));
+        }),
+        typeSafeRegisterCommand(constants.commands.deopts.ungroupByFunction, async () => {
+            await setGroupDeopts(groupDeopts.delete(constants.GroupDeopts.ByFunction));
+        }),
+        typeSafeRegisterCommand(constants.commands.deopts.ungroupByKind, async () => {
+            await setGroupDeopts(groupDeopts.delete(constants.GroupDeopts.ByKind));
+        }),
+
         // Maps
         typeSafeRegisterCommand(constants.commands.maps.sortByName, async () => {
             await setSortMaps(constants.MapSortMode.ByName);
@@ -149,34 +229,34 @@ export function activateCommands(context: ExtensionContext) {
             await setSortMaps(constants.MapSortMode.ByCount);
         }),
         typeSafeRegisterCommand(constants.commands.maps.showUnreferenced, async () => {
-            await setShowMaps([...union(showMaps, [constants.ShowMaps.Unreferenced])]);
+            await setShowMaps(showMaps.add(constants.ShowMaps.Unreferenced));
         }),
         typeSafeRegisterCommand(constants.commands.maps.hideUnreferenced, async () => {
-            await setShowMaps([...except(showMaps, [constants.ShowMaps.Unreferenced])]);
+            await setShowMaps(showMaps.delete(constants.ShowMaps.Unreferenced));
         }),
         typeSafeRegisterCommand(constants.commands.maps.showNonUserCode, async () => {
-            await setShowMaps([...union(showMaps, [constants.ShowMaps.NonUserCode])]);
+            await setShowMaps(showMaps.add(constants.ShowMaps.NonUserCode));
         }),
         typeSafeRegisterCommand(constants.commands.maps.hideNonUserCode, async () => {
-            await setShowMaps([...except(showMaps, [constants.ShowMaps.NonUserCode])]);
+            await setShowMaps(showMaps.delete(constants.ShowMaps.NonUserCode));
         }),
         typeSafeRegisterCommand(constants.commands.maps.showTransitions, async () => {
-            await setShowMaps([...union(showMaps, [constants.ShowMaps.Transitions])]);
+            await setShowMaps(showMaps.add(constants.ShowMaps.Transitions));
         }),
         typeSafeRegisterCommand(constants.commands.maps.hideTransitions, async () => {
-            await setShowMaps([...except(showMaps, [constants.ShowMaps.Transitions])]);
+            await setShowMaps(showMaps.delete(constants.ShowMaps.Transitions));
         }),
         typeSafeRegisterCommand(constants.commands.maps.groupByFile, async () => {
-            await setGroupMaps([...union(groupMaps, [constants.GroupMaps.ByFile])]);
+            await setGroupMaps(groupMaps.add(constants.GroupMaps.ByFile));
         }),
         typeSafeRegisterCommand(constants.commands.maps.groupByFunction, async () => {
-            await setGroupMaps([...union(groupMaps, [constants.GroupMaps.ByFunction])]);
+            await setGroupMaps(groupMaps.add(constants.GroupMaps.ByFunction));
         }),
         typeSafeRegisterCommand(constants.commands.maps.ungroupByFile, async () => {
-            await setGroupMaps([...except(groupMaps, [constants.GroupMaps.ByFile])]);
+            await setGroupMaps(groupMaps.delete(constants.GroupMaps.ByFile));
         }),
         typeSafeRegisterCommand(constants.commands.maps.ungroupByFunction, async () => {
-            await setGroupMaps([...except(groupMaps, [constants.GroupMaps.ByFunction])]);
+            await setGroupMaps(groupMaps.delete(constants.GroupMaps.ByFunction));
         }),
 
         // Profile
@@ -225,37 +305,37 @@ export function activateCommands(context: ExtensionContext) {
 
         // Decorations
         typeSafeRegisterCommand(constants.commands.decorations.showDeopts, async () => {
-            await setShowDecorations([...union(showDecorations, [constants.ShowDecorations.Deopts])]);
+            await setShowDecorations(showDecorations.add(constants.ShowDecorations.Deopts));
         }),
         typeSafeRegisterCommand(constants.commands.decorations.hideDeopts, async () => {
-            await setShowDecorations([...except(showDecorations, [constants.ShowDecorations.Deopts])]);
+            await setShowDecorations(showDecorations.delete(constants.ShowDecorations.Deopts));
         }),
         typeSafeRegisterCommand(constants.commands.decorations.showICs, async () => {
-            await setShowDecorations([...union(showDecorations, [constants.ShowDecorations.ICs])]);
+            await setShowDecorations(showDecorations.add(constants.ShowDecorations.ICs));
         }),
         typeSafeRegisterCommand(constants.commands.decorations.hideICs, async () => {
-            await setShowDecorations([...except(showDecorations, [constants.ShowDecorations.ICs])]);
+            await setShowDecorations(showDecorations.delete(constants.ShowDecorations.ICs));
         }),
         typeSafeRegisterCommand(constants.commands.decorations.showFunctionStates, async () => {
-            await setShowDecorations([...union(showDecorations, [constants.ShowDecorations.Functions])]);
+            await setShowDecorations(showDecorations.add(constants.ShowDecorations.Functions));
         }),
         typeSafeRegisterCommand(constants.commands.decorations.hideFunctionStates, async () => {
-            await setShowDecorations([...except(showDecorations, [constants.ShowDecorations.Functions])]);
+            await setShowDecorations(showDecorations.delete(constants.ShowDecorations.Functions));
         }),
         typeSafeRegisterCommand(constants.commands.decorations.showProfiler, async () => {
-            await setShowDecorations([...union(showDecorations, [constants.ShowDecorations.Profiler])]);
+            await setShowDecorations(showDecorations.add(constants.ShowDecorations.Profiler));
         }),
         typeSafeRegisterCommand(constants.commands.decorations.hideProfiler, async () => {
-            await setShowDecorations([...except(showDecorations, [constants.ShowDecorations.Profiler])]);
+            await setShowDecorations(showDecorations.delete(constants.ShowDecorations.Profiler));
         }),
         typeSafeRegisterCommand(constants.commands.decorations.showLineTicks, async () => {
-            await setShowDecorations([...union(showDecorations, [constants.ShowDecorations.LineTicks])]);
+            await setShowDecorations(showDecorations.add(constants.ShowDecorations.LineTicks));
         }),
         typeSafeRegisterCommand(constants.commands.decorations.hideLineTicks, async () => {
-            await setShowDecorations([...except(showDecorations, [constants.ShowDecorations.LineTicks])]);
+            await setShowDecorations(showDecorations.delete(constants.ShowDecorations.LineTicks));
         }),
         typeSafeRegisterCommand(constants.commands.decorations.hideAll, async () => {
-            await setShowDecorations([]);
+            await setShowDecorations(showDecorations.clear());
         }),
         typeSafeRegisterCommand(constants.commands.profile.showLineTickDecorationsForNode, async (context) => {
             if (context instanceof ContextCommandHandler) {
@@ -264,6 +344,7 @@ export function activateCommands(context: ExtensionContext) {
         }),
         typeSafeRegisterCommand(constants.commands.profile.hideLineTicks, async () => {
             await setShowLineTicks(false);
+            await setShowDecorations(showDecorations.delete(constants.ShowDecorations.LineTicks));
         }),
 
         // Export CPU profile

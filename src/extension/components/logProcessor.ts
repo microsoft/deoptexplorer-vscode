@@ -926,6 +926,7 @@ export class LogProcessor {
                     map,
                     code.isJSFunction() ? code.state : undefined
                 );
+                update.functionEntry = this._functions.get(codeFilePosition);
                 entry.updates.push(update);
 
                 if (codeFilePosition) {
@@ -937,7 +938,6 @@ export class LogProcessor {
                     if (!mapReferences) this._mapReferences.set(map, mapReferences = new Set());
                     if (!mapReferences.has(entry)) {
                         mapReferences.add(entry);
-                        map.referencedBy ||= [];
                         map.referencedBy.push(new MapReferencedByIcEntryUpdate(entry, update));
                     }
                 }
@@ -982,11 +982,11 @@ export class LogProcessor {
             inliningId,
             scriptOffset,
         );
-
+        update.functionEntry = codeFilePosition && this._functions.get(codeFilePosition);
         entry.updates.push(update);
 
-        if (codeFilePosition) {
-            this._functions.get(codeFilePosition)?.timeline.push({ event: "deopt", timestamp, entry, update });
+        if (update.functionEntry) {
+            update.functionEntry?.timeline.push({ event: "deopt", timestamp, entry, update });
         }
     }
 
@@ -1082,7 +1082,6 @@ export class LogProcessor {
                 const targetMaps = this._maps.find(property.type)?.value;
                 const targetMap = targetMaps?.[targetMaps.length - 1];
                 if (targetMap) {
-                    targetMap.referencedBy ||= [];
                     targetMap.referencedBy.push(new MapReferencedByMapProperty(property));
                 }
             }
@@ -1134,7 +1133,6 @@ export class LogProcessor {
         }
 
         if (from && to) {
-            from.referencedBy ||= [];
             from.referencedBy.push(new MapReferencedByMap(new MapReference(toAddress, toIndex, to, reason)));
             for (const sourceProperty of from.properties) {
                 const existingProperty = to.properties.find(property => PropertyNameEqualer.equals(property.name, sourceProperty.name));

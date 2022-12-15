@@ -79,7 +79,8 @@ function formatSummaryForDeoptEntryUpdate(update: DeoptEntryUpdate | undefined) 
         case DeoptimizeKind.Eager: return `Eager bailout${getDeoptReason(update)}`;
         case DeoptimizeKind.Lazy: return `Lazy bailout${getDeoptReason(update)}`;
         case DeoptimizeKind.Soft: return `Soft bailout${getDeoptReason(update)}`;
-        default: return `'${update.bailoutType}' bailout${getDeoptReason(update)}`;
+        case DeoptimizeKind.DependencyChange: return `Dependency change${getDeoptReason(update)}`;
+        default: return `'${formatDeoptimizeKind(update.bailoutType)}' bailout${getDeoptReason(update)}`;
     }
 }
 

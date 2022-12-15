@@ -44,6 +44,9 @@ export const enum DeoptimizeKind {
      * Used in a dynamic map check, either eagerly deoptimizes if necessary or resumes execution if the check succeeds.
      */
     EagerWithResume,
+
+    /** NOTE: Not an actual DeoptimizeKind */
+    DependencyChange,
 }
 
 const enumVersions = new VersionedEnum<DeoptimizeKind>("DeoptimizeKind", {
@@ -57,6 +60,7 @@ const enumVersions = new VersionedEnum<DeoptimizeKind>("DeoptimizeKind", {
         [DeoptimizeKind.Bailout, "Bailout", "bailout"],
         [DeoptimizeKind.Lazy, "Lazy", "deopt-lazy", /*back compat*/ "lazy"],
         [DeoptimizeKind.EagerWithResume, "Eager with Resume", "eager-with-resume"],
+        [DeoptimizeKind.DependencyChange, "Dependency Change", "dependency-change"],
     ],
 
     // 8.6.218:
@@ -68,6 +72,7 @@ const enumVersions = new VersionedEnum<DeoptimizeKind>("DeoptimizeKind", {
         [DeoptimizeKind.BailoutSoft, "Bailout Soft", "bailout-soft"],
         [DeoptimizeKind.Bailout, "Bailout", "bailout"],
         [DeoptimizeKind.Lazy, "Lazy", "deopt-lazy", /*back compat*/ "lazy"],
+        [DeoptimizeKind.DependencyChange, "Dependency Change", "dependency-change"],
     ],
 
     // 8.6.79:
@@ -78,6 +83,7 @@ const enumVersions = new VersionedEnum<DeoptimizeKind>("DeoptimizeKind", {
         [DeoptimizeKind.Soft, "Soft", "deopt-soft", /*back compat*/ "soft"],
         [DeoptimizeKind.BailoutSoft, "Bailout Soft", "bailout-soft"],
         [DeoptimizeKind.Lazy, "Lazy", "deopt-lazy", /*back compat*/ "lazy"],
+        [DeoptimizeKind.DependencyChange, "Dependency Change", "dependency-change"],
     ],
 
     // Any older and we just use these.

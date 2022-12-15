@@ -4,7 +4,8 @@
 import { Disposable, EventEmitter, ExtensionContext, Uri } from "vscode";
 import { LogFile } from "../model/logFile";
 import { ProfileViewNodeSnapshot } from "../model/profileViewNodeSnapshot";
-import { LogStatus, ShowMaps, MapSortMode, ProfileShowMode, ProfileSortMode, ShowDecorations, GroupMaps } from "../constants";
+import { LogStatus, ShowMaps, MapSortMode, ProfileShowMode, ProfileSortMode, ShowDecorations, GroupMaps, GroupDeopts, SortDeopts, SortICs, ShowICStates } from "../constants";
+import { ImmutableEnumSet } from "../../core/collections/enumSet";
 
 export let events!: ReturnType<typeof createEvents>["events"];
 export let emitters!: ReturnType<typeof createEvents>["emitters"];
@@ -43,13 +44,21 @@ function createEvents() {
         willLogStatusChange: new EventEmitter<void>(),
         didLogStatusChange: new EventEmitter<LogStatus>(),
         willShowDecorationsChange: new EventEmitter<void>(),
-        didShowDecorationsChange: new EventEmitter<readonly ShowDecorations[]>(),
+        didShowDecorationsChange: new EventEmitter<ImmutableEnumSet<ShowDecorations>>(),
+        willSortDeoptsChange: new EventEmitter<void>(),
+        didSortDeoptsChange: new EventEmitter<SortDeopts>(),
+        willGroupDeoptsChange: new EventEmitter<void>(),
+        didGroupDeoptsChange: new EventEmitter<ImmutableEnumSet<GroupDeopts>>(),
+        willSortICsChange: new EventEmitter<void>(),
+        didSortICsChange: new EventEmitter<SortICs>(),
+        willShowICStatesChange: new EventEmitter<void>(),
+        didShowICStatesChange: new EventEmitter<ImmutableEnumSet<ShowICStates>>(),
         willShowMapsChange: new EventEmitter<void>(),
-        didShowMapsChange: new EventEmitter<readonly ShowMaps[]>(),
+        didShowMapsChange: new EventEmitter<ImmutableEnumSet<ShowMaps>>(),
         willSortMapsChange: new EventEmitter<void>(),
         didSortMapsChange: new EventEmitter<MapSortMode>(),
         willGroupMapsChange: new EventEmitter<void>(),
-        didGroupMapsChange: new EventEmitter<readonly GroupMaps[]>(),
+        didGroupMapsChange: new EventEmitter<ImmutableEnumSet<GroupMaps>>(),
         willShowProfileChange: new EventEmitter<void>(),
         didShowProfileChange: new EventEmitter<ProfileShowMode>(),
         willSortProfileChange: new EventEmitter<void>(),

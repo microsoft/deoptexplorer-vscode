@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { from } from "@esfx/iter-query";
 import { TreeItemCollapsibleState } from "vscode";
 import { createTreeItem } from "../createTreeItem";
 import { BaseNode } from "./baseNode";
@@ -19,13 +20,6 @@ export class PageNode extends BaseNode {
         readonly formatDescription?: (start: number, page: BaseNode[]) => string | undefined,
     ) {
         super(provider, parent);
-        for (const node of page) {
-            node["_visualParent"] = this;
-        }
-    }
-
-    get children() {
-        return this.page;
     }
 
     protected createTreeItem() {
@@ -36,7 +30,8 @@ export class PageNode extends BaseNode {
     }
 
     protected getChildren(): Iterable<BaseNode> {
-        return this.page;
+        return from(this.page)
+            .select(node => Object.create(node, { _visualParent: { value: this } }) as BaseNode);
     }
 }
 

@@ -39,7 +39,7 @@ const digitsRegExp = /^\d+$/;
             const result = enumMappings[value];
             return typeof result === "number" ? result : result[0];
         }
-        throw new TypeError(`Argument is not a valid ${this._name}`);
+        throw new TypeError(`Argument is not a valid ${this._name}: ${value}`);
     }
 
     /**
@@ -64,7 +64,7 @@ const digitsRegExp = /^\d+$/;
                 }
             }
         }
-        throw new TypeError(`Argument is not a valid ${this._name}`);
+        throw new TypeError(`Argument is not a valid ${this._name}: ${value}`);
     }
 
     /**
@@ -84,6 +84,6 @@ const digitsRegExp = /^\d+$/;
                 }
             }
         }
-        throw new TypeError(`Argument is not a valid ${this._name}`);
+        throw new TypeError(`Argument is not a valid ${this._name}: ${value}`);
     }
 }

@@ -28,14 +28,27 @@ import {
     kDefaultShowNodeModulesProfileNodes,
     GroupMaps,
     kDefaultGroupMaps,
+    kDefaultGroupDeopts,
+    GroupDeopts,
+    kDefaultSortDeopts,
+    SortDeopts,
+    kDefaultSortICs,
+    SortICs,
+    kDefaultShowICStates,
+    ShowICStates,
 } from "../constants";
 import * as storage from "./storage";
 import { typeSafeExecuteCommand } from "../vscode/commands";
 import { emitters } from "./events";
+import { ImmutableEnumSet } from "../../core/collections/enumSet";
 
 let currentContext: ExtensionContext | undefined;
 
 export let logStatus = kDefaultLogStatus;
+export let sortICs = kDefaultSortICs;
+export let showICStates = kDefaultShowICStates;
+export let sortDeopts = kDefaultSortDeopts;
+export let groupDeopts = kDefaultGroupDeopts;
 export let sortMaps = kDefaultMapSortMode;
 export let groupMaps = kDefaultGroupMaps;
 export let showMaps = kDefaultShowMaps;
@@ -65,6 +78,76 @@ export async function setLogStatus(value: LogStatus) {
     }
 }
 
+export async function setSortICs(value: SortICs) {
+    if (sortICs !== value) {
+        if (currentContext) {
+            emitters.willSortICsChange();
+        }
+        sortICs = value;
+        if (currentContext) {
+            await Promise.all([
+                storage.setSortICs(value),
+                setContext(contextKeys.ics.sort, sortICs),
+            ]);
+            emitters.didSortICsChange(value);
+        }
+    }
+}
+
+export async function setShowICStates(value: ImmutableEnumSet<ShowICStates>) {
+    if (!showICStates.equals(value)) {
+        if (currentContext) {
+            emitters.willShowICStatesChange();
+        }
+        showICStates = value;
+        if (currentContext) {
+            await Promise.all([
+                storage.setShowICStates(value),
+                setContext(contextKeys.ics.show.states, [...showICStates]),
+                setContext(contextKeys.ics.show.state.megamorphic, showICStates.has(ShowICStates.Megamorphic)),
+                setContext(contextKeys.ics.show.state.polymorphic, showICStates.has(ShowICStates.Polymorphic)),
+                setContext(contextKeys.ics.show.state.monomorphic, showICStates.has(ShowICStates.Monomorphic)),
+                setContext(contextKeys.ics.show.state.other, showICStates.has(ShowICStates.Other)),
+            ]);
+            emitters.didShowICStatesChange(value);
+        }
+    }
+}
+
+export async function setSortDeopts(value: SortDeopts) {
+    if (sortDeopts !== value) {
+        if (currentContext) {
+            emitters.willSortDeoptsChange();
+        }
+        sortDeopts = value;
+        if (currentContext) {
+            await Promise.all([
+                storage.setSortDeopts(value),
+                setContext(contextKeys.deopts.sort, sortDeopts),
+            ]);
+            emitters.didSortDeoptsChange(value);
+        }
+    }
+}
+
+export async function setGroupDeopts(value: ImmutableEnumSet<GroupDeopts>) {
+    if (!groupDeopts.equals(value)) {
+        if (currentContext) {
+            emitters.willGroupDeoptsChange();
+        }
+        groupDeopts = value;
+        if (currentContext) {
+            await Promise.all([
+                storage.setGroupDeopts(value),
+                setContext(contextKeys.deopts.groupByFile, groupDeopts.has(GroupDeopts.ByFile)),
+                setContext(contextKeys.deopts.groupByFunction, groupDeopts.has(GroupDeopts.ByFunction)),
+                setContext(contextKeys.deopts.groupByKind, groupDeopts.has(GroupDeopts.ByKind)),
+            ]);
+            emitters.didGroupDeoptsChange(value);
+        }
+    }
+}
+
 export async function setSortMaps(value: MapSortMode) {
     if (sortMaps !== value) {
         if (currentContext) {
@@ -81,49 +164,37 @@ export async function setSortMaps(value: MapSortMode) {
     }
 }
 
-export async function setGroupMaps(value: readonly GroupMaps[]) {
-    if (groupMaps !== value) {
-        if (value.length > 1) {
-            value = [...orderBy(distinct(value), identity)];
+export async function setGroupMaps(value: ImmutableEnumSet<GroupMaps>) {
+    if (!groupMaps.equals(value)) {
+        if (currentContext) {
+            emitters.willGroupMapsChange();
         }
-        if (!corresponds(groupMaps, value)) {
-            if (currentContext) {
-                emitters.willGroupMapsChange();
-            }
-            groupMaps = value;
-            if (currentContext) {
-                await Promise.all([
-                    storage.setGroupMaps(value),
-                    setContext(contextKeys.groupMaps, groupMaps.length === 0 ? undefined : groupMaps),
-                    setContext(contextKeys.maps.groupByFile, groupMaps.includes(GroupMaps.ByFile)),
-                    setContext(contextKeys.maps.groupByFunction, groupMaps.includes(GroupMaps.ByFunction)),
-                ]);
-                emitters.didGroupMapsChange(value);
-            }
+        groupMaps = value;
+        if (currentContext) {
+            await Promise.all([
+                storage.setGroupMaps(value),
+                setContext(contextKeys.maps.groupByFile, groupMaps.has(GroupMaps.ByFile)),
+                setContext(contextKeys.maps.groupByFunction, groupMaps.has(GroupMaps.ByFunction)),
+            ]);
+            emitters.didGroupMapsChange(value);
         }
     }
 }
 
-export async function setShowMaps(value: readonly ShowMaps[]) {
-    if (showMaps !== value) {
-        if (value.length > 1) {
-            value = [...orderBy(distinct(value), identity)];
+export async function setShowMaps(value: ImmutableEnumSet<ShowMaps>) {
+    if (!showMaps.equals(value)) {
+        if (currentContext) {
+            emitters.willShowMapsChange();
         }
-        if (!corresponds(showMaps, value)) {
-            if (currentContext) {
-                emitters.willShowMapsChange();
-            }
-            showMaps = value;
-            if (currentContext) {
-                await Promise.all([
-                    storage.setShowMaps(value),
-                    setContext(contextKeys.showMaps, value.length === 0 ? undefined : value),
-                    setContext(contextKeys.maps.showUnreferenced, showMaps.includes(ShowMaps.Unreferenced)),
-                    setContext(contextKeys.maps.showNonUserCode, showMaps.includes(ShowMaps.NonUserCode)),
-                    setContext(contextKeys.maps.showTransitions, showMaps.includes(ShowMaps.Transitions)),
-                ]);
-                emitters.didShowMapsChange(value);
-            }
+        showMaps = value;
+        if (currentContext) {
+            await Promise.all([
+                storage.setShowMaps(value),
+                setContext(contextKeys.maps.showUnreferenced, showMaps.has(ShowMaps.Unreferenced)),
+                setContext(contextKeys.maps.showNonUserCode, showMaps.has(ShowMaps.NonUserCode)),
+                setContext(contextKeys.maps.showTransitions, showMaps.has(ShowMaps.Transitions)),
+            ]);
+            emitters.didShowMapsChange(value);
         }
     }
 }
@@ -209,27 +280,21 @@ export async function setShowNodeModulesProfileNodes(value: boolean) {
     }
 }
 
-export async function setShowDecorations(value: readonly ShowDecorations[]) {
-    if (showDecorations !== value) {
-        if (value.length > 1) {
-            value = [...orderBy(distinct(value), identity)];
+export async function setShowDecorations(value: ImmutableEnumSet<ShowDecorations>) {
+    if (!showDecorations.equals(value)) {
+        if (currentContext) {
+            emitters.willShowDecorationsChange();
         }
-        if (!corresponds(showDecorations, value)) {
-            if (currentContext) {
-                emitters.willShowDecorationsChange();
-            }
-            showDecorations = value;
-            if (currentContext) {
-                await Promise.all([
-                    setContext(contextKeys.showDecorations, value.length === 0 ? undefined : value),
-                    setContext(contextKeys.decorations.showDeopts, showDecorations.includes(ShowDecorations.Deopts)),
-                    setContext(contextKeys.decorations.showICs, showDecorations.includes(ShowDecorations.ICs)),
-                    setContext(contextKeys.decorations.showFunctionState, showDecorations.includes(ShowDecorations.Functions)),
-                    setContext(contextKeys.decorations.showProfiler, showDecorations.includes(ShowDecorations.Profiler)),
-                    setContext(contextKeys.decorations.showLineTicks, showDecorations.includes(ShowDecorations.LineTicks)),
-                ]);
-                emitters.didShowDecorationsChange(value);
-            }
+        showDecorations = value;
+        if (currentContext) {
+            await Promise.all([
+                setContext(contextKeys.decorations.showDeopts, showDecorations.has(ShowDecorations.Deopts)),
+                setContext(contextKeys.decorations.showICs, showDecorations.has(ShowDecorations.ICs)),
+                setContext(contextKeys.decorations.showFunctionState, showDecorations.has(ShowDecorations.Functions)),
+                setContext(contextKeys.decorations.showProfiler, showDecorations.has(ShowDecorations.Profiler)),
+                setContext(contextKeys.decorations.showLineTicks, showDecorations.has(ShowDecorations.LineTicks)),
+            ]);
+            emitters.didShowDecorationsChange(value);
         }
     }
 }
@@ -253,35 +318,50 @@ export async function activateContextService(context: ExtensionContext) {
     showNativeCodeProfileNodes = storage.getShowNativeCodeProfileNodes();
     showNodeJsProfileNodes = storage.getShowNodeJsProfileNodes();
     showNodeModulesProfileNodes = storage.getShowNodeModulesProfileNodes();
+    sortICs = storage.getSortICs();
+    showICStates = storage.getShowICStates();
+    groupDeopts = storage.getGroupDeopts();
+    sortDeopts = storage.getSortDeopts();
     groupMaps = storage.getGroupMaps();
     showMaps = storage.getShowMaps();
     sortMaps = storage.getSortMaps();
     await Promise.all([
-        setContext(contextKeys.decorations.showDeopts, showDecorations.includes(ShowDecorations.Deopts)),
-        setContext(contextKeys.decorations.showICs, showDecorations.includes(ShowDecorations.ICs)),
-        setContext(contextKeys.decorations.showFunctionState, showDecorations.includes(ShowDecorations.Functions)),
-        setContext(contextKeys.decorations.showProfiler, showDecorations.includes(ShowDecorations.Profiler)),
-        setContext(contextKeys.decorations.showLineTicks, showDecorations.includes(ShowDecorations.LineTicks)),
-        setContext(contextKeys.maps.showUnreferenced, showMaps.includes(ShowMaps.Unreferenced)),
-        setContext(contextKeys.maps.showNonUserCode, showMaps.includes(ShowMaps.NonUserCode)),
-        setContext(contextKeys.maps.showTransitions, showMaps.includes(ShowMaps.Transitions)),
-        setContext(contextKeys.maps.groupByFile, groupMaps.includes(GroupMaps.ByFile)),
-        setContext(contextKeys.maps.groupByFunction, groupMaps.includes(GroupMaps.ByFunction)),
+        setContext(contextKeys.decorations.showDeopts, showDecorations.has(ShowDecorations.Deopts)),
+        setContext(contextKeys.decorations.showICs, showDecorations.has(ShowDecorations.ICs)),
+        setContext(contextKeys.decorations.showFunctionState, showDecorations.has(ShowDecorations.Functions)),
+        setContext(contextKeys.decorations.showProfiler, showDecorations.has(ShowDecorations.Profiler)),
+        setContext(contextKeys.decorations.showLineTicks, showDecorations.has(ShowDecorations.LineTicks)),
+        setContext(contextKeys.ics.sort, sortICs),
+        setContext(contextKeys.ics.show.states, [...showICStates]),
+        setContext(contextKeys.ics.show.state.megamorphic, showICStates.has(ShowICStates.Megamorphic)),
+        setContext(contextKeys.ics.show.state.polymorphic, showICStates.has(ShowICStates.Polymorphic)),
+        setContext(contextKeys.ics.show.state.monomorphic, showICStates.has(ShowICStates.Monomorphic)),
+        setContext(contextKeys.ics.show.state.other, showICStates.has(ShowICStates.Other)),
+        setContext(contextKeys.deopts.sort, sortDeopts),
+        setContext(contextKeys.deopts.groupByFile, groupDeopts.has(GroupDeopts.ByFile)),
+        setContext(contextKeys.deopts.groupByFunction, groupDeopts.has(GroupDeopts.ByFunction)),
+        setContext(contextKeys.deopts.groupByKind, groupDeopts.has(GroupDeopts.ByKind)),
+        setContext(contextKeys.maps.showUnreferenced, showMaps.has(ShowMaps.Unreferenced)),
+        setContext(contextKeys.maps.showNonUserCode, showMaps.has(ShowMaps.NonUserCode)),
+        setContext(contextKeys.maps.showTransitions, showMaps.has(ShowMaps.Transitions)),
+        setContext(contextKeys.maps.groupByFile, groupMaps.has(GroupMaps.ByFile)),
+        setContext(contextKeys.maps.groupByFunction, groupMaps.has(GroupMaps.ByFunction)),
         setContext(contextKeys.logStatus, logStatus),
         setContext(contextKeys.sortMaps, sortMaps),
-        setContext(contextKeys.groupMaps, groupMaps.length === 0 ? undefined : groupMaps),
-        setContext(contextKeys.showMaps, showMaps.length === 0 ? undefined : showMaps),
         setContext(contextKeys.sortProfile, sortProfile),
         setContext(contextKeys.showProfile, showProfile),
         setContext(contextKeys.showProfileJustMyCode, showJustMyCode),
         setContext(contextKeys.showNativeCodeProfileNodes, showNativeCodeProfileNodes),
         setContext(contextKeys.showNodeJsProfileNodes, showNodeJsProfileNodes),
         setContext(contextKeys.showNodeModulesProfileNodes, showNodeModulesProfileNodes),
-        setContext(contextKeys.showDecorations, showDecorations.length === 0 ? undefined : showDecorations),
         setContext(contextKeys.showLineTicks, showLineTicks),
     ]);
     return new Disposable(() => {
         logStatus = kDefaultLogStatus;
+        sortICs = kDefaultSortICs;
+        showICStates = kDefaultShowICStates;
+        sortDeopts = kDefaultSortDeopts;
+        groupDeopts = kDefaultGroupDeopts;
         sortMaps = kDefaultMapSortMode;
         groupMaps = kDefaultGroupMaps;
         showMaps = kDefaultShowMaps;

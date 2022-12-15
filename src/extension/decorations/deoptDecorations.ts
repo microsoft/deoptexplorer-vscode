@@ -15,7 +15,7 @@ import { VSDisposableStack } from "../vscode/disposable";
 import { createDecorationType, getTextEditors } from "./utils";
 
 export class DeoptDecorations {
-    private _showDecorations: "active" | "visible" | "none" = showDecorations.includes(ShowDecorations.Deopts) ? "visible" : "none";
+    private _showDecorations: "active" | "visible" | "none" = showDecorations.has(ShowDecorations.Deopts) ? "visible" : "none";
     private _maxDecorations = 2_000;
     private _disposables: VSDisposableStack;
     private _eagerDeoptDecorationType: TextEditorDecorationType;
@@ -54,7 +54,7 @@ export class DeoptDecorations {
     }
 
     private _onDidShowDecorationsChange() {
-        this.showDecorations = showDecorations.includes(ShowDecorations.Deopts) ? "visible" : "none";
+        this.showDecorations = showDecorations.has(ShowDecorations.Deopts) ? "visible" : "none";
     }
 
     private _hide() {

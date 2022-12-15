@@ -7,8 +7,10 @@ import * as constants from "../../constants";
 import { groupMaps, showMaps, sortMaps } from "../../services/context";
 import { BaseNode } from "../common/baseNode";
 import { MapsTreeDataProvider } from "./mapsTreeDataProvider";
+import { ImmutableEnumSet } from "../../../core/collections/enumSet";
+import { Disposable } from "@esfx/disposable";
 
-export class MapsTree {
+export class MapsTree implements Disposable {
     private provider: MapsTreeDataProvider;
     private treeView: TreeView<BaseNode>;
 
@@ -49,42 +51,44 @@ export class MapsTree {
         }
     }
 
-    setGroupBy(value: readonly constants.GroupMaps[]) {
-        if (this.provider.groupBy !== value) {
+    setGroupBy(value: ImmutableEnumSet<constants.GroupMaps>) {
+        if (!this.provider.groupBy.equals(value)) {
             this.provider.groupBy = value;
             this.updateTreeViewHeader();
         }
     }
 
-    setFilter(value: readonly constants.ShowMaps[]) {
-        if (this.provider.filter !== value) {
+    setFilter(value: ImmutableEnumSet<constants.ShowMaps>) {
+        if (!this.provider.filter.equals(value)) {
             this.provider.filter = value;
             this.updateTreeViewHeader();
         }
     }
 
-    dispose() {
+    [Disposable.dispose]() {
         this.treeView.dispose();
     }
 
     private updateTreeViewHeader() {
-        const groupByFile = this.provider.groupBy.includes(constants.GroupMaps.ByFile);
-        const groupByFunction = this.provider.groupBy.includes(constants.GroupMaps.ByFunction);
-        const groupBy =
-            groupByFile && groupByFunction ? `Constructor/File/Function` :
-            groupByFile ? `Constructor/File` :
-            groupByFile ? `Constructor/Function` :
-            `Constructor`;
+        const groupByArray: string[] = ["Constructor"];
+        if (this.provider.groupBy.has(constants.GroupMaps.ByFile)) groupByArray.push("File");
+        if (this.provider.groupBy.has(constants.GroupMaps.ByFunction)) groupByArray.push("Function");
+        const groupBy = groupByArray.join("/");
 
         const sortBy =
             this.provider.sortBy === constants.MapSortMode.ByCount ? `Count` :
             `Name`;
 
+        // TODO: reverse this filter
         const filtered =
-            this.provider.filter.length !== 3 ? ` (filtered)` :
+            this.provider.filter.size !== constants.kCountShowMaps ? ` (filtered)` :
             ``;
 
-        const description = `By ${groupBy}, ${sortBy}${filtered}`;
+        const segments: string[] = [];
+        if (groupBy) segments.push(groupBy);
+        segments.push(`${sortBy}${filtered}`);
+
+        const description = `By ${segments.join(", ")}`;
         if (this.treeView.description !== description) {
             this.treeView.description = description;
         }
