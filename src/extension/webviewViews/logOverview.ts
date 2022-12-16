@@ -4,15 +4,18 @@
 import { Deferred } from "@esfx/async-deferred";
 import * as path from "path";
 import { CancellationToken, Disposable, ExtensionContext, Uri, WebviewView, WebviewViewProvider, WebviewViewResolveContext, window } from "vscode";
-import { colors } from "../utils/colors";
+import { colors, getColor } from "../utils/colors";
 import { CommandUri } from "../vscode/commandUri";
 import { LogFile } from "../model/logFile";
 import * as constants from "../constants";
 import { html } from "../../core/html";
-import { formatMillisecondsShort } from "../formatting/numbers";
+import { formatMemory, formatMemoryHighPrecision, formatMillisecondsShort } from "../formatting/numbers";
 import { pieChart, pieChartStyleResource, Slice } from "../../third-party-derived/chromium/pieChart";
 import { events } from "../services/events";
 import { createNonce } from "../utils/csp";
+import { from } from "@esfx/iter-query";
+
+const SHOW_MEMORY_BREAKDOWN = false;
 
 // <logfile>
 // - Show Report
@@ -66,13 +69,27 @@ class OverviewWebviewViewProvider implements WebviewViewProvider {
             const codiconsFontUri = webview.asWebviewUri(Uri.joinPath(this._extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.ttf'));
             const pieChartStyleUri = webview.asWebviewUri(Uri.joinPath(this._extensionUri, pieChartStyleResource));
             const profile = this._openedLog.profile;
-            const slices: Slice[] = [
+            const timeSlices: Slice[] = [
                 { value: profile.totalProgramTime.inMillisecondsF(), title: "Program", color: colors[0] },
                 { value: profile.totalIdleTime.inMillisecondsF(), title: "Idle", color: colors[1] },
                 { value: profile.totalGcTime.inMillisecondsF(), title: "GC", color: colors[2] },
                 { value: profile.totalFunctionTime.inMillisecondsF(), title: "Scripting", color: colors[3] },
             ];
-            slices.sort((a, b) => b.value - a.value);
+            timeSlices.sort((a, b) => b.value - a.value);
+
+            const entryCategories = from(this._openedLog.memory.entrySizes.values())
+                .orderBy(c => c.name)
+                .toArray();
+
+            let totalEntrySize = 0;
+            const memorySlices: Slice[] = [];
+            for (const memoryCategory of entryCategories) {
+                totalEntrySize += memoryCategory.size;
+                memorySlices.push({ value: memoryCategory.size, title: memoryCategory.name, color: getColor(4 + memorySlices.length) });
+            }
+
+            memorySlices.push({ value: this._openedLog.memory.size - totalEntrySize, title: "Other", color: getColor(4 + memorySlices.length) });
+            memorySlices.sort((a, b) => b.value - a.value);
 
             webview.html = html`
                 <!DOCTYPE html>
@@ -98,8 +115,14 @@ class OverviewWebviewViewProvider implements WebviewViewProvider {
                     <div class="message">
                         <p>V8 Version: ${this._openedLog.version} (${this._openedLog.version.toFullString()})</p>
                         <p>Execution Time: ${formatMillisecondsShort(this._openedLog.profile.duration.inMillisecondsF())}</p>
+                        <p>Memory Usage: ${formatMemoryHighPrecision(this._openedLog.memory.size)}</p>
                         <p style="margin-top: 12px; margin-bottom: 12px;"><a title="Show Report" href="${new CommandUri(constants.commands.log.showReport)}">Show Report</a></p>
-                        <p>${pieChart(slices, { size: 150, formatter: formatMillisecondsShort, cutout: true, legend: true })}</p>
+                        <p><b>Time</b></p>
+                        <p>${pieChart(timeSlices, { size: 150, formatter: formatMillisecondsShort, cutout: true, legend: true })}</p>
+                        ${SHOW_MEMORY_BREAKDOWN ? html`
+                        <p style="margin-top: 12px"><b>Memory Usage</b> (breakdown is approximate)</p>
+                        <p>${pieChart(memorySlices, { size: 150, formatter: formatMemory, cutout: true, legend: true })}</p>
+                        ` : ""}
                     </div>
                     <script nonce="${nonce}" src="${scriptOverviewUri}"></script>
                 </body>

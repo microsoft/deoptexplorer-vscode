@@ -164,7 +164,7 @@ export namespace contextKeys {
         const decorations = `${extensionName}.decorations`;
         export const showDeopts = `${decorations}.showDeopts` as const;
         export const showICs = `${decorations}.showICs` as const;
-        export const showFunctionState = `${decorations}.showFunctionStateDecorations` as const;
+        export const showFunctionState = `${decorations}.showFunctionState` as const;
         export const showProfiler = `${decorations}.showProfiler` as const;
         export const showLineTicks = `${decorations}.showLineTicks` as const;
     }

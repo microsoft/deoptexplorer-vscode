@@ -16,57 +16,59 @@
 //  in the LICENSE.deoptigate file.
 
 import { CancelError } from "@esfx/cancelable";
-import { empty, flatMap, identity, last, map } from "@esfx/iter-fn";
+import { empty, flatMap, identity, map } from "@esfx/iter-fn";
 import { from } from "@esfx/iter-query";
 import { CancellationError, CancellationToken, Location, Position, Progress, Uri } from "vscode";
+import { Address, formatAddress, isAddress, parseAddress, tryParseAddress } from "../../core/address";
 import { assert } from "../../core/assert";
 import { LocationMap } from "../../core/collections/locationMap";
 import { StringMap } from "../../core/collections/stringMap";
 import { StringSet } from "../../core/collections/stringSet";
+import { SourceLocation } from "../../core/sourceMap";
+import { Sources } from "../../core/sources";
+import { TimeDelta, TimeTicks } from "../../core/time";
+import { V8Version } from "../../core/v8Version";
+import { DeoptEntry, DeoptEntryUpdate } from "../../third-party-derived/deoptigate/deoptEntry";
+import { FunctionEntry, FunctionEntryUpdate } from "../../third-party-derived/deoptigate/functionEntry";
+import { IcEntry, IcEntryUpdate } from "../../third-party-derived/deoptigate/icEntry";
+import { kNullAddress } from "../../third-party-derived/v8/constants";
+import { CodeKind, formatCodeKind, parseCodeKind } from "../../third-party-derived/v8/enums/codeKind";
+import { DeoptimizeKind, parseDeoptimizeKind } from "../../third-party-derived/v8/enums/deoptimizeKind";
+import { FunctionState, parseFunctionState } from "../../third-party-derived/v8/enums/functionState";
+import { IcState, parseIcState } from "../../third-party-derived/v8/enums/icState";
+import { IcType } from "../../third-party-derived/v8/enums/icType";
+import { MapEvent, parseMapEvent } from "../../third-party-derived/v8/enums/mapEvent";
+import { parseVmState, VmState } from "../../third-party-derived/v8/enums/vmState";
+import { TickSample } from "../../third-party-derived/v8/tickSample";
+import { CodeEntry, DynamicCodeEntry, SharedFunctionCodeEntry } from "../../third-party-derived/v8/tools/codeentry";
+import { CodeMap } from "../../third-party-derived/v8/tools/codemap";
+import { ConsArray } from "../../third-party-derived/v8/tools/consarray";
+import { CppEntriesProvider, getCppEntriesProvider } from "../../third-party-derived/v8/tools/cppEntriesProvider";
+import { cancelTokenArg, commandNameArg, parseInt32, Parser, Parsers, parseString, parseVarArgs } from "../../third-party-derived/v8/tools/logreader";
+import { Profile } from "../../third-party-derived/v8/tools/profile";
+import { SplayTree } from "../../third-party-derived/v8/tools/splaytree";
+import { DeoptPosition } from "../model/deoptPosition";
+import { Entry } from "../model/entry";
+import { FileEntry } from "../model/fileEntry";
+import { LogFile } from "../model/logFile";
+import { MapEntry, MapEntryUpdate, MapId, MapProperty, MapReference, MapReferencedByIcEntryUpdate, MapReferencedByMap, MapReferencedByMapProperty, PropertyNameEqualer, SymbolName } from "../model/mapEntry";
+import { MemoryCategory } from "../model/memoryCategory";
+import { MemoryEntry } from "../model/memoryEntry";
+import { MemoryOverview } from "../model/memoryOverview";
 import { measureAsync, measureSync, output } from "../outputChannel";
 import { getCanonicalUri, isIgnoredFile } from "../services/canonicalPaths";
 import { LocationComparer } from "../vscode/location";
 import { messageOnlyProgress } from "../vscode/progress";
 import { pathOrUriStringToUri } from "../vscode/uri";
-import { CodeKind, parseCodeKind } from "../../third-party-derived/v8/enums/codeKind";
-import { DeoptEntry, DeoptEntryUpdate } from "../../third-party-derived/deoptigate/deoptEntry";
-import { DeoptimizeKind, parseDeoptimizeKind } from "../../third-party-derived/v8/enums/deoptimizeKind";
-import { DeoptPosition } from "../model/deoptPosition";
-import { Entry } from "../model/entry";
-import { FileEntry } from "../model/fileEntry";
-import { FunctionEntry, FunctionEntryUpdate } from "../../third-party-derived/deoptigate/functionEntry";
-import { FunctionState, parseFunctionState } from "../../third-party-derived/v8/enums/functionState";
-import { IcEntry, IcEntryUpdate } from "../../third-party-derived/deoptigate/icEntry";
-import { IcState, parseIcState } from "../../third-party-derived/v8/enums/icState";
-import { IcType } from "../../third-party-derived/v8/enums/icType";
-import { LogFile } from "../model/logFile";
-import { MapReferencedByIcEntryUpdate, MapEntry, MapEntryUpdate, MapReferencedByMap, MapProperty, MapReferencedByMapProperty, MapReference, MapId, PropertyNameEqualer, SymbolName, SymbolNameEqualer } from "../model/mapEntry";
-import { MapEvent, parseMapEvent } from "../../third-party-derived/v8/enums/mapEvent";
-import { TimeDelta, TimeTicks } from "../../core/time";
-import { V8Version } from "../../core/v8Version";
-import { parseVmState, VmState } from "../../third-party-derived/v8/enums/vmState";
-import { Sources } from "../../core/sources";
-import { Address, formatAddress, isAddress, parseAddress, toAddress, tryParseAddress } from "../../core/address";
-import { kNullAddress } from "../../third-party-derived/v8/constants";
-import { CppEntriesProvider, getCppEntriesProvider } from "../../third-party-derived/v8/tools/cppEntriesProvider";
-import { TickSample } from "../../third-party-derived/v8/tickSample";
-import { CodeEntry, DynamicCodeEntry, SharedFunctionCodeEntry } from "../../third-party-derived/v8/tools/codeentry";
-import { CodeMap } from "../../third-party-derived/v8/tools/codemap";
-import { ConsArray } from "../../third-party-derived/v8/tools/consarray";
-import { cancelTokenArg, commandNameArg, parseInt32, Parser, Parsers, parseString, parseVarArgs } from "../../third-party-derived/v8/tools/logreader";
-import { Profile } from "../../third-party-derived/v8/tools/profile";
-import { SplayTree } from "../../third-party-derived/v8/tools/splaytree";
 import { VersionedLogReader } from "./v8/versionedLogReader";
 import { WindowsCppEntriesProvider } from "./windowsCppEntriesProvider";
-import { SourceLocation } from "../../core/sourceMap";
-import { FunctionName } from "../model/functionName";
-import { HashMap } from "@esfx/collections-hashmap";
 
 const constructorRegExp = /\n - constructor: (0x[a-fA-F0-9]+) <JSFunction ([a-zA-Z$_][a-zA-Z$_0-9]*)(?: \(sfi = ([a-fA-F0-9]+)\))?/;
 const typeRegExp = /\n - type: (\w+)\r?\n/;
 const elementsKindRegExp = /\n - elements kind: (\w+)\r?\n/;
 const instanceSizeRegExp = /\n - instance size: (\d+)\r?\n/;
 const inobjectPropertiesRegExp = /\n - inobject properties: (\d+)\r?\n/;
+const unusedPropertyFieldsRegExp = /\n - unused property fields: (\d+)\r?\n/;
 // const mapDetailsMapLineRegExp = /^Map=(?<value>.*)$/;
 // const mapDetailsFieldKeyValueRegExp = /^ - (?<key>type|instance size|inobject properties|elements kind|unused property fields|enum length|native context|prototype info|back pointer|prototype_validity cell|instance descriptors(?: \(own\))?|layout descriptor|prototype|constructor|dependent code|construction counter): (?<value>.*)$/;
 // const mapDetailsFieldKeyRegExp = /^ - (?<key>deprecated_map|stable_map|migration_target|dictionary_map|named_interceptor|indexed_interceptor|may_have_interesting_symbols|undetectable|callable|constructor|has_prototype_slot(?: \(non-instance prototype\))?|access_check_needed|non-extensible|prototype_map)$/;
@@ -106,6 +108,13 @@ export class LogProcessor {
     private _ics = new LocationMap<IcEntry>();
     private _deopts = new LocationMap<DeoptEntry>();
     private _maps = new SplayTree<Address, MapEntry[]>();
+    private _heapCapacity = 0;
+    private _heapAvailable = 0;
+    private _memory = new SplayTree<Address, MemoryEntry>();
+    private _memorySize = 0;
+    private _maxMemorySize = 0;
+    private _memorySizes = new Map<string, MemoryCategory>();
+    private _entrySizes = new Map<string, MemoryCategory>();;
     private _codeTypes = new Map<string, CodeType>();
     private _lastTimestamp = TimeTicks.Zero;
     private _mapReferences = new Map<MapEntry, Set<IcEntry>>();
@@ -454,6 +463,25 @@ export class LogProcessor {
                 }),
 
                 // #endregion profiles
+
+                // #region memory
+                "heap-capacity": DISPATCHER({
+                    parsers: [parseInt],
+                    processor: this.processHeapCapacityEvent.bind(this)
+                }),
+                "heap-available": DISPATCHER({
+                    parsers: [parseInt],
+                    processor: this.processHeapAvailableEvent.bind(this)
+                }),
+                "new": DISPATCHER({
+                    parsers: [parseString, parseAddress, parseInt],
+                    processor: this.processNewEvent.bind(this)
+                }),
+                "delete": DISPATCHER({
+                    parsers: [parseString, parseAddress],
+                    processor: this.processDeleteEvent.bind(this)
+                }),
+                // #endregion memory
             }
         },
         timedRange, pairwiseTimedRange);
@@ -690,6 +718,14 @@ export class LogProcessor {
                     mapId => mapId.toString(),
                     flatMap(this._maps.exportKeysAndValues(), ([address, maps]) => map(maps, (map, index) => [new MapId(address, index), map] as [MapId, MapEntry]))),
                 this._profile,
+                new MemoryOverview(
+                    this._heapCapacity,
+                    this._heapAvailable,
+                    this._memorySize,
+                    this._maxMemorySize,
+                    this._memorySizes,
+                    this._entrySizes,
+                ),
                 this._sourcePaths,
                 this._generatedPaths,
                 this._sources
@@ -760,6 +796,9 @@ export class LogProcessor {
             this._codeTypes.set(name, CodeType.Cpp);
         }, this._messageOnlyProgress, token);
         this._messageOnlyProgress?.report("Processing log...");
+
+        const size = Number(endAddress - startAddress);
+        this.changeMemoryCategorySize(this._entrySizes, "Shared Library Code", size);
     }
 
     // CODE_CREATION_EVENT
@@ -797,6 +836,8 @@ export class LogProcessor {
                 this._seenFiles.add(code.functionName.filePosition.uri);
             }
         }
+
+        this.changeMemoryCategorySize(this._entrySizes, type, size);
     }
 
     private _codeEntries: DynamicCodeEntry[] = [];
@@ -842,6 +883,10 @@ export class LogProcessor {
             }
         }
         this._profile.deleteCode(startAddress);
+
+        if (code) {
+            this.changeMemoryCategorySize(this._entrySizes, code.type, code.size);
+        }
     }
 
     // CODE_DISABLE_OPT_EVENT
@@ -1032,9 +1077,15 @@ export class LogProcessor {
 
         const instanceSize = instanceSizeRegExp.exec(details)?.[1];
         map.instanceSize = instanceSize ? parseInt(instanceSize, 10) : undefined;
+        if (map.instanceSize !== undefined) {
+            this.changeMemoryCategorySize(this._entrySizes, "Maps", map.instanceSize);
+        }
 
         const inobjectProperties = inobjectPropertiesRegExp.exec(details)?.[1];
         map.inobjectPropertiesCount = inobjectProperties ? parseInt(inobjectProperties, 10) : undefined;
+
+        const unusedPropertyFields = unusedPropertyFieldsRegExp.exec(details)?.[1];
+        map.unusedPropertyFields = unusedPropertyFields ? parseInt(unusedPropertyFields, 10) : undefined;
 
         const detailLines = details.split(/\r?\n/g);
         for (const line of detailLines) {
@@ -1189,6 +1240,74 @@ export class LogProcessor {
     }
 
     // #endregion profiles
+
+    // #region memory
+
+    private processHeapCapacityEvent(size: number) {
+        this._heapCapacity = size;
+    }
+
+    private processHeapAvailableEvent(size: number) {
+        this._heapAvailable = size;
+    }
+
+    private changeMemoryCategorySize(categories: Map<string, MemoryCategory>, name: string, sizeDelta: number) {
+        let memoryCategory = categories.get(name);
+        if (!memoryCategory) {
+            if (sizeDelta < 0) {
+                return;
+            }
+
+            categories.set(name, memoryCategory = new MemoryCategory(name, 0, 0));
+        }
+
+        memoryCategory.size += sizeDelta;
+        if (memoryCategory.maxSize < memoryCategory.size) {
+            memoryCategory.maxSize = memoryCategory.size;
+        }
+    }
+
+    // event source: https://github.com/v8/v8/blob/89f05508b15561c37bc0545d989050b34a342f9f/src/logging/log.cc#L1234
+    private processNewEvent(name: string, object: Address, size: number) {
+        if (size <= 0) {
+            if (name !== "CodeRange") {
+                console.log(`skipping 'new' event for category '${name}' with size 0`);
+            }
+            return;
+        }
+
+        const existing = this._memory.find(object)?.value;
+        if (existing) {
+            console.log(`'new' event for category '${name}' at address ${formatAddress(object)} replaced an existing entry.`);
+            this._memory.remove(object);
+        }
+        this._memory.insert(object, new MemoryEntry(name, size));
+        this._memorySize += size;
+        if (this._maxMemorySize < this._memorySize) {
+            this._maxMemorySize = this._memorySize;
+        }
+
+        this.changeMemoryCategorySize(this._memorySizes, name, size);
+    }
+
+    // event source: https://github.com/v8/v8/blob/89f05508b15561c37bc0545d989050b34a342f9f/src/logging/log.cc#L1242
+    private processDeleteEvent(name: string, object: Address) {
+        const existing = this._memory.find(object)?.value;
+        if (!existing) {
+            console.log(`'delete' event for category '${name}' at ${formatAddress(object)} referenced an allocation that was not recorded.`);
+            return;
+        }
+
+        if (existing.name !== name) {
+            console.log(`'delete' event category '${name}' did not match existing memory category '${existing.name}'.`);
+        }
+
+        this._memory.remove(object);
+        this._memorySize -= existing.size;
+        this.changeMemoryCategorySize(this._memorySizes, existing.name, -existing.size);
+    }
+
+    // #endregion
 }
 
 export type ProcessorParameter<T extends Parser> =

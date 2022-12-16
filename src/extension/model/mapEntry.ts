@@ -107,6 +107,7 @@ export class MapEntry {
     elementsKind?: string;
     instanceSize?: number;
     inobjectPropertiesCount?: number;
+    unusedPropertyFields?: number;
 
     readonly updates: MapEntryUpdate[] = [];
     readonly properties: MapProperty[] = [];
