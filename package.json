@@ -2,7 +2,7 @@
 	"name": "deoptexplorer-vscode",
 	"displayName": "deoptexplorer-vscode",
 	"description": "V8 Deoptimization Explorer Extension for VS Code",
-	"version": "0.1.5",
+	"version": "0.1.6",
 	"license": "MIT",
 	"engines": {
 		"vscode": "^1.56.0"

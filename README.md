@@ -1,9 +1,7 @@
 # deoptexplorer-vscode
 
-A VS Code extension to visualize deoptimizations in your JavaScript and TypeScript code running in V8 (i.e. Edge,
-Chrome, NodeJS, etc.).
-
-![Overview](resources/overview.gif)
+A VS Code extension to inspect deoptimizations, ICs, function states, V8 maps, and cpu profiling data for your
+JavaScript and TypeScript code running in V8 (i.e., Edge, Chrome, NodeJS, etc.).
 
 ## Overview
 
@@ -20,7 +18,6 @@ The information provided by Deopt Explorer can be broken down into several categ
 - [Deoptimizations](#deoptimizations) &mdash; View the kinds of deoptimizations that occured in a function.
 - [Function State](#function-state) &mdash; View whether a function was interpreted or compiled.
 - [Maps](#maps) &mdash; View the types of each object encountered by V8.
-- [Timeline](#timeline) &mdash; View a report on where V8 spends its time during execution.
 
 ### CPU Profiles
 
@@ -31,8 +28,8 @@ to view *Top Down* (Call Tree), *Bottom Up*, and Flat views, similar to the Chro
 
 ### Inline Cache Evolution
 
-This extension provides a tree view, file decorations, and hover information to allow you to inspect how an
-[Inline Cache][] (IC) evolves based on the types of values encountered by V8's interpreter and optimizing compiler:
+Using the `ICS` tree view, you can navigate IC events and used editor decorations and hover information to inspect how
+an [Inline Cache][] (IC) evolves based on the types of values encountered by V8's interpreter and optimizing compiler:
 
 ![Inline Caches](resources/inline-cache.png)
 
@@ -62,13 +59,6 @@ polymorphism in your code:
 You can also peek at the maps associated with an [IC](#inline-caches) event:
 
 ![Maps Peek](resources/maps-peek.png)
-
-### Timeline
-
-A deoptimization report provides a timeline of V8 execution that allows you to visualize how much time V8 spent in
-various tasks such as script execution, compilation, garbage collection, etc.:
-
-![Timeline](resources/timeline.png)
 
 ## How to Use
 
@@ -161,7 +151,7 @@ optimization hints in the related source code files:
 V8 changes frequently in ways that can break this tool. While I try to keep this up to date with engine releases, and
 support multiple versions of the engine, it can be difficult for one person to keep on top of breaking changes. If you
 find the extension is not working for you and you are using a more recent version of NodeJS or the V8 engine, please
-file an issue. Parsing failures should show up in the Output Window for the "Deopt Explorer" extension.
+file an issue. Log parsing failures should show up in the Output Window for the "Deopt Explorer" extension.
 
 <!--
 ## Color Customization

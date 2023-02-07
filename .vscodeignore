@@ -3,6 +3,9 @@
 .vscode-test/**
 docs/**
 node_modules
+!node_modules/@esfx/equatable
+!node_modules/@microsoft/typescript-etw
+!node_modules/typescript
 !node_modules/ms
 !node_modules/debug
 !node_modules/get-symbol-from-current-process-h
