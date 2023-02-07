@@ -132,7 +132,7 @@ function getV8Flags() {
 
 function showHelp() {
     const lines = [
-        `de-node [options] [--] <executable> [executable_options]`,
+        `dexnode [options] [--] <executable> [executable_options]`,
         `options:`,
         `  -h --help        print this message`,
         `     --no-maps     exclude v8 maps from log`,
@@ -140,13 +140,13 @@ function showHelp() {
         `     --no-deopts   exclude deopts from log`,
         `     --no-profile  exclude cpu profile from log`,
         `     --no-sources  exclude sources from log`,
-        `     --no-quiet    write de-node messages to stdout (default)`,
+        `     --no-quiet    write dexnode messages to stdout (default)`,
         `     --maps        include v8 maps in log (default)`,
         `     --ics         include ics in log (default)`,
         `     --deopts      include deopts in log (default)`,
         `     --profile     include cpu profile in log (default)`,
         `     --sources     include sources in log (default)`,
-        `     --quiet       do not write de-node messages to stdout`,
+        `     --quiet       do not write dexnode messages to stdout`,
         `     --out FILE    write all log output to FILE (default: isolate-<pid>-<isolate id>-v8.log)`,
         `     --            pass all remaining arguments to node`,
     ];

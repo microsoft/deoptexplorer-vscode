@@ -1,9 +1,9 @@
 {
-  "name": "de-node",
+  "name": "dexnode",
   "version": "1.0.0",
   "description": "Run NodeJS with logging options needed by Deopt Explorer",
   "bin": {
-    "de-node": "bin/de-node"
+    "dexnode": "bin/dexnode"
   },
   "keywords": [
     "deopt",
@@ -21,6 +21,7 @@
   },
   "scripts": {
     "compile": "tsc -b",
+    "clean": "tsc -b --clean",
     "prestart": "npm run compile",
     "start": "node bin/de-node"
   }
