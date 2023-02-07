@@ -32,4 +32,4 @@ options:
      --            pass all remaining arguments to node
 ```
 
-[Deopt Explorer]: https://github.com/rbuckton/deoptexplorer-vscode
+[Deopt Explorer]: https://github.com/microsoft/deoptexplorer-vscode

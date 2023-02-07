@@ -62,9 +62,53 @@ You can also peek at the maps associated with an [IC](#inline-caches) event:
 
 ## How to Use
 
-Deopt Explorer gathers deoptimizations from a V8 log file you can generate from the command line. Since V8 is constantly
-evolving, the exact command line switches depend on the version of V8, NodeJS, etc. Running with the requisite switches
-will create an `isolate-<id>-v8.log` file in the current directory that can be consumed by Deopt Explorer.
+Deopt Explorer gathers deoptimizations from a V8 log file you can generate from the command line. The easiest
+way to generate a log compatible with your current NodeJS install is to use [`dexnode`](#dexnode).
+
+### `dexnode`
+
+[`dexnode`](https://npmjs.com/package/dexnode) is a commandline utility published on NPM. It wraps the existing `node`
+executable to provide the commandline options necessary to generate a v8 log that can be consumed by Deopt Explorer.
+
+#### Installation
+
+```sh
+npm install --global dexnode
+```
+
+#### Examples
+
+```sh
+dexnode myscript.js
+```
+
+#### Usage
+
+```
+dexnode [options] [--] <executable> [executable_options]
+options:
+  -h --help        print this message
+     --no-maps     exclude v8 maps from log
+     --no-ics      exclude ics from log
+     --no-deopts   exclude deopts from log
+     --no-profile  exclude cpu profile from log
+     --no-sources  exclude sources from log
+     --no-quiet    write dexnode messages to stdout (default)
+     --maps        include v8 maps in log (default)
+     --ics         include ics in log (default)
+     --deopts      include deopts in log (default)
+     --profile     include cpu profile in log (default)
+     --sources     include sources in log (default)
+     --quiet       do not write dexnode messages to stdout
+     --out FILE    write all log output to FILE (default: isolate-<pid>-<isolate id>-v8.log)
+     --            pass all remaining arguments to node
+```
+
+### NodeJS Commandline Options
+
+You can also pass the requisite commandline options directly to the `node` process. Since V8 is constantly evolving, the
+exact command line switches depend on the version of V8, NodeJS, etc. Running with the requisite switches will create an
+`isolate-<id>-v8.log` file in the current directory that can be consumed by Deopt Explorer.
 
 #### NodeJS 16+
 
@@ -97,7 +141,7 @@ node \
   path/to/file.js
 ```
 
-### Options Overview
+#### Options Overview
 
 The options provided above have the following effects on the output log file, which are leveraged by Deopt Explorer:
 
