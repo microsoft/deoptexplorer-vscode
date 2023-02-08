@@ -53,13 +53,15 @@
 			}
 		},
 		"commands": [
-			{	"command": "deoptexplorer.log.open",
+			{
+				"command": "deoptexplorer.log.open",
 				"icon": "$(file-add)",
 				"title": "Open V8 Log",
 				"category": "Deopt Explorer",
 				"enablement": "deoptexplorer.logStatus != 'opening'"
 			},
-			{	"command": "deoptexplorer.log.reload",
+			{
+				"command": "deoptexplorer.log.reload",
 				"icon": {
 					"light": "resources/light/refresh.svg",
 					"dark": "resources/dark/refresh.svg"
@@ -68,7 +70,8 @@
 				"category": "Deopt Explorer",
 				"enablement": "deoptexplorer.logStatus == 'open'"
 			},
-			{	"command": "deoptexplorer.log.close",
+			{
+				"command": "deoptexplorer.log.close",
 				"icon": {
 					"light": "resources/light/close-log.svg",
 					"dark": "resources/dark/close-log.svg"
@@ -77,7 +80,8 @@
 				"category": "Deopt Explorer",
 				"enablement": "deoptexplorer.logStatus == 'open'"
 			},
-			{	"command": "deoptexplorer.log.showReport",
+			{
+				"command": "deoptexplorer.log.showReport",
 				"icon": {
 					"light": "resources/light/report.svg",
 					"dark": "resources/dark/report.svg"
@@ -86,107 +90,122 @@
 				"category": "Deopt Explorer",
 				"enablement": "deoptexplorer.logStatus == 'open'"
 			},
-
-			{	"command": "deoptexplorer.ics.sortByLocation",
+			{
+				"command": "deoptexplorer.ics.sortByLocation",
 				"title": "Sort by Location",
 				"category": "Deopt Explorer ICs",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.ics.sort != 'by-location'"
 			},
-			{	"command": "deoptexplorer.ics.sortByState",
+			{
+				"command": "deoptexplorer.ics.sortByState",
 				"title": "Sort by IC State",
 				"category": "Deopt Explorer ICs",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.ics.sort != 'by-state'"
 			},
-
-			{	"command": "deoptexplorer.ics.showStateMegamorphic",
+			{
+				"command": "deoptexplorer.ics.showStateMegamorphic",
 				"title": "Show Megamorphic ICs",
 				"category": "Deopt Explorer ICs",
 				"enablement": "deoptexplorer.logStatus == 'open' && !deoptexplorer.ics.show.state.megamorphic"
 			},
-			{	"command": "deoptexplorer.ics.hideStateMegamorphic",
+			{
+				"command": "deoptexplorer.ics.hideStateMegamorphic",
 				"title": "Hide Megamorphic ICs",
 				"category": "Deopt Explorer ICs",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.ics.show.state.megamorphic"
 			},
-			{	"command": "deoptexplorer.ics.showStatePolymorphic",
+			{
+				"command": "deoptexplorer.ics.showStatePolymorphic",
 				"title": "Show Polymorphic ICs",
 				"category": "Deopt Explorer ICs",
 				"enablement": "deoptexplorer.logStatus == 'open' && !deoptexplorer.ics.show.state.polymorphic"
 			},
-			{	"command": "deoptexplorer.ics.hideStatePolymorphic",
+			{
+				"command": "deoptexplorer.ics.hideStatePolymorphic",
 				"title": "Hide Polymorphic ICs",
 				"category": "Deopt Explorer ICs",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.ics.show.state.polymorphic"
 			},
-			{	"command": "deoptexplorer.ics.showStateMonomorphic",
+			{
+				"command": "deoptexplorer.ics.showStateMonomorphic",
 				"title": "Show Monomorphic ICs",
 				"category": "Deopt Explorer ICs",
 				"enablement": "deoptexplorer.logStatus == 'open' && !deoptexplorer.ics.show.state.monomorphic"
 			},
-			{	"command": "deoptexplorer.ics.hideStateMonomorphic",
+			{
+				"command": "deoptexplorer.ics.hideStateMonomorphic",
 				"title": "Hide Monomorphic ICs",
 				"category": "Deopt Explorer ICs",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.ics.show.state.monomorphic"
 			},
-			{	"command": "deoptexplorer.ics.showStateOther",
+			{
+				"command": "deoptexplorer.ics.showStateOther",
 				"title": "Show Other ICs",
 				"category": "Deopt Explorer ICs",
 				"enablement": "deoptexplorer.logStatus == 'open' && !deoptexplorer.ics.show.state.other"
 			},
-			{	"command": "deoptexplorer.ics.hideStateOther",
+			{
+				"command": "deoptexplorer.ics.hideStateOther",
 				"title": "Hide Other ICs",
 				"category": "Deopt Explorer ICs",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.ics.show.state.other"
 			},
-
-			{	"command": "deoptexplorer.deopts.sortByLocation",
+			{
+				"command": "deoptexplorer.deopts.sortByLocation",
 				"title": "Sort by Location",
 				"category": "Deopt Explorer Deopts",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.deopts.sort != 'by-location'"
 			},
-			{	"command": "deoptexplorer.deopts.sortByKind",
+			{
+				"command": "deoptexplorer.deopts.sortByKind",
 				"title": "Sort by Kind",
 				"category": "Deopt Explorer Deopts",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.deopts.sort != 'by-kind'"
 			},
-			{	"command": "deoptexplorer.deopts.sortByCount",
+			{
+				"command": "deoptexplorer.deopts.sortByCount",
 				"title": "Sort by Count",
 				"category": "Deopt Explorer Deopts",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.deopts.sort != 'by-count'"
 			},
-
-			{	"command": "deoptexplorer.deopts.groupByFile",
+			{
+				"command": "deoptexplorer.deopts.groupByFile",
 				"title": "Group by File",
 				"category": "Deopt Explorer Deopts",
 				"enablement": "false && deoptexplorer.logStatus == 'open' && !deoptexplorer.deopts.groupByFile"
 			},
-			{	"command": "deoptexplorer.deopts.groupByFunction",
+			{
+				"command": "deoptexplorer.deopts.groupByFunction",
 				"title": "Group by Function",
 				"category": "Deopt Explorer Deopts",
 				"enablement": "false && deoptexplorer.logStatus == 'open' && !deoptexplorer.deopts.groupByFunction"
 			},
-			{	"command": "deoptexplorer.deopts.groupByKind",
+			{
+				"command": "deoptexplorer.deopts.groupByKind",
 				"title": "Group by Kind",
 				"category": "Deopt Explorer Deopts",
 				"enablement": "false && deoptexplorer.logStatus == 'open' && !deoptexplorer.deopts.groupByKind"
 			},
-			{	"command": "deoptexplorer.deopts.ungroupByFile",
+			{
+				"command": "deoptexplorer.deopts.ungroupByFile",
 				"title": "Ungroup by File",
 				"category": "Deopt Explorer Deopts",
 				"enablement": "false && deoptexplorer.logStatus == 'open' && deoptexplorer.deopts.groupByFile"
 			},
-			{	"command": "deoptexplorer.deopts.ungroupByFunction",
+			{
+				"command": "deoptexplorer.deopts.ungroupByFunction",
 				"title": "Ungroup by Function",
 				"category": "Deopt Explorer Deopts",
 				"enablement": "false && deoptexplorer.logStatus == 'open' && deoptexplorer.deopts.groupByFunction"
 			},
-			{	"command": "deoptexplorer.deopts.ungroupByKind",
+			{
+				"command": "deoptexplorer.deopts.ungroupByKind",
 				"title": "Ungroup by Kind",
 				"category": "Deopt Explorer Deopts",
 				"enablement": "false && deoptexplorer.logStatus == 'open' && deoptexplorer.deopts.groupByKind"
 			},
-
-			{	"command": "deoptexplorer.maps.sortByName",
+			{
+				"command": "deoptexplorer.maps.sortByName",
 				"icon": {
 					"light": "resources/light/filter.svg",
 					"dark": "resources/dark/filter.svg"
@@ -195,7 +214,8 @@
 				"category": "Deopt Explorer Maps",
 				"enablement": "deoptexplorer.logStatus == 'open'"
 			},
-			{	"command": "deoptexplorer.maps.sortByCount",
+			{
+				"command": "deoptexplorer.maps.sortByCount",
 				"icon": {
 					"light": "resources/light/no-filter.svg",
 					"dark": "resources/dark/no-filter.svg"
@@ -204,7 +224,8 @@
 				"category": "Deopt Explorer Maps",
 				"enablement": "deoptexplorer.logStatus == 'open'"
 			},
-			{	"command": "deoptexplorer.maps.showUnreferenced",
+			{
+				"command": "deoptexplorer.maps.showUnreferenced",
 				"icon": {
 					"light": "resources/light/maps-show-referenced.svg",
 					"dark": "resources/dark/maps-show-referenced.svg"
@@ -213,7 +234,8 @@
 				"category": "Deopt Explorer Maps",
 				"enablement": "deoptexplorer.logStatus == 'open' && !deoptexplorer.maps.showUnreferenced"
 			},
-			{	"command": "deoptexplorer.maps.hideUnreferenced",
+			{
+				"command": "deoptexplorer.maps.hideUnreferenced",
 				"icon": {
 					"light": "resources/light/maps-show-all.svg",
 					"dark": "resources/dark/maps-show-all.svg"
@@ -222,73 +244,80 @@
 				"category": "Deopt Explorer Maps",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.maps.showUnreferenced"
 			},
-
-			{	"command": "deoptexplorer.maps.groupByFile",
+			{
+				"command": "deoptexplorer.maps.groupByFile",
 				"title": "Group by File",
 				"category": "Deopt Explorer Maps",
 				"enablement": "deoptexplorer.logStatus == 'open' && !deoptexplorer.maps.groupByFile"
 			},
-			{	"command": "deoptexplorer.maps.groupByFunction",
+			{
+				"command": "deoptexplorer.maps.groupByFunction",
 				"title": "Group by Function",
 				"category": "Deopt Explorer Maps",
 				"enablement": "deoptexplorer.logStatus == 'open' && !deoptexplorer.maps.groupByFunction"
 			},
-			{	"command": "deoptexplorer.maps.ungroupByFile",
+			{
+				"command": "deoptexplorer.maps.ungroupByFile",
 				"title": "Ungroup by File",
 				"category": "Deopt Explorer Maps",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.maps.groupByFile"
 			},
-			{	"command": "deoptexplorer.maps.ungroupByFunction",
+			{
+				"command": "deoptexplorer.maps.ungroupByFunction",
 				"title": "Ungroup by Function",
 				"category": "Deopt Explorer Maps",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.maps.groupByFunction"
 			},
-
-			{	"command": "deoptexplorer.maps.showNonUserCode",
+			{
+				"command": "deoptexplorer.maps.showNonUserCode",
 				"title": "Show Maps for Built-ins",
 				"category": "Deopt Explorer Maps",
 				"enablement": "deoptexplorer.logStatus == 'open' && !deoptexplorer.maps.showNonUserCode"
 			},
-			{	"command": "deoptexplorer.maps.hideNonUserCode",
+			{
+				"command": "deoptexplorer.maps.hideNonUserCode",
 				"title": "Hide Maps for Built-ins",
 				"category": "Deopt Explorer Maps",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.maps.showNonUserCode"
 			},
-
-			{	"command": "deoptexplorer.maps.showTransitions",
+			{
+				"command": "deoptexplorer.maps.showTransitions",
 				"title": "Show Maps for Intermediate Transitions",
 				"category": "Deopt Explorer Maps",
 				"enablement": "deoptexplorer.logStatus == 'open' && !deoptexplorer.maps.showTransitions"
 			},
-			{	"command": "deoptexplorer.maps.hideTransitions",
+			{
+				"command": "deoptexplorer.maps.hideTransitions",
 				"title": "Hide Maps for Intermediate Transitions",
 				"category": "Deopt Explorer Maps",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.maps.showTransitions"
 			},
-
-			{	"command": "deoptexplorer.profile.exportProfile",
+			{
+				"command": "deoptexplorer.profile.exportProfile",
 				"title": "Export CPU Profile...",
 				"category": "Deopt Explorer",
 				"enablement": "deoptexplorer.logStatus == 'open'"
 			},
-
-			{	"command": "deoptexplorer.profile.sortBySelfTime",
+			{
+				"command": "deoptexplorer.profile.sortBySelfTime",
 				"title": "Sort by Self-Time",
 				"category": "Deopt Explorer Profile",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.sortProfile != 'by-self-time'"
 			},
-			{	"command": "deoptexplorer.profile.sortByTotalTime",
+			{
+				"command": "deoptexplorer.profile.sortByTotalTime",
 				"title": "Sort by Total-Time",
 				"category": "Deopt Explorer Profile",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.sortProfile != 'by-total-time'"
 			},
-			{	"command": "deoptexplorer.profile.sortByName",
+			{
+				"command": "deoptexplorer.profile.sortByName",
 				"title": "Sort by Name",
 				"category": "Deopt Explorer Profile",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.sortProfile != 'by-name'"
 			},
-
-			{	"command": "deoptexplorer.profile.showCallTree",
+			{
+				"command": "deoptexplorer.profile.showCallTree",
 				"icon": {
 					"light": "resources/light/call-tree.svg",
 					"dark": "resources/dark/call-tree.svg"
@@ -297,7 +326,8 @@
 				"category": "Deopt Explorer Profile",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.showProfile != 'call-tree'"
 			},
-			{	"command": "deoptexplorer.profile.showBottomUp",
+			{
+				"command": "deoptexplorer.profile.showBottomUp",
 				"title": "View as Bottom-Up",
 				"icon": {
 					"light": "resources/light/bottom-up.svg",
@@ -306,14 +336,15 @@
 				"category": "Deopt Explorer Profile",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.showProfile != 'bottom-up'"
 			},
-			{	"command": "deoptexplorer.profile.showFlat",
+			{
+				"command": "deoptexplorer.profile.showFlat",
 				"title": "View as List",
 				"icon": "$(list-flat)",
 				"category": "Deopt Explorer Profile",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.showProfile != 'flat'"
 			},
-
-			{	"command": "deoptexplorer.profile.enableJustMyCode",
+			{
+				"command": "deoptexplorer.profile.enableJustMyCode",
 				"icon": {
 					"light": "resources/light/maps-show-all.svg",
 					"dark": "resources/dark/maps-show-all.svg"
@@ -322,7 +353,8 @@
 				"category": "Deopt Explorer Profile",
 				"enablement": "deoptexplorer.logStatus == 'open' && !deoptexplorer.showProfileJustMyCode"
 			},
-			{	"command": "deoptexplorer.profile.disableJustMyCode",
+			{
+				"command": "deoptexplorer.profile.disableJustMyCode",
 				"icon": {
 					"light": "resources/light/maps-show-referenced.svg",
 					"dark": "resources/dark/maps-show-referenced.svg"
@@ -331,7 +363,8 @@
 				"category": "Deopt Explorer Profile",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.showProfileJustMyCode"
 			},
-			{	"command": "deoptexplorer.profile.showNativeCode",
+			{
+				"command": "deoptexplorer.profile.showNativeCode",
 				"icon": {
 					"light": "resources/light/maps-show-all.svg",
 					"dark": "resources/dark/maps-show-all.svg"
@@ -340,7 +373,8 @@
 				"category": "Deopt Explorer Profile",
 				"enablement": "deoptexplorer.logStatus == 'open' && !deoptexplorer.showNativeCodeProfileNodes && !deoptexplorer.showProfileJustMyCode"
 			},
-			{	"command": "deoptexplorer.profile.hideNativeCode",
+			{
+				"command": "deoptexplorer.profile.hideNativeCode",
 				"icon": {
 					"light": "resources/light/maps-show-referenced.svg",
 					"dark": "resources/dark/maps-show-referenced.svg"
@@ -349,7 +383,8 @@
 				"category": "Deopt Explorer Profile",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.showNativeCodeProfileNodes && !deoptexplorer.showProfileJustMyCode"
 			},
-			{	"command": "deoptexplorer.profile.showNodeJs",
+			{
+				"command": "deoptexplorer.profile.showNodeJs",
 				"icon": {
 					"light": "resources/light/maps-show-all.svg",
 					"dark": "resources/dark/maps-show-all.svg"
@@ -358,7 +393,8 @@
 				"category": "Deopt Explorer Profile",
 				"enablement": "deoptexplorer.logStatus == 'open' && !deoptexplorer.showNodeJsProfileNodes && !deoptexplorer.showProfileJustMyCode"
 			},
-			{	"command": "deoptexplorer.profile.hideNodeJs",
+			{
+				"command": "deoptexplorer.profile.hideNodeJs",
 				"icon": {
 					"light": "resources/light/maps-show-referenced.svg",
 					"dark": "resources/dark/maps-show-referenced.svg"
@@ -367,7 +403,8 @@
 				"category": "Deopt Explorer Profile",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.showNodeJsProfileNodes && !deoptexplorer.showProfileJustMyCode"
 			},
-			{	"command": "deoptexplorer.profile.showNodeModules",
+			{
+				"command": "deoptexplorer.profile.showNodeModules",
 				"icon": {
 					"light": "resources/light/maps-show-all.svg",
 					"dark": "resources/dark/maps-show-all.svg"
@@ -376,7 +413,8 @@
 				"category": "Deopt Explorer Profile",
 				"enablement": "deoptexplorer.logStatus == 'open' && !deoptexplorer.showNodeModulesProfileNodes && !deoptexplorer.showProfileJustMyCode"
 			},
-			{	"command": "deoptexplorer.profile.hideNodeModules",
+			{
+				"command": "deoptexplorer.profile.hideNodeModules",
 				"icon": {
 					"light": "resources/light/maps-show-referenced.svg",
 					"dark": "resources/dark/maps-show-referenced.svg"
@@ -385,80 +423,92 @@
 				"category": "Deopt Explorer Profile",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.showNodeModulesProfileNodes && !deoptexplorer.showProfileJustMyCode"
 			},
-			{	"command": "deoptexplorer.profile.showLineTickDecorationsForNode",
+			{
+				"command": "deoptexplorer.profile.showLineTickDecorationsForNode",
 				"title": "Show Line Tick Decorations",
 				"icon": "$(note)",
 				"category": "Deopt Explorer Profile",
 				"enablement": "deoptexplorer.logStatus == 'open'"
 			},
-			{	"command": "deoptexplorer.profile.hideLineTicks",
+			{
+				"command": "deoptexplorer.profile.hideLineTicks",
 				"icon": "$(close)",
 				"title": "Close Line Ticks",
 				"category": "Deopt Explorer Profile",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.showLineTicks"
 			},
-
-			{	"command": "deoptexplorer.decorations.showDeopts",
+			{
+				"command": "deoptexplorer.decorations.showDeopts",
 				"title": "Show Deoptimization Decorations",
 				"icon": "$(eye-closed)",
 				"category": "Deopt Explorer",
 				"enablement": "deoptexplorer.logStatus == 'open' && !deoptexplorer.decorations.showDeopts"
 			},
-			{	"command": "deoptexplorer.decorations.hideDeopts",
+			{
+				"command": "deoptexplorer.decorations.hideDeopts",
 				"title": "Hide Deoptimization Decorations",
 				"icon": "$(eye)",
 				"category": "Deopt Explorer",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.decorations.showDeopts"
 			},
-			{	"command": "deoptexplorer.decorations.showICs",
+			{
+				"command": "deoptexplorer.decorations.showICs",
 				"title": "Show IC Decorations",
 				"icon": "$(eye-closed)",
 				"category": "Deopt Explorer",
 				"enablement": "deoptexplorer.logStatus == 'open' && !deoptexplorer.decorations.showICs"
 			},
-			{	"command": "deoptexplorer.decorations.hideICs",
+			{
+				"command": "deoptexplorer.decorations.hideICs",
 				"title": "Hide IC Decorations",
 				"icon": "$(eye)",
 				"category": "Deopt Explorer",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.decorations.showICs"
 			},
-			{	"command": "deoptexplorer.decorations.showFunctionStates",
+			{
+				"command": "deoptexplorer.decorations.showFunctionStates",
 				"title": "Show Function State Decorations",
 				"icon": "$(eye-closed)",
 				"category": "Deopt Explorer",
 				"enablement": "deoptexplorer.logStatus == 'open' && !deoptexplorer.decorations.showFunctionState"
 			},
-			{	"command": "deoptexplorer.decorations.hideFunctionStates",
+			{
+				"command": "deoptexplorer.decorations.hideFunctionStates",
 				"title": "Hide Function State Decorations",
 				"icon": "$(eye)",
 				"category": "Deopt Explorer",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.decorations.showFunctionState"
 			},
-			{	"command": "deoptexplorer.decorations.showProfiler",
+			{
+				"command": "deoptexplorer.decorations.showProfiler",
 				"title": "Show Profiler Samples",
 				"icon": "$(eye)",
 				"category": "Deopt Explorer",
 				"enablement": "deoptexplorer.logStatus == 'open' && !deoptexplorer.decorations.showProfiler && false"
 			},
-			{	"command": "deoptexplorer.decorations.hideProfiler",
+			{
+				"command": "deoptexplorer.decorations.hideProfiler",
 				"title": "Hide Profiler Samples",
 				"icon": "$(eye-closed)",
 				"category": "Deopt Explorer",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.decorations.showProfiler && false"
 			},
-			{	"command": "deoptexplorer.decorations.showLineTicks",
+			{
+				"command": "deoptexplorer.decorations.showLineTicks",
 				"title": "Show Line Tick Decorations",
 				"icon": "$(eye)",
 				"category": "Deopt Explorer",
 				"enablement": "deoptexplorer.logStatus == 'open' && !deoptexplorer.decorations.showLineTicks"
 			},
-			{	"command": "deoptexplorer.decorations.hideLineTicks",
+			{
+				"command": "deoptexplorer.decorations.hideLineTicks",
 				"title": "Hide Line Tick Decorations",
 				"icon": "$(eye-closed)",
 				"category": "Deopt Explorer",
 				"enablement": "deoptexplorer.logStatus == 'open' && deoptexplorer.decorations.showLineTicks"
 			},
-			{	"command": "deoptexplorer.decorations.hideAll",
+			{
+				"command": "deoptexplorer.decorations.hideAll",
 				"title": "Hide Decorations",
 				"icon": "$(eye-closed)",
 				"category": "Deopt Explorer",
@@ -467,300 +517,345 @@
 		],
 		"menus": {
 			"view/title": [
-				{	"command": "deoptexplorer.log.showReport",
+				{
+					"command": "deoptexplorer.log.showReport",
 					"when": "view == deoptexplorer.logOverviewView",
 					"group": "navigation@1"
 				},
-				{	"command": "deoptexplorer.log.reload",
+				{
+					"command": "deoptexplorer.log.reload",
 					"when": "view == deoptexplorer.logOverviewView",
 					"group": "navigation@2"
 				},
-				{	"command": "deoptexplorer.log.close",
+				{
+					"command": "deoptexplorer.log.close",
 					"when": "view == deoptexplorer.logOverviewView",
 					"group": "navigation@3"
 				},
-				{	"command": "deoptexplorer.log.open",
+				{
+					"command": "deoptexplorer.log.open",
 					"when": "view == deoptexplorer.logOverviewView",
 					"group": "navigation@4"
 				},
-
-				{	"command": "deoptexplorer.decorations.showDeopts",
+				{
+					"command": "deoptexplorer.decorations.showDeopts",
 					"when": "view == deoptexplorer.files && !deoptexplorer.decorations.showDeopts",
 					"group": "View@0"
 				},
-				{	"command": "deoptexplorer.decorations.hideDeopts",
+				{
+					"command": "deoptexplorer.decorations.hideDeopts",
 					"when": "view == deoptexplorer.files && deoptexplorer.decorations.showDeopts",
 					"group": "View@0"
 				},
-
-				{	"command": "deoptexplorer.decorations.showICs",
+				{
+					"command": "deoptexplorer.decorations.showICs",
 					"when": "view == deoptexplorer.files && !deoptexplorer.decorations.showICs",
 					"group": "View@1"
 				},
-				{	"command": "deoptexplorer.decorations.hideICs",
+				{
+					"command": "deoptexplorer.decorations.hideICs",
 					"when": "view == deoptexplorer.files && deoptexplorer.decorations.showICs",
 					"group": "View@1"
 				},
-
-				{	"command": "deoptexplorer.decorations.showFunctionStates",
+				{
+					"command": "deoptexplorer.decorations.showFunctionStates",
 					"when": "view == deoptexplorer.files && !deoptexplorer.decorations.showFunctionState",
 					"group": "View@2"
 				},
-				{	"command": "deoptexplorer.decorations.hideFunctionStates",
+				{
+					"command": "deoptexplorer.decorations.hideFunctionStates",
 					"when": "view == deoptexplorer.files && deoptexplorer.decorations.showFunctionState",
 					"group": "View@2"
 				},
-
-				{	"command": "deoptexplorer.decorations.showICs",
+				{
+					"command": "deoptexplorer.decorations.showICs",
 					"when": "view == deoptexplorer.ics && !deoptexplorer.decorations.showICs",
 					"group": "View@0"
 				},
-				{	"command": "deoptexplorer.decorations.hideICs",
+				{
+					"command": "deoptexplorer.decorations.hideICs",
 					"when": "view == deoptexplorer.ics && deoptexplorer.decorations.showICs",
 					"group": "View@0"
 				},
-
-				{	"command": "deoptexplorer.ics.showStateMegamorphic",
+				{
+					"command": "deoptexplorer.ics.showStateMegamorphic",
 					"when": "view == deoptexplorer.ics && !deoptexplorer.ics.show.state.megamorphic",
 					"group": "Filter@0"
 				},
-				{	"command": "deoptexplorer.ics.hideStateMegamorphic",
+				{
+					"command": "deoptexplorer.ics.hideStateMegamorphic",
 					"when": "view == deoptexplorer.ics && deoptexplorer.ics.show.state.megamorphic",
 					"group": "Filter@0"
 				},
-				{	"command": "deoptexplorer.ics.showStatePolymorphic",
+				{
+					"command": "deoptexplorer.ics.showStatePolymorphic",
 					"when": "view == deoptexplorer.ics && !deoptexplorer.ics.show.state.polymorphic",
 					"group": "Filter@1"
 				},
-				{	"command": "deoptexplorer.ics.hideStatePolymorphic",
+				{
+					"command": "deoptexplorer.ics.hideStatePolymorphic",
 					"when": "view == deoptexplorer.ics && deoptexplorer.ics.show.state.polymorphic",
 					"group": "Filter@1"
 				},
-				{	"command": "deoptexplorer.ics.showStateMonomorphic",
+				{
+					"command": "deoptexplorer.ics.showStateMonomorphic",
 					"when": "view == deoptexplorer.ics && !deoptexplorer.ics.show.state.monomorphic",
 					"group": "Filter@2"
 				},
-				{	"command": "deoptexplorer.ics.hideStateMonomorphic",
+				{
+					"command": "deoptexplorer.ics.hideStateMonomorphic",
 					"when": "view == deoptexplorer.ics && deoptexplorer.ics.show.state.monomorphic",
 					"group": "Filter@2"
 				},
-				{	"command": "deoptexplorer.ics.showStateOther",
+				{
+					"command": "deoptexplorer.ics.showStateOther",
 					"when": "view == deoptexplorer.ics && !deoptexplorer.ics.show.state.other",
 					"group": "Filter@3"
 				},
-				{	"command": "deoptexplorer.ics.hideStateOther",
+				{
+					"command": "deoptexplorer.ics.hideStateOther",
 					"when": "view == deoptexplorer.ics && deoptexplorer.ics.show.state.other",
 					"group": "Filter@4"
 				},
-
-				{	"command": "deoptexplorer.ics.sortByLocation",
+				{
+					"command": "deoptexplorer.ics.sortByLocation",
 					"when": "view == deoptexplorer.ics",
 					"group": "Sort@0"
 				},
-				{	"command": "deoptexplorer.ics.sortByState",
+				{
+					"command": "deoptexplorer.ics.sortByState",
 					"when": "view == deoptexplorer.ics",
 					"group": "Sort@1"
 				},
-
-				{	"command": "deoptexplorer.decorations.showDeopts",
+				{
+					"command": "deoptexplorer.decorations.showDeopts",
 					"when": "view == deoptexplorer.deopts && !deoptexplorer.decorations.showDeopts",
 					"group": "View@0"
 				},
-				{	"command": "deoptexplorer.decorations.hideDeopts",
+				{
+					"command": "deoptexplorer.decorations.hideDeopts",
 					"when": "view == deoptexplorer.deopts && deoptexplorer.decorations.showDeopts",
 					"group": "View@0"
 				},
-
-				{	"command": "deoptexplorer.deopts.groupByFile",
+				{
+					"command": "deoptexplorer.deopts.groupByFile",
 					"when": "false && view == deoptexplorer.deopts && !deoptexplorer.deopts.groupByFile",
 					"group": "Group@0"
 				},
-				{	"command": "deoptexplorer.deopts.ungroupByFile",
+				{
+					"command": "deoptexplorer.deopts.ungroupByFile",
 					"when": "false && view == deoptexplorer.deopts && deoptexplorer.deopts.groupByFile",
 					"group": "Group@0"
 				},
-				{	"command": "deoptexplorer.deopts.groupByFunction",
+				{
+					"command": "deoptexplorer.deopts.groupByFunction",
 					"when": "false && view == deoptexplorer.deopts && !deoptexplorer.deopts.groupByFunction",
 					"group": "Group@1"
 				},
-				{	"command": "deoptexplorer.deopts.ungroupByFunction",
+				{
+					"command": "deoptexplorer.deopts.ungroupByFunction",
 					"when": "false && view == deoptexplorer.deopts && deoptexplorer.deopts.groupByFunction",
 					"group": "Group@1"
 				},
-				{	"command": "deoptexplorer.deopts.groupByKind",
+				{
+					"command": "deoptexplorer.deopts.groupByKind",
 					"when": "false && view == deoptexplorer.deopts && !deoptexplorer.deopts.groupByKind",
 					"group": "Group@2"
 				},
-				{	"command": "deoptexplorer.deopts.ungroupByKind",
+				{
+					"command": "deoptexplorer.deopts.ungroupByKind",
 					"when": "false && view == deoptexplorer.deopts && deoptexplorer.deopts.groupByKind",
 					"group": "Group@2"
 				},
-
-				{	"command": "deoptexplorer.deopts.sortByLocation",
+				{
+					"command": "deoptexplorer.deopts.sortByLocation",
 					"when": "view == deoptexplorer.deopts",
 					"group": "Sort@0"
 				},
-				{	"command": "deoptexplorer.deopts.sortByKind",
+				{
+					"command": "deoptexplorer.deopts.sortByKind",
 					"when": "view == deoptexplorer.deopts",
 					"group": "Sort@1"
 				},
-				{	"command": "deoptexplorer.deopts.sortByCount",
+				{
+					"command": "deoptexplorer.deopts.sortByCount",
 					"when": "view == deoptexplorer.deopts",
 					"group": "Sort@1"
 				},
-
-				{	"command": "deoptexplorer.decorations.showFunctionStates",
+				{
+					"command": "deoptexplorer.decorations.showFunctionStates",
 					"when": "view == deoptexplorer.functions && !deoptexplorer.decorations.showFunctionState",
 					"group": "View@0"
 				},
-				{	"command": "deoptexplorer.decorations.hideFunctionStates",
+				{
+					"command": "deoptexplorer.decorations.hideFunctionStates",
 					"when": "view == deoptexplorer.functions && deoptexplorer.decorations.showFunctionState",
 					"group": "View@0"
 				},
-
-				{	"command": "deoptexplorer.maps.sortByName",
+				{
+					"command": "deoptexplorer.maps.sortByName",
 					"when": "view == deoptexplorer.maps && deoptexplorer.sortMaps == 'by-count'",
 					"group": "navigation@0"
 				},
-				{	"command": "deoptexplorer.maps.sortByCount",
+				{
+					"command": "deoptexplorer.maps.sortByCount",
 					"when": "view == deoptexplorer.maps && deoptexplorer.sortMaps != 'by-count'",
 					"group": "navigation@0"
 				},
-
-				{	"command": "deoptexplorer.maps.showUnreferenced",
+				{
+					"command": "deoptexplorer.maps.showUnreferenced",
 					"when": "view == deoptexplorer.maps && !deoptexplorer.maps.showUnreferenced",
 					"group": "View@1"
 				},
-				{	"command": "deoptexplorer.maps.hideUnreferenced",
+				{
+					"command": "deoptexplorer.maps.hideUnreferenced",
 					"when": "view == deoptexplorer.maps && deoptexplorer.maps.showUnreferenced",
 					"group": "View@1"
 				},
-
-				{	"command": "deoptexplorer.maps.showNonUserCode",
+				{
+					"command": "deoptexplorer.maps.showNonUserCode",
 					"when": "view == deoptexplorer.maps && !deoptexplorer.maps.showNonUserCode",
 					"group": "View@2"
 				},
-				{	"command": "deoptexplorer.maps.hideNonUserCode",
+				{
+					"command": "deoptexplorer.maps.hideNonUserCode",
 					"when": "view == deoptexplorer.maps && deoptexplorer.maps.showNonUserCode",
 					"group": "View@2"
 				},
-
-				{	"command": "deoptexplorer.maps.showTransitions",
+				{
+					"command": "deoptexplorer.maps.showTransitions",
 					"when": "view == deoptexplorer.maps && !deoptexplorer.maps.showTransitions",
 					"group": "View@3"
 				},
-				{	"command": "deoptexplorer.maps.hideTransitions",
+				{
+					"command": "deoptexplorer.maps.hideTransitions",
 					"when": "view == deoptexplorer.maps && deoptexplorer.maps.showTransitions",
 					"group": "View@3"
 				},
-
-				{	"command": "deoptexplorer.maps.groupByFile",
+				{
+					"command": "deoptexplorer.maps.groupByFile",
 					"when": "view == deoptexplorer.maps && !deoptexplorer.maps.groupByFile",
 					"group": "Group@0"
 				},
-				{	"command": "deoptexplorer.maps.ungroupByFile",
+				{
+					"command": "deoptexplorer.maps.ungroupByFile",
 					"when": "view == deoptexplorer.maps && deoptexplorer.maps.groupByFile",
 					"group": "Group@0"
 				},
-				{	"command": "deoptexplorer.maps.groupByFunction",
+				{
+					"command": "deoptexplorer.maps.groupByFunction",
 					"when": "view == deoptexplorer.maps && !deoptexplorer.maps.groupByFunction",
 					"group": "Group@1"
 				},
-				{	"command": "deoptexplorer.maps.ungroupByFunction",
+				{
+					"command": "deoptexplorer.maps.ungroupByFunction",
 					"when": "view == deoptexplorer.maps && deoptexplorer.maps.groupByFunction",
 					"group": "Group@1"
 				},
-
-				{	"command": "deoptexplorer.profile.enableJustMyCode",
+				{
+					"command": "deoptexplorer.profile.enableJustMyCode",
 					"when": "view == deoptexplorer.profile && !deoptexplorer.showProfileJustMyCode",
 					"group": "navigation@0"
 				},
-				{	"command": "deoptexplorer.profile.disableJustMyCode",
+				{
+					"command": "deoptexplorer.profile.disableJustMyCode",
 					"when": "view == deoptexplorer.profile && deoptexplorer.showProfileJustMyCode",
 					"group": "navigation@0"
 				},
-
-				{	"command": "deoptexplorer.profile.enableJustMyCode",
+				{
+					"command": "deoptexplorer.profile.enableJustMyCode",
 					"when": "view == deoptexplorer.profile && !deoptexplorer.showProfileJustMyCode",
 					"group": "Filter@0"
 				},
-				{	"command": "deoptexplorer.profile.disableJustMyCode",
+				{
+					"command": "deoptexplorer.profile.disableJustMyCode",
 					"when": "view == deoptexplorer.profile && deoptexplorer.showProfileJustMyCode",
 					"group": "Filter@0"
 				},
-				{	"command": "deoptexplorer.profile.showNativeCode",
+				{
+					"command": "deoptexplorer.profile.showNativeCode",
 					"when": "view == deoptexplorer.profile && !deoptexplorer.showNativeCodeProfileNodes",
 					"group": "Filter@1"
 				},
-				{	"command": "deoptexplorer.profile.hideNativeCode",
+				{
+					"command": "deoptexplorer.profile.hideNativeCode",
 					"when": "view == deoptexplorer.profile && deoptexplorer.showNativeCodeProfileNodes",
 					"group": "Filter@1"
 				},
-
-				{	"command": "deoptexplorer.profile.showNodeJs",
+				{
+					"command": "deoptexplorer.profile.showNodeJs",
 					"when": "view == deoptexplorer.profile && !deoptexplorer.showNodeJsProfileNodes",
 					"group": "Filter@2"
 				},
-				{	"command": "deoptexplorer.profile.hideNodeJs",
+				{
+					"command": "deoptexplorer.profile.hideNodeJs",
 					"when": "view == deoptexplorer.profile && deoptexplorer.showNodeJsProfileNodes",
 					"group": "Filter@2"
 				},
-
-				{	"command": "deoptexplorer.profile.showNodeModules",
+				{
+					"command": "deoptexplorer.profile.showNodeModules",
 					"when": "view == deoptexplorer.profile && !deoptexplorer.showNodeModulesProfileNodes",
 					"group": "Filter@3"
 				},
-				{	"command": "deoptexplorer.profile.hideNodeModules",
+				{
+					"command": "deoptexplorer.profile.hideNodeModules",
 					"when": "view == deoptexplorer.profile && deoptexplorer.showNodeModulesProfileNodes",
 					"group": "Filter@3"
 				},
-
-				{	"command": "deoptexplorer.profile.exportProfile",
+				{
+					"command": "deoptexplorer.profile.exportProfile",
 					"when": "view == deoptexplorer.profile",
 					"group": "Save@1"
 				},
-
-				{	"command": "deoptexplorer.profile.showCallTree",
+				{
+					"command": "deoptexplorer.profile.showCallTree",
 					"when": "view == deoptexplorer.profile",
 					"group": "View@1"
 				},
-				{	"command": "deoptexplorer.profile.showBottomUp",
+				{
+					"command": "deoptexplorer.profile.showBottomUp",
 					"when": "view == deoptexplorer.profile",
 					"group": "View@2"
 				},
-				{	"command": "deoptexplorer.profile.showFlat",
+				{
+					"command": "deoptexplorer.profile.showFlat",
 					"when": "view == deoptexplorer.profile",
 					"group": "View@3"
 				},
-
-				{	"command": "deoptexplorer.profile.sortBySelfTime",
+				{
+					"command": "deoptexplorer.profile.sortBySelfTime",
 					"when": "view == deoptexplorer.profile",
 					"group": "Sort@1"
 				},
-				{	"command": "deoptexplorer.profile.sortByTotalTime",
+				{
+					"command": "deoptexplorer.profile.sortByTotalTime",
 					"when": "view == deoptexplorer.profile",
 					"group": "Sort@2"
 				},
-				{	"command": "deoptexplorer.profile.sortByName",
+				{
+					"command": "deoptexplorer.profile.sortByName",
 					"when": "view == deoptexplorer.profile",
 					"group": "Sort@3"
 				},
-
-				{	"command": "deoptexplorer.decorations.showLineTicks",
+				{
+					"command": "deoptexplorer.decorations.showLineTicks",
 					"when": "view == deoptexplorer.lineTicks && !deoptexplorer.decorations.showLineTicks",
 					"group": "navigation@0"
 				},
-				{	"command": "deoptexplorer.decorations.hideLineTicks",
+				{
+					"command": "deoptexplorer.decorations.hideLineTicks",
 					"when": "view == deoptexplorer.lineTicks && deoptexplorer.decorations.showLineTicks",
 					"group": "navigation@0"
 				},
-				{	"command": "deoptexplorer.profile.hideLineTicks",
+				{
+					"command": "deoptexplorer.profile.hideLineTicks",
 					"when": "view == deoptexplorer.lineTicks",
 					"group": "navigation@1"
 				}
 			],
 			"view/item/context": [
-				{	"command": "deoptexplorer.profile.showLineTickDecorationsForNode",
+				{
+					"command": "deoptexplorer.profile.showLineTickDecorationsForNode",
 					"when": "view == deoptexplorer.profile && viewItem == 'profile-node+ticks'",
 					"group": "inline@0"
 				}
@@ -1330,7 +1425,7 @@
 		]
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run clean && npm run webpack-release",
+		"vscode:prepublish": "npm run clean && npm run webpack-release && npm run install-native-deps",
 		"syntax": "node scripts/syntax.js",
 		"webpack": "npm run syntax && webpack --mode development",
 		"webpack-dev": "npm run syntax && webpack --mode development --watch",
@@ -1340,7 +1435,8 @@
 		"compile-log": "node --log-ic --log-maps --prof --log-internal-timer-events --log-source-code D:/dev/TypeScript/built/local/tsc.js -b --force",
 		"watch": "tsc -b -w",
 		"pretest": "npm run compile",
-		"test": "node out/test/runTest.js"
+		"test": "node out/test/runTest.js",
+		"install-native-deps": "npm i @esfx/equatable-native-darwin-x64@1.1.0-alpha.202211291446 @esfx/equatable-native-linux-x64@1.1.0-alpha.202211291446 @esfx/equatable-native-win32-x64@1.1.0-alpha.202211291446 --no-save --no-fund --no-audit --force"
 	},
 	"dependencies": {
 		"@esfx/async-deferred": "^1.1.0-alpha.202211291446",
