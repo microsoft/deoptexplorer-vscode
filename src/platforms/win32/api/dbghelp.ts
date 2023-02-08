@@ -2,15 +2,14 @@
 // Licensed under the MIT License.
 
 import { lazy } from "@esfx/fn";
-import * as fs from "fs";
+import { randomBytes } from "crypto";
 import * as ffi from "ffi-napi";
 import * as ref from "ref-napi";
 import { Disposable, ExtensionContext, Uri } from "vscode";
-import { tryExec } from "../../core/utils";
-import { randomBytes } from "crypto";
-import { INT, DWORD, DWORD64, CHAR, GUID, BOOL, ULONG, ULONG64, PVOID, PCSTR, HANDLE, PSTR, WORD, LONG, BYTE, ULONGLONG, PWSTR, PCWSTR, PDWORD64, WCHAR, PCHAR, PDWORD } from "./win32";
-import { StructType } from "./ref-struct";
+import { tryExec } from "../../../core/utils";
 import { ArrayType } from "./ref-array";
+import { StructType } from "./ref-struct";
+import { BOOL, CHAR, DWORD, DWORD64, GUID, HANDLE, INT, PCSTR, PCWSTR, PDWORD, PDWORD64, PSTR, PVOID, PWSTR, ULONG, ULONG64, WCHAR } from "./win32";
 
 export enum SYM_TYPE {
     SymNone = 0,
@@ -797,21 +796,21 @@ export const CBA_DEBUG_INFO =                       0x10000000; // Display verbo
 export const CBA_SRCSRV_INFO =                      0x20000000; // Display verbose information for source server. The CallbackData parameter is a pointer to a string.
 export const CBA_SRCSRV_EVENT =                     0x40000000; // Display verbose information for source server. If you do not handle this event, the information is resent through the CBA_DEBUG_INFO event. The CallbackData parameter is a pointer to a IMAGEHLP_CBA_EVENT structure.
 
-export const UNDNAME_COMPLETE =                     0x00000000;     // Enable full undecoration.
-export const UNDNAME_NO_LEADING_UNDERSCORES =       0x00000001;     // Remove leading underscores from Microsoft keywords.
-export const UNDNAME_NO_MS_KEYWORDS =               0x00000002;     // Disable expansion of Microsoft keywords.
-export const UNDNAME_NO_FUNCTION_RETURNS =          0x00000004;     // Disable expansion of return types for primary declarations.
-export const UNDNAME_NO_ALLOCATION_MODEL =          0x00000008;     // Disable expansion of the declaration model.
-export const UNDNAME_NO_ALLOCATION_LANGUAGE =       0x00000010;     // Disable expansion of the declaration language specifier.
-export const UNDNAME_NO_MS_THISTYPE =               0x00000020;     // Disable expansion of Microsoft keywords on the this type for primary declaration.
-export const UNDNAME_NO_CV_THISTYPE =               0x00000040;     // Disable expansion of CodeView modifiers on the this type for primary declaration.
-export const UNDNAME_NO_ACCESS_SPECIFIERS =         0x00000080;     // Disable expansion of access specifiers for members.
-export const UNDNAME_NO_THROW_SIGNATURES =          0x00000100;     // Disable expansion of throw-signatures for functions and pointers to functions.
-export const UNDNAME_NO_MEMBER_TYPE =               0x00000200;     // Disable expansion of the static or virtual attribute of members.
-export const UNDNAME_NO_RETURN_UDT_MODEL =          0x00000400;     // Disable expansion of the Microsoft model for user-defined type returns.
-export const UNDNAME_32_BIT_DECODE =                0x00000800;     // Undecorate 32-bit decorated names.
-export const UNDNAME_NAME_ONLY =                    0x00001000;     // Undecorate only the name for primary declaration. Returns [scope::]name. Does expand template parameters.
-export const UNDNAME_NO_ARGUMENTS =                 0x00002000;     // Do not undecorate function arguments.
-export const UNDNAME_NO_SPECIAL_SYMS =              0x00004000;     // Do not undecorate special names, such as vtable, vcall, vector, metatype, and so on.
-export const UNDNAME_NO_TYPE_PREFIX =               0x00008000;     // Disable enum/class/struct/union prefix
-export const UNDNAME_NO_PTR64_EXPANSION =           0x00020000;    // Disable expansion of __ptr64 keyword
+export const UNDNAME_COMPLETE =                     0x00000000; // Enable full undecoration.
+export const UNDNAME_NO_LEADING_UNDERSCORES =       0x00000001; // Remove leading underscores from Microsoft keywords.
+export const UNDNAME_NO_MS_KEYWORDS =               0x00000002; // Disable expansion of Microsoft keywords.
+export const UNDNAME_NO_FUNCTION_RETURNS =          0x00000004; // Disable expansion of return types for primary declarations.
+export const UNDNAME_NO_ALLOCATION_MODEL =          0x00000008; // Disable expansion of the declaration model.
+export const UNDNAME_NO_ALLOCATION_LANGUAGE =       0x00000010; // Disable expansion of the declaration language specifier.
+export const UNDNAME_NO_MS_THISTYPE =               0x00000020; // Disable expansion of Microsoft keywords on the this type for primary declaration.
+export const UNDNAME_NO_CV_THISTYPE =               0x00000040; // Disable expansion of CodeView modifiers on the this type for primary declaration.
+export const UNDNAME_NO_ACCESS_SPECIFIERS =         0x00000080; // Disable expansion of access specifiers for members.
+export const UNDNAME_NO_THROW_SIGNATURES =          0x00000100; // Disable expansion of throw-signatures for functions and pointers to functions.
+export const UNDNAME_NO_MEMBER_TYPE =               0x00000200; // Disable expansion of the static or virtual attribute of members.
+export const UNDNAME_NO_RETURN_UDT_MODEL =          0x00000400; // Disable expansion of the Microsoft model for user-defined type returns.
+export const UNDNAME_32_BIT_DECODE =                0x00000800; // Undecorate 32-bit decorated names.
+export const UNDNAME_NAME_ONLY =                    0x00001000; // Undecorate only the name for primary declaration. Returns [scope::]name. Does expand template parameters.
+export const UNDNAME_NO_ARGUMENTS =                 0x00002000; // Do not undecorate function arguments.
+export const UNDNAME_NO_SPECIAL_SYMS =              0x00004000; // Do not undecorate special names, such as vtable, vcall, vector, metatype, and so on.
+export const UNDNAME_NO_TYPE_PREFIX =               0x00008000; // Disable enum/class/struct/union prefix
+export const UNDNAME_NO_PTR64_EXPANSION =           0x00020000; // Disable expansion of __ptr64 keyword

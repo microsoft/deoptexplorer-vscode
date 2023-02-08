@@ -22,6 +22,7 @@ import { UriEqualer } from "../../core/uri";
 import { delay } from "@esfx/async-delay";
 import { ImmutableEnumSet } from "../../core/collections/enumSet";
 import { CppEntriesProvider } from "../../third-party-derived/v8/tools/cppEntriesProvider";
+import { createWindowsCppEntriesProvider } from "../../platforms/win32";
 
 export let openedFile: Uri | undefined;
 export let openedLog: LogFile | undefined;
@@ -68,9 +69,8 @@ export async function openLogFile(uri: Uri | undefined, force: boolean) {
             progress.report({ message: "Processing log..." });
 
             let cppEntriesProvider: CppEntriesProvider | undefined;
-            if (process.platform === "win32" && process.arch === "x64") {
-                const { WindowsCppEntriesProvider } = await import("../components/windowsCppEntriesProvider");
-                cppEntriesProvider = new WindowsCppEntriesProvider({
+            if (process.platform === "win32") {
+                cppEntriesProvider = await createWindowsCppEntriesProvider({
                     globalStorageUri: currentContext?.globalStorageUri
                 });
             }

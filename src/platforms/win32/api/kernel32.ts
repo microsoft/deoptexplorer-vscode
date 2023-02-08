@@ -4,8 +4,8 @@
 import { lazy } from "@esfx/fn";
 import * as ffi from "ffi-napi";
 import * as ref from "ref-napi";
-import { tryExec } from "../../core/utils";
-import { HANDLE, PCSTR, DWORD, BOOL, LPCSTR, PVOID, PSTR, LPCVOID, LPSTR, HMODULE } from "./win32";
+import { tryExec } from "../../../core/utils";
+import { BOOL, DWORD, HANDLE, HMODULE, LPCSTR, LPCVOID, LPSTR, PCSTR, PSTR, PVOID } from "./win32";
 
 export function LoadLibraryEx(
     lpLibFileName:  LPCSTR,

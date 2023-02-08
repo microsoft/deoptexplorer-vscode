@@ -14,11 +14,11 @@ import { Address, parseAddress, toAddress } from "../../core/address";
 import { tryReaddirSync } from "../../core/fs";
 import { kNullAddress } from "../../third-party-derived/v8/constants";
 import { FuncInfo, WindowsCppEntriesProvider as V8WindowsCppEntriesProvider } from "../../third-party-derived/v8/tools/cppEntriesProvider";
-import { output } from "../outputChannel";
-import * as dbghelp from "../utils/dbghelp";
-import * as kernel32 from "../utils/kernel32";
-import { PSTR, sizeof } from "../utils/win32";
-import * as winnt from "../utils/winnt";
+import { output } from "../../extension/outputChannel";
+import * as dbghelp from "./api/dbghelp";
+import * as kernel32 from "./api/kernel32";
+import { PSTR, sizeof } from "./api/win32";
+import * as winnt from "./api/winnt";
 
 // Whether to download symbols from the Microsoft public symbol store, but this can be very slow...
 const USE_MS_PUBLIC_SYMBOL_STORE = false;

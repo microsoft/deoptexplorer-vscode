@@ -11,17 +11,17 @@ node_modules
 !node_modules/@esfx/equatable/LICENSE
 !node_modules/@esfx/equatable/THIRD_PARTY_NOTICES
 !node_modules/@esfx/equatable/package.json
-!node_modules/@esfx/equatable-native-win32-x64/
-!node_modules/@esfx/equatable-native-linux-x64/
-!node_modules/@esfx/equatable-native-darwin-x64/
+!node_modules/@esfx/equatable-native-*/dist
+!node_modules/@esfx/equatable-native-*/index.js
+!node_modules/@esfx/equatable-native-*/LICENSE
+!node_modules/@esfx/equatable-native-*/package.json
 
 # typescript:
 !node_modules/typescript/lib/typescript.js
 !node_modules/typescript/LICENSE.txt
 !node_modules/typescript/package.json
-# !node_modules/@microsoft/typescript-etw
 
-# ref-napi and dependencies (only used on win32-x64):
+# ref-napi and dependencies (NOTE: only loaded on win32-x64):
 !node_modules/ref-napi/lib
 !node_modules/ref-napi/prebuilds/win32-x64
 !node_modules/ref-napi/LICENSE
@@ -41,16 +41,13 @@ node_modules
 !node_modules/node-addon-api/LICENSE.md
 !node_modules/node-addon-api/package.json
 
-# ffi-napi (only used on win32-x64):
+# ffi-napi (NOTE: only loaded on win32-x64):
 !node_modules/ffi-napi/lib
 !node_modules/ffi-napi/prebuilds/win32-x64
 !node_modules/ffi-napi/LICENSE
 !node_modules/ffi-napi/package.json
 
-# get-uv-event-loop-napi-h only used on win32
-#!node_modules/get-uv-event-loop-napi-h
-
-# ref-struct-di (only used on win32):
+# ref-struct-di (NOTE: only loaded on win32):
 !node_modules/ref-struct-di/lib
 !node_modules/ref-struct-di/LICENSE
 !node_modules/ref-struct-di/package.json
