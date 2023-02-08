@@ -21,6 +21,7 @@ import * as storage from "./storage";
 import { UriEqualer } from "../../core/uri";
 import { delay } from "@esfx/async-delay";
 import { ImmutableEnumSet } from "../../core/collections/enumSet";
+import { CppEntriesProvider } from "../../third-party-derived/v8/tools/cppEntriesProvider";
 
 export let openedFile: Uri | undefined;
 export let openedLog: LogFile | undefined;
@@ -66,9 +67,18 @@ export async function openLogFile(uri: Uri | undefined, force: boolean) {
 
             progress.report({ message: "Processing log..." });
 
+            let cppEntriesProvider: CppEntriesProvider | undefined;
+            if (process.platform === "win32" && process.arch === "x64") {
+                const { WindowsCppEntriesProvider } = await import("../components/windowsCppEntriesProvider");
+                cppEntriesProvider = new WindowsCppEntriesProvider({
+                    globalStorageUri: currentContext?.globalStorageUri
+                });
+            }
+
             const processor = new LogProcessor({
                 excludeNatives: !workspace.getConfiguration("deoptexplorer").get("includeNatives", false),
-                globalStorageUri: currentContext?.globalStorageUri
+                globalStorageUri: currentContext?.globalStorageUri,
+                cppEntriesProvider,
             });
             const stats = await tryStatAsync(file);
             const log = await processor.process(readLines(file), scaleProgress(progress, 0.6), token, stats?.size || undefined);

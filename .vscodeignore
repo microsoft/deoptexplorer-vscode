@@ -3,18 +3,59 @@
 .vscode-test/**
 docs/**
 node_modules
-!node_modules/@esfx/equatable
-!node_modules/@microsoft/typescript-etw
-!node_modules/typescript
+
+# @esfx/equatable and dependencies:
+!node_modules/@esfx/equatable/dist/cjs/**/*.js
+!node_modules/@esfx/equatable/dist/cjs/**/*.js.map
+!node_modules/@esfx/equatable/lib/**/*.js
+!node_modules/@esfx/equatable/LICENSE
+!node_modules/@esfx/equatable/THIRD_PARTY_NOTICES
+!node_modules/@esfx/equatable/package.json
+!node_modules/@esfx/equatable-native-win32-x64/dist
+!node_modules/@esfx/equatable-native-win32-x64/index.js
+!node_modules/@esfx/equatable-native-win32-x64/LICENSE
+!node_modules/@esfx/equatable-native-win32-x64/package.json
+
+# typescript:
+!node_modules/typescript/lib/typescript.js
+!node_modules/typescript/LICENSE.txt
+!node_modules/typescript/package.json
+# !node_modules/@microsoft/typescript-etw
+
+# ref-napi and dependencies (only used on win32-x64):
+!node_modules/ref-napi/lib
+!node_modules/ref-napi/prebuilds/win32-x64
+!node_modules/ref-napi/LICENSE
+!node_modules/ref-napi/package.json
+!node_modules/debug/src
+!node_modules/debug/LICENSE
+!node_modules/debug/package.json
 !node_modules/ms
-!node_modules/debug
-!node_modules/get-symbol-from-current-process-h
-!node_modules/node-addon-api
-!node_modules/node-gyp-build
-!node_modules/ref-napi
-!node_modules/get-uv-event-loop=napi-h
-!node_modules/ref-struct-di
-!node_modules/ffi-napi
+!node_modules/get-symbol-from-current-process-h/*.js
+!node_modules/get-symbol-from-current-process-h/include
+!node_modules/get-symbol-from-current-process-h/LICENSE
+!node_modules/get-symbol-from-current-process-h/package.json
+!node_modules/node-gyp-build/index.js
+!node_modules/node-gyp-build/LICENSE
+!node_modules/node-gyp-build/package.json
+!node_modules/node-addon-api/index.js
+!node_modules/node-addon-api/LICENSE.md
+!node_modules/node-addon-api/package.json
+
+# ffi-napi (only used on win32-x64):
+!node_modules/ffi-napi/lib
+!node_modules/ffi-napi/prebuilds/win32-x64
+!node_modules/ffi-napi/LICENSE
+!node_modules/ffi-napi/package.json
+
+# get-uv-event-loop-napi-h only used on win32
+#!node_modules/get-uv-event-loop-napi-h
+
+# ref-struct-di (only used on win32):
+!node_modules/ref-struct-di/lib
+!node_modules/ref-struct-di/LICENSE
+!node_modules/ref-struct-di/package.json
+
 out/**
 resources/**/*.d.ts
 resources/octicons/**

@@ -61,7 +61,6 @@ import { LocationComparer } from "../vscode/location";
 import { messageOnlyProgress } from "../vscode/progress";
 import { pathOrUriStringToUri } from "../vscode/uri";
 import { VersionedLogReader } from "./v8/versionedLogReader";
-import { WindowsCppEntriesProvider } from "./windowsCppEntriesProvider";
 
 const constructorRegExp = /\n - constructor: (0x[a-fA-F0-9]+) <JSFunction ([a-zA-Z$_][a-zA-Z$_0-9]*)(?: \(sfi = ([a-fA-F0-9]+)\))?/;
 const typeRegExp = /\n - type: (\w+)\r?\n/;
@@ -121,14 +120,11 @@ export class LogProcessor {
     private _seenFiles = new StringSet(uriToString);
     private _generatedPaths = new StringSet(uriToString);
     private _sourcePaths = new StringSet(uriToString);
-    private _globalStorageUri: Uri | undefined;
     private _messageOnlyProgress: Progress<string> | undefined;
 
     constructor({
         globalStorageUri,
-        cppEntriesProvider =
-            process.platform === "win32" ? new WindowsCppEntriesProvider({ globalStorageUri }) :
-            getCppEntriesProvider({ globalStorageUri }),
+        cppEntriesProvider = getCppEntriesProvider({ globalStorageUri }),
         excludeIc = false,
         excludeBytecodes = false,
         excludeBuiltins = false,

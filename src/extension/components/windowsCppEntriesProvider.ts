@@ -10,15 +10,15 @@ import * as path from "path";
 import * as ref from "ref-napi";
 import * as semver from "semver";
 import { CancellationError, CancellationToken, Progress, Uri, workspace } from "vscode";
-import { output } from "../outputChannel";
-import { FuncInfo, WindowsCppEntriesProvider as V8WindowsCppEntriesProvider } from "../../third-party-derived/v8/tools/cppEntriesProvider";
-import * as dbghelp from "../utils/dbghelp";
+import { Address, parseAddress, toAddress } from "../../core/address";
 import { tryReaddirSync } from "../../core/fs";
+import { kNullAddress } from "../../third-party-derived/v8/constants";
+import { FuncInfo, WindowsCppEntriesProvider as V8WindowsCppEntriesProvider } from "../../third-party-derived/v8/tools/cppEntriesProvider";
+import { output } from "../outputChannel";
+import * as dbghelp from "../utils/dbghelp";
 import * as kernel32 from "../utils/kernel32";
 import { PSTR, sizeof } from "../utils/win32";
 import * as winnt from "../utils/winnt";
-import { Address, parseAddress, toAddress } from "../../core/address";
-import { kNullAddress } from "../../third-party-derived/v8/constants";
 
 // Whether to download symbols from the Microsoft public symbol store, but this can be very slow...
 const USE_MS_PUBLIC_SYMBOL_STORE = false;
