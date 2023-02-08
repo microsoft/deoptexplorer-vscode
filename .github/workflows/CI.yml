@@ -23,6 +23,10 @@ jobs:
           platform: darwin
           arch: x64
           npm_config_arch: x64
+        - os: macos-latest
+          platform: darwin
+          arch: arm64
+          npm_config_arch: arm64
 
     runs-on: ${{ matrix.os }}
     steps:
