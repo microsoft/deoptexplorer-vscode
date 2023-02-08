@@ -23,7 +23,7 @@ node_modules
 
 # ref-napi and dependencies (NOTE: only loaded on win32-x64):
 !node_modules/ref-napi/lib
-!node_modules/ref-napi/prebuilds/win32-x64
+!node_modules/ref-napi/prebuilds/
 !node_modules/ref-napi/LICENSE
 !node_modules/ref-napi/package.json
 !node_modules/debug/src
@@ -43,7 +43,7 @@ node_modules
 
 # ffi-napi (NOTE: only loaded on win32-x64):
 !node_modules/ffi-napi/lib
-!node_modules/ffi-napi/prebuilds/win32-x64
+!node_modules/ffi-napi/prebuilds/
 !node_modules/ffi-napi/LICENSE
 !node_modules/ffi-napi/package.json
 
