@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import child_process from "node:child_process";
+import child_process from "child_process";
 import semver from "semver";
 
 const NULL_DEVICE = process.platform === "win32" ? "\\\\.\\NUL" : "/dev/null";
@@ -120,7 +120,7 @@ function getV8Flags() {
         ...argv.out ? [`--logfile=${argv.out}`, "--no-logfile-per-isolate"] : [],
     ];
     if (semver.satisfies(v8, ">=8.0.0")) return [
-        ...argv.deopts ? ["--log-deopt", ...redirectCodeTraces()] : [],
+        ...argv.deopts ? ["--trace-deopt", ...redirectCodeTraces()] : [],
         ...argv.ics ? ["--trace-ic"] : [],
         ...argv.maps ? ["--trace-maps", "--trace-maps-details"] : [],
         ...argv.sources ? ["--log-code", "--log-source-code"] : [],
