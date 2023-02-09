@@ -10,7 +10,7 @@
 	"publisher": "rbuckton",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/rbuckton/deoptigate-vscode.git"
+		"url": "https://github.com/microsoft/deoptigate-vscode.git"
 	},
 	"categories": [
 		"Other"
