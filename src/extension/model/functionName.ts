@@ -62,7 +62,7 @@ export class FunctionName {
 
             let name: string | undefined;
             let pathname: string | undefined;
-            for (let i = nameAndLocation.lastIndexOf(" "); i >= 0; i = nameAndLocation.lastIndexOf(" ", i - 1)) {
+            for (let i = nameAndLocation.lastIndexOf(" "); i >= 0; i = i === 0 ? -1 : nameAndLocation.lastIndexOf(" ", i - 1)) {
                 cppFunctionNameRegExp.lastIndex = i + 1;
                 if (cppFunctionNameRegExp.test(nameAndLocation)) {
                     continue;

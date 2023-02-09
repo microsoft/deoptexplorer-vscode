@@ -64,12 +64,18 @@ export async function tryReaddirAsync(uri: Uri) {
 }
 
 export async function* readLines(file: string | Uri) {
-    if (typeof file !== "string" && file.scheme !== "file") {
+    if (typeof file !== "string") {
         yield* vscodeReadLines(file);
         return;
     }
 
-    const reader = fs.createReadStream(typeof file === "string" ? file : new URL(file.toString()), { encoding: "utf8" });
+    // if (typeof file !== "string" && file.scheme !== "file") {
+    //     yield* vscodeReadLines(file);
+    //     return;
+    // }
+
+    // const reader = fs.createReadStream(typeof file === "string" ? file : new URL(file.toString()), { encoding: "utf8" });
+    const reader = fs.createReadStream(file, { encoding: "utf8" });
     let remaining = "";
     let hasRemaining = false;
     let chunk: string;
