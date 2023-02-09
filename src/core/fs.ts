@@ -63,7 +63,18 @@ export async function tryReaddirAsync(uri: Uri) {
 }
 
 export async function* readLines(file: string | Uri) {
-    const reader = fs.createReadStream(typeof file === "string" ? file : new URL(file.toString()), { encoding: "utf8" });
+    const fileOrURL = typeof file === "string" ? file : new URL(file.toString());
+    let reader;
+    try {
+        reader = fs.createReadStream(fileOrURL, { encoding: "utf8" });
+    }
+    catch (e) {
+        if (e instanceof TypeError && e.message.includes("The URL must be of scheme file") && fileOrURL instanceof URL) {
+            throw new TypeError(`The URL '${fileOrURL}' must be of scheme file`, { cause: e });
+        }
+        throw e;
+    }
+
     let remaining = "";
     let hasRemaining = false;
     let chunk: string;
