@@ -50,14 +50,22 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 16.x
+        cache: 'npm'
     - run: npm install
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         npm_config_arch: ${{ matrix.npm_config_arch }}
+        npm_config_devdir: ".node-gyp"
     - shell: pwsh
       run: echo "target=${{ matrix.platform }}-${{ matrix.arch }}" >> $env:GITHUB_ENV
     - run: npx vsce ls
+      env:
+        npm_config_arch: ${{ matrix.npm_config_arch }}
+        npm_config_devdir: ".node-gyp"
     - run: npx vsce package --target ${{ env.target }}
+      env:
+        npm_config_arch: ${{ matrix.npm_config_arch }}
+        npm_config_devdir: ".node-gyp"
     - uses: actions/upload-artifact@v3
       with:
         name: ${{ env.target }}
