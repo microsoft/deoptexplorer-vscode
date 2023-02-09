@@ -107,7 +107,7 @@ async function* vscodeReadLines(file: Uri) {
             if (data[pos] === 0x0d && pos < data.length - 1 && data[pos+1] === 0x0a) {
                 pos++;
             }
-            start = pos;
+            start = pos + 1;
         }
     }
     if (start < data.length) {
