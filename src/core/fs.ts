@@ -3,35 +3,36 @@
 
 import * as fs from "fs";
 import { URL } from "url";
+import { TextDecoder } from "util";
 import { FileStat, FileType, Uri, workspace } from "vscode";
 import { assert } from "./assert";
 
-/**
- * Attempts a synchronous stat(2) to get file status.
- * @param file Path to a file. If a `URL` or `Uri` is provided, it must use the `file:` protocol.
- */
-export function tryStatSync(file: string | URL | Uri): FileStat | undefined {
-    try {
-        if (file instanceof Uri) {
-            if (file.scheme !== "file") return;
-            file = file.fsPath;
-        }
-        const stat = fs.statSync(file);
-        let type = FileType.Unknown;
-        if (stat.isDirectory()) type |= FileType.Directory;
-        if (stat.isFile() || stat.isCharacterDevice()) type |= FileType.File;
-        if (stat.isSymbolicLink()) type |= FileType.SymbolicLink;
-        return {
-            ctime: stat.ctimeMs,
-            mtime: stat.mtimeMs,
-            size: stat.size,
-            type
-        }
-    }
-    catch {
-        return undefined;
-    }
-}
+// /**
+//  * Attempts a synchronous stat(2) to get file status.
+//  * @param file Path to a file. If a `URL` or `Uri` is provided, it must use the `file:` protocol.
+//  */
+// export function tryStatSync(file: string | URL | Uri): FileStat | undefined {
+//     try {
+//         if (file instanceof Uri) {
+//             if (file.scheme !== "file") return;
+//             file = file.fsPath;
+//         }
+//         const stat = fs.statSync(file);
+//         let type = FileType.Unknown;
+//         if (stat.isDirectory()) type |= FileType.Directory;
+//         if (stat.isFile() || stat.isCharacterDevice()) type |= FileType.File;
+//         if (stat.isSymbolicLink()) type |= FileType.SymbolicLink;
+//         return {
+//             ctime: stat.ctimeMs,
+//             mtime: stat.mtimeMs,
+//             size: stat.size,
+//             type
+//         }
+//     }
+//     catch {
+//         return undefined;
+//     }
+// }
 
 export function tryReaddirSync(dir: string | URL | Uri) {
     try {
@@ -63,18 +64,12 @@ export async function tryReaddirAsync(uri: Uri) {
 }
 
 export async function* readLines(file: string | Uri) {
-    const fileOrURL = typeof file === "string" ? file : new URL(file.toString());
-    let reader;
-    try {
-        reader = fs.createReadStream(fileOrURL, { encoding: "utf8" });
-    }
-    catch (e) {
-        if (e instanceof TypeError && e.message.includes("The URL must be of scheme file") && fileOrURL instanceof URL) {
-            throw new TypeError(`The URL '${fileOrURL}' must be of scheme file`, { cause: e });
-        }
-        throw e;
+    if (typeof file !== "string" && file.scheme !== "file") {
+        yield* vscodeReadLines(file);
+        return;
     }
 
+    const reader = fs.createReadStream(typeof file === "string" ? file : new URL(file.toString()), { encoding: "utf8" });
     let remaining = "";
     let hasRemaining = false;
     let chunk: string;
@@ -99,6 +94,24 @@ export async function* readLines(file: string | Uri) {
     }
     if (hasRemaining) {
         yield remaining;
+    }
+}
+
+async function* vscodeReadLines(file: Uri) {
+    const data = Buffer.from(await workspace.fs.readFile(file));
+    const decoder = new TextDecoder("utf8");
+    let start = 0;
+    for (let pos = 0; pos < data.length; pos++) {
+        if (data[pos] === 0x0d || data[pos] === 0xa) {
+            yield decoder.decode(data.slice(start, pos));
+            if (data[pos] === 0x0d && pos < data.length - 1 && data[pos+1] === 0x0a) {
+                pos++;
+            }
+            start = pos;
+        }
+    }
+    if (start < data.length) {
+        yield decoder.decode(data.slice(start));
     }
 }
 
