@@ -175,9 +175,8 @@ export class Sources {
     }
 
     private _getExistingResolutionWorker(file: Uri): InternalFileResolution | undefined {
-        if (this._scriptUrlToScript.has(file)) {
-            return fileOk;
-        }
+        if (this._scriptUrlToScript.has(file)) return fileOk;
+        if (isIgnoredFile(file)) return fileSkip;
         return this._resolutions.get(file);
     }
 

@@ -538,6 +538,7 @@ export class LogProcessor {
 
                 const resolvedFiles = new StringSet(uriToString);
                 for (const file of workQueue.values()) {
+                    if (token.isCancellationRequested) throw new CancellationError();
                     if (resolvedFiles.has(file)) continue;
                     resolvedFiles.add(file);
 
