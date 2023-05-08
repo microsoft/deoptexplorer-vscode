@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+// TODO: Most of this isn't working anymore in the latest VS Code because `ref-napi` and `ffi-napi` haven't been
+//       updated to support newer versions of electron.
+
 import type { ExtensionContext } from "vscode";
 import type { WindowsCppEntriesProviderOptions } from "./windowsCppEntriesProvider";
 export type { WindowsCppEntriesProvider, WindowsCppEntriesProviderOptions } from "./windowsCppEntriesProvider";

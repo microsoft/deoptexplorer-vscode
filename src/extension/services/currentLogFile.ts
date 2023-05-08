@@ -70,9 +70,15 @@ export async function openLogFile(uri: Uri | undefined, force: boolean) {
 
             let cppEntriesProvider: CppEntriesProvider | undefined;
             if (process.platform === "win32") {
-                cppEntriesProvider = await createWindowsCppEntriesProvider({
-                    globalStorageUri: currentContext?.globalStorageUri
-                });
+                try {
+                    cppEntriesProvider = await createWindowsCppEntriesProvider({
+                        globalStorageUri: currentContext?.globalStorageUri
+                    });
+                }
+                catch (e) {
+                    console.error("Failed to load win32 native binaries. They may be out of date and do not match the current electron ABI.");
+                    console.error(e);
+                }
             }
 
             const processor = new LogProcessor({

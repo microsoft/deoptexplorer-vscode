@@ -16,7 +16,13 @@ import { activateWebviews } from "./webviewViews";
 export async function activate(context: ExtensionContext) {
     // 'dbghelp' should only be loaded on Windows platforms
     if (process.platform === "win32") {
-        context.subscriptions.push(await activateWin32(context));
+        try {
+            context.subscriptions.push(await activateWin32(context));
+        }
+        catch (e) {
+            console.error("Failed to load win32 native binaries. They may be out of date and do not match the current electron ABI.");
+            console.error(e);
+        }
     }
 
     try {
