@@ -2,20 +2,21 @@
 // Licensed under the MIT License.
 
 import { AsyncMutex } from "@esfx/async-mutex";
-import { except, union } from "@esfx/iter-fn";
 import * as path from "path";
-import { Disposable, ExtensionContext, Location, Position, ProviderResult, QuickPickItem, Uri, window } from "vscode";
+import { Disposable, ExtensionContext, Location, Position, ProviderResult, Uri, window } from "vscode";
 import { writeFileAsync } from "../core/fs";
 import * as constants from "./constants";
 import { MapId } from "./model/mapEntry";
 import { log } from "./outputChannel";
 import { CanonicalUri } from "./services/canonicalPaths";
-import { setShowDecorations, setShowProfileJustMyCode, setShowLineTicks, setShowMaps, setShowNativeCodeProfileNodes, setShowNodeJsProfileNodes, setShowNodeModulesProfileNodes, setShowProfile, setSortMaps, setSortProfile, showDecorations, showMaps, setGroupMaps, groupMaps, setGroupDeopts, groupDeopts, setSortDeopts, setSortICs, showICStates, setShowICStates } from "./services/context";
+import { groupDeopts, groupMaps, setGroupDeopts, setGroupMaps, setShowDecorations, setShowICStates, setShowLineTicks, setShowMaps, setShowNativeCodeProfileNodes, setShowNodeJsProfileNodes, setShowNodeModulesProfileNodes, setShowProfile, setShowProfileJustMyCode, setSortDeopts, setSortICs, setSortMaps, setSortProfile, showDecorations, showICStates, showMaps } from "./services/context";
 import { closeLogFile, openedFile, openedLog, openLogFile } from "./services/currentLogFile";
+import { emitters } from "./services/events";
 import { cancelPendingOperations, diskOperationToken } from "./services/operationManager";
+import * as storage from "./services/storage";
 import { showMapAsReference } from "./textDocumentContentProviders/map";
 import { cancellationTokenToCancelable } from "./vscode/cancellationToken";
-import { typeSafeExecuteCommand, typeSafeRegisterCommand } from "./vscode/commands";
+import { typeSafeRegisterCommand } from "./vscode/commands";
 import { showFunctionHistory } from "./webviewViews/functionHistory";
 import { showReportView } from "./webviewViews/report";
 
@@ -32,6 +33,8 @@ declare global {
         [constants.commands.log.reload]: () => void;
         [constants.commands.log.close]: () => void;
         [constants.commands.log.showReport]: () => void;
+        [constants.commands.log.clearRecent]: () => void;
+        [constants.commands.log.removeRecent]: (context: ContextCommandHandler) => void;
         [constants.commands.functions.showFunctionHistory]: (filePosition: Location) => void;
         [constants.commands.ics.sortByLocation]: () => void;
         [constants.commands.ics.sortByState]: () => void;
@@ -140,6 +143,22 @@ export function activateCommands(context: ExtensionContext) {
         // Close the current V8 Log
         typeSafeRegisterCommand(constants.commands.log.close, async () => {
             closeLogFile();
+        }),
+
+        // Clear recent V8 Logs
+        typeSafeRegisterCommand(constants.commands.log.clearRecent, async () => {
+            if (storage.getRecentFiles().length) {
+                emitters.willChangeRecentLogs();
+                await storage.setRecentFiles([]);
+                emitters.didChangeRecentLogs();
+            }
+        }),
+
+        // Remove recent V8 Log
+        typeSafeRegisterCommand(constants.commands.log.removeRecent, async (context: ContextCommandHandler) => {
+            if (context instanceof ContextCommandHandler) {
+                await context.onCommand(constants.commands.log.removeRecent);
+            }
         }),
 
         // Show information about a map

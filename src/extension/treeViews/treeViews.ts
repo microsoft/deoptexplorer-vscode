@@ -25,6 +25,7 @@ export async function activateTreeViewService(context: ExtensionContext) {
 
         const pickerWatcher = stack.use(new WorkspaceWatcher(pickerProvider));
         pickerWatcher.startWatching();
+        stack.use(events.onDidChangeRecentLogs(() => { pickerProvider.invalidate(); }));
 
         const icsTree = stack.use(new IcsTree());
         const deoptsTree = stack.use(new DeoptsTree());

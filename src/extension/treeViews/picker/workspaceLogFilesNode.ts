@@ -44,7 +44,7 @@ export class WorkspaceLogFilesNode extends BaseNode {
                 .zip(stats, (file, stat) => ({ file, stat }))
                 .where((entry): entry is { file: Uri, stat: FileStat } => !!entry.stat)
                 .orderByDescending(({ stat }) => stat.mtime)
-                .toArray(({ file, stat }) => new DiscoveredLogFileNode(this, file, stat));
+                .toArray(({ file, stat }) => new DiscoveredLogFileNode(this, file, stat, /*recent*/ false));
         }
     }
 }

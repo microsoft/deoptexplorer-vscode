@@ -16,6 +16,8 @@ export namespace commands {
         export const reload = `${log}.reload` as const;
         export const close = `${log}.close` as const;
         export const showReport = `${log}.showReport` as const;
+        export const clearRecent = `${log}.clearRecent` as const;
+        export const removeRecent = `${log}.removeRecent` as const;
     }
 
     export namespace functions {

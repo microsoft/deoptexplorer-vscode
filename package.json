@@ -61,6 +61,17 @@
 				"enablement": "deoptexplorer.logStatus != 'opening'"
 			},
 			{
+				"command": "deoptexplorer.log.clearRecent",
+				"title": "Clear recent logs",
+				"category": "Deopt Explorer"
+			},
+			{
+				"command": "deoptexplorer.log.removeRecent",
+				"icon": "$(close)",
+				"title": "Remove recent log file",
+				"category": "Deopt Explorer"
+			},
+			{
 				"command": "deoptexplorer.log.reload",
 				"icon": {
 					"light": "resources/light/refresh.svg",
@@ -858,6 +869,17 @@
 					"command": "deoptexplorer.profile.showLineTickDecorationsForNode",
 					"when": "view == deoptexplorer.profile && viewItem == 'profile-node+ticks'",
 					"group": "inline@0"
+				},
+				{
+					"command": "deoptexplorer.log.removeRecent",
+					"when": "view == deoptexplorer.pick && viewItem == 'logFile+recent'",
+					"group": "inline@0"
+				}
+			],
+			"commandPalette": [
+				{
+					"command": "deoptexplorer.log.removeRecent",
+					"when": "false"
 				}
 			]
 		},

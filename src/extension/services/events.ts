@@ -26,6 +26,8 @@ function createEvents() {
         // didShowLineTicks: new EventEmitter<{ node: ProfileViewNode, lineTicks: readonly FileLineTick[] }>(),
         // didHideLineTicks: new EventEmitter<void>(),
         // willRevealMap: new EventEmitter<{ address: number }>(),
+        willChangeRecentLogs: new EventEmitter<void>(),
+        didChangeRecentLogs: new EventEmitter<void>(),
 
         // State:
         //

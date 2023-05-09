@@ -43,7 +43,7 @@ export class RecentLogFilesNode extends BaseNode {
             return from(recentFiles)
                 .zip(stats, (file, stat) => ({ file, stat }))
                 .where((entry): entry is { file: Uri, stat: FileStat } => !!entry.stat)
-                .toArray(({ file, stat }) => new DiscoveredLogFileNode(this, file, stat));
+                .toArray(({ file, stat }) => new DiscoveredLogFileNode(this, file, stat, /*recent*/ true));
         }
     }
 }
