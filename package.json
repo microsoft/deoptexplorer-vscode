@@ -15,6 +15,14 @@
 	"categories": [
 		"Other"
 	],
+	"keywords": [
+		"V8",
+		"JavaScript",
+		"Performance",
+		"Inline Cache",
+		"IC",
+		"Deoptimization"
+	],
 	"activationEvents": [
 		"onLanguage:deoptexplorer-v8-map",
 		"onCommand:deoptexplorer.log.opens",
