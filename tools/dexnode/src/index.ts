@@ -3,6 +3,7 @@
 
 import child_process from "child_process";
 import semver from "semver";
+import path from "path";
 
 const NULL_DEVICE = process.platform === "win32" ? "\\\\.\\NUL" : "/dev/null";
 const argv = parseArgs();
@@ -154,10 +155,12 @@ function showHelp() {
 }
 
 function main() {
-    const args = [...getV8Flags(), ...argv._];
+    const processName = path.basename(process.execPath);
+    const isDeno = typeof (globalThis as any).Deno?.version?.v8 === "string";
+    const args = isDeno ? ["run", `--v8-flags=${getV8Flags().join(",")}`, ...argv._] : [...getV8Flags(), ...argv._];
     if (!argv.quiet) {
-        console.log(`$ node ${args.join(" ")}`);
+        console.log(`$ ${processName} ${args.join(" ")}`);
     }
-    const result = child_process.spawnSync(process.argv0, args, { stdio: "inherit" });
+    const result = child_process.spawnSync(process.execPath, args, { stdio: "inherit" });
     process.exit(result.status ?? undefined);
 }
