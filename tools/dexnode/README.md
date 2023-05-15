@@ -6,8 +6,21 @@ with the necessary arguments required to produce a log that can be consumed by [
 
 # Installation
 
-```
+```sh
 npm install --global dexnode
+```
+
+#### Examples
+
+```sh
+# NodeJS (via global install)
+dexnode myscript.js
+
+# NodeJS (via `npm exec`)
+npm exec dexnode myscript.js
+
+# Deno (via `deno run`)
+deno run -A npm:dexnode myscript.js
 ```
 
 # Usage
