@@ -9,11 +9,11 @@ import { getCanonicalUri } from "../services/canonicalPaths";
 import { compareNullable, equateNullable, hashNullable } from "../../core/utils";
 import { LocationComparer, LocationEqualer, LocationSerializer } from "../vscode/location";
 import { tryParseTrailingRange } from "../vscode/range";
-import { pathOrUriStringToUri } from "../vscode/uri";
+import { isPathOrUriString, pathOrUriStringToUri } from "../vscode/uri";
 import { KnownSerializedType, RegisteredSerializer, registerKnownSerializer } from "../../core/serializer";
 import { CodeEntry } from "../../third-party-derived/v8/tools/codeentry";
 import { FunctionState, parseFunctionState } from "../../third-party-derived/v8/enums/functionState";
-import { uriBasename } from "../../core/uri";
+import { resolveUri, uriBasename } from "../../core/uri";
 
 const functionFileRegExp = /^(?:(?<type>\w+): (?<state>[~*])?)?(?<nameAndLocation>.*)$/;
 const uriOrPathStartRegExp = /(?:[\\/](?:[a-z](?:[:|]|%3a|%7c)[\\/]?)|[a-z](?:[:|]|%3a|%7c)[\\/]?)|[a-z][-+.a-z0-9]*:/iy;
@@ -104,7 +104,9 @@ export class FunctionName {
             let location: Location | undefined;
             if (range || pathname) {
                 range ??= new Range(new Position(0, 0), new Position(0, 0));
-                const uri = pathname ? pathOrUriStringToUri(pathname) : Uri.parse("missing:", /*strict*/ true);
+                const uri = !pathname ? Uri.parse("missing:", /*strict*/ true) :
+                    isPathOrUriString(pathname) ? pathOrUriStringToUri(pathname) :
+                    resolveUri(Uri.parse("unknown:", /*strict*/ true), pathname);
                 location = new Location(getCanonicalUri(uri), range);
             }
 

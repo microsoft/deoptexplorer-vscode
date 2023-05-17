@@ -162,7 +162,10 @@ export class CodeEntry extends EntryBase {
     }
 
     protected finishInitialize() {
-        this._functionName = this.type === "RegExp" ? new FunctionName(this.getRawName(), undefined) : FunctionName.parse(this.getRawName());
+        this._functionName =
+            this.type === "SHARED_LIB" ? undefined :
+            this.type === "RegExp" ? new FunctionName(this.getRawName(), undefined) :
+            FunctionName.parse(this.getRawName());
     }
 
     static root_entry() {
