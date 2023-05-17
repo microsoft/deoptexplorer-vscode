@@ -15,7 +15,7 @@ declare global {
 const chromeDefaultPaths: Partial<Record<NodeJS.Platform, string[]>> = {
     win32: ["C:/Program Files/Google/Chrome/Application/chrome.exe", "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe"],
     darwin: ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"],
-    linux: ["/usr/bin/google-chrome"],
+    linux: ["/usr/bin/google-chrome-stable", "/usr/bin/google-chrome"],
 };
 
 const chromeRegKeys = [
