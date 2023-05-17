@@ -40,7 +40,7 @@ function canWriteToDevNull() {
 
 function parseArgs() {
     const booleans = new Set(["maps", "ics", "deopts", "profile", "sources", "quiet", "help"]);
-    const strings = new Set(["out"]);
+    const strings = new Set(["v8_version", "out"]);
     const aliases = { h: "help", "?": "help" };
     const argv: {
         maps?: boolean,
@@ -50,6 +50,7 @@ function parseArgs() {
         sources?: boolean,
         quiet?: boolean,
         help?: boolean,
+        v8_version?: string,
         out?: string,
     } = Object.create(null);
     const args = process.argv.slice(2);
@@ -91,6 +92,7 @@ function parseArgs() {
             arg = arg.slice(0, eqIndex);
         }
 
+        arg = arg.replace(/-/g, "_");
         if (strings.has(arg)) {
             // stop parsing if argument already encountered
             if (arg in argv) break;
@@ -140,7 +142,7 @@ function prepareV8Flags(v8version: string, v8_flags: string[], cleanupSteps: (()
                 v8_flags.push("--trace-deopt");
                 break;
         }
-        
+
         if (!argv._.includes("--redirect-code-traces")) {
             v8_flags.push("--redirect-code-traces");
             if (NULL_DEVICE) {
@@ -157,7 +159,6 @@ function prepareV8Flags(v8version: string, v8_flags: string[], cleanupSteps: (()
                 }
             }
         }
-
     }
 
     function prepareICs() {
@@ -247,7 +248,7 @@ async function main() {
 
     const v8_flags: string[] = [];
     const cleanup: (() => Promise<void> | void)[] = [];
-    prepareV8Flags(process.versions.v8 ?? "", v8_flags, cleanup);
+    prepareV8Flags(argv.v8_version ?? process.versions.v8 ?? "", v8_flags, cleanup);
 
     const args: string[] = [];
     if (isDeno) {
