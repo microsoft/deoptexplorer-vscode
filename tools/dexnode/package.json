@@ -24,6 +24,6 @@
     "compile": "tsc -b",
     "clean": "tsc -b --clean",
     "prestart": "npm run compile",
-    "start": "node bin/de-node"
+    "start": "node bin/dexnode"
   }
 }
