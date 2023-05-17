@@ -10,7 +10,7 @@ export class Script {
 
     constructor(
         readonly scriptId: number,
-        readonly url: Uri,
+        readonly url: Uri | undefined,
         readonly text: string
     ) {
         assert(scriptId >= 0);

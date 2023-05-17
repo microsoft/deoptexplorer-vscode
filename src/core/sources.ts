@@ -110,9 +110,9 @@ export class Sources {
     }
 
     addScript(script: Script) {
-        this.delete(script.url);
+        if (script.url) this.delete(script.url);
         this._scriptIdToScript.set(script.scriptId, script);
-        this._scriptUrlToScript.set(script.url, script);
+        if (script.url) this._scriptUrlToScript.set(script.url, script);
     }
 
     // #endregion

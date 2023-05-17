@@ -55,6 +55,10 @@ export function pathToFileUri(file: string, canonicalize?: boolean) {
 
 const fsAbsolutePathStartRegExp = /^(?:[\\/]|[a-z]:)/i;
 
+export function isPathOrUriString(text: string) {
+    return isUriString(text) || fsAbsolutePathStartRegExp.test(text);
+}
+
 /**
  * Converts a canonical file-system path or a canonical URI string into a canonical URI.
  */

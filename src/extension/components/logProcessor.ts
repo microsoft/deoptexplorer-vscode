@@ -59,8 +59,9 @@ import { measureAsync, measureSync, output } from "../outputChannel";
 import { getCanonicalUri, isIgnoredFile } from "../services/canonicalPaths";
 import { LocationComparer } from "../vscode/location";
 import { messageOnlyProgress } from "../vscode/progress";
-import { pathOrUriStringToUri } from "../vscode/uri";
+import { isPathOrUriString, pathOrUriStringToUri } from "../vscode/uri";
 import { VersionedLogReader } from "./v8/versionedLogReader";
+import { resolveUri } from "../../core/uri";
 
 const constructorRegExp = /\n - constructor: (0x[a-fA-F0-9]+) <JSFunction ([a-zA-Z$_][a-zA-Z$_0-9]*)(?: \(sfi = ([a-fA-F0-9]+)\))?/;
 const typeRegExp = /\n - type: (\w+)\r?\n/;
@@ -73,7 +74,7 @@ const unusedPropertyFieldsRegExp = /\n - unused property fields: (\d+)\r?\n/;
 // const mapDetailsFieldKeyRegExp = /^ - (?<key>deprecated_map|stable_map|migration_target|dictionary_map|named_interceptor|indexed_interceptor|may_have_interesting_symbols|undetectable|callable|constructor|has_prototype_slot(?: \(non-instance prototype\))?|access_check_needed|non-extensible|prototype_map)$/;
 // const mapDetailsInstanceDescriptorsFieldRegExp = /^ - (?<key>instance descriptors) (?<own>\(own\) )?#(?<count>): (?<value>.*)$/;
 const mapDetailsPropertyLikeRegExp = /^  \[\d+\]:/;
-const mapDetailsPropertyRegExp = /^  \[\d+\]: 0x[a-fA-F0-9]+ <(?<type>String\[#\d+\]|Symbol): (?<key>[^>]+)> \((?:const )?(?:data|accessor)(?: field(?: \d+)?(?::(?<mnemonic>\w+))?| descriptor)(?:, p: \d+)?(?:, attrs: \[(?<attrs>[W_][E_][C_])\])?\) @ (?:Any|None|Class\((?<classMapAddress>[a-fA-F0-9]+)\))?/;
+const mapDetailsPropertyRegExp = /^  \[\d+\]: 0x[a-fA-F0-9]+ <(?<type>String\[#?\d+\]|Symbol): (?<key>[^>]*)> \((?:const )?(?:data|accessor)(?: field(?: \d+)?(?::(?<mnemonic>\w+))?| descriptor)(?:, p: \d+)?(?:, attrs: \[(?<attrs>[W_][E_][C_])\])?\) @ (?:Any|None|Class\((?<classMapAddress>[a-fA-F0-9]+)\))?/;
 const mapDetailsPropertyRegExp2 = /^  \[\d+\]: [a-fA-F0-9]{8}[a-fA-F0-9]{8}?:? \[(?<type>[^\]]+)\] in (?<space>\w+): u?#(?<key>(?:(?! \((?:const )?(?:data|accessor)).)+) \((?:const )?(?:data|accessor)(?: field(?: \d+)?(?::(?<mnemonic>\w+))?| descriptor)(?:, p: \d+)?(?:, attrs: \[(?<attrs>[W_][E_][C_])\])?\) @ (?:Any|None|Class\((?<classMapAddress>[a-fA-F0-9]+)\))?/;
 
 const enum CodeType {
@@ -894,8 +895,10 @@ export class LogProcessor {
 
     // event source: https://github.com/v8/v8/blob/01c670e416310453b01533a85057a3e2db3ac64f/src/logging/log.cc#L1699
     private processScriptSource(scriptId: number, url: string, source: string) {
-        const uri = getCanonicalUri(pathOrUriStringToUri(url));
-        this._seenFiles.add(uri);
+        const uri = url ? getCanonicalUri(isPathOrUriString(url) ? pathOrUriStringToUri(url) : resolveUri(Uri.parse("unknown:", /*strict*/ true), url)) : undefined;
+        if (uri) {
+            this._seenFiles.add(uri);
+        }
         this._profile.addScriptSource(scriptId, uri, source);
     }
 
