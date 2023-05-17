@@ -197,6 +197,28 @@ optimization hints in the related source code files:
 - Highlighting for IC hints, such as polymorphic and megamorphic property access.
 - Highlighting for Optimization state for functions.
 
+### Chromium (Chrome, MS Edge) Commandline Options
+
+To use Deopt Explorer with Chrome, Edge, or other Chromium based browsers, you must specify the `--no-sandbox`
+commandline option and encode the same V8 options from [Options Overview](#options-overview) as a comma-separated list
+passed via the `--js-flags` option. For example:
+
+```
+chrome \
+  --no-sandbox \
+  --js-flags=--log-deopt,--log-ic,--log-maps,--log-maps-details,--log-internal-timer-events,--prof,... <URL>
+```
+
+It may be necessary to ensure all existing browser processes are closed before launching the browser. On Android, it may
+also be necessary to specify the `--single-process` option due to Android's sandboxing rules:
+
+```
+chrome \
+  --no-sandbox \
+  --single-process \
+  --js-flags=--log-deopt,--log-ic,--log-maps,--log-maps-details,--log-internal-timer-events,--prof,... <URL>
+```
+
 ## Caveats
 
 V8 changes frequently in ways that can break this tool. While I try to keep this up to date with engine releases, and
