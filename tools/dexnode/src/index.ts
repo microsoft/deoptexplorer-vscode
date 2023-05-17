@@ -5,6 +5,10 @@ import child_process from "child_process";
 import semver from "semver";
 import path from "path";
 
+declare global {
+    var Deno: { version?: { v8?: string; }; } | undefined;
+}
+
 const NULL_DEVICE = process.platform === "win32" ? "\\\\.\\NUL" : "/dev/null";
 const argv = parseArgs();
 if (argv.help) {
@@ -156,7 +160,7 @@ function showHelp() {
 
 function main() {
     const processName = path.basename(process.execPath);
-    const isDeno = typeof (globalThis as any).Deno?.version?.v8 === "string";
+    const isDeno = typeof globalThis.Deno?.version?.v8 === "string";
     const args = isDeno ? ["run", `--v8-flags=${getV8Flags().join(",")}`, ...argv._] : [...getV8Flags(), ...argv._];
     if (!argv.quiet) {
         console.log(`$ ${processName} ${args.join(" ")}`);
