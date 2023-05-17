@@ -52,6 +52,7 @@ function parseArgs() {
         help?: boolean,
         v8_version?: string,
         out?: string,
+        v8_version?: string,
     } = Object.create(null);
     const args = process.argv.slice(2);
     if (!args.length) {
