@@ -12,18 +12,18 @@ export const HOST_CHROME_STABLE: Host<"chrome"> = {
         HostFlags.UseLatestV8Version,
     paths: {
         win32: [
+            "chrome",
             "C:/Program Files/Google/Chrome/Application/chrome.exe",
             "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
-            "chrome"
         ],
         darwin: [
             "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
         ],
         linux: [
-            "/usr/bin/google-chrome-stable",
-            "/usr/bin/google-chrome",
+            "chrome",
             "google-chrome-stable",
-            "chrome"
+            "/usr/bin/google-chrome",
+            "/usr/bin/google-chrome-stable",
         ],
     },
     registry: [
@@ -46,8 +46,8 @@ export const HOST_CHROME_DEV: Host<"chrome_dev"> = {
             "/Applications/Google Chrome Dev.app/Contents/MacOS/Google Chrome Dev",
         ],
         linux: [
+            "google-chrome-dev",
             "/usr/bin/google-chrome-dev",
-            "google-chrome-dev"
         ],
     },
     registry: [
@@ -70,8 +70,8 @@ export const HOST_CHROME_BETA: Host<"chrome_beta"> = {
             "/Applications/Google Chrome Beta.app/Contents/MacOS/Google Chrome Beta",
         ],
         linux: [
+            "google-chrome-beta",
             "/usr/bin/google-chrome-beta",
-            "google-chrome-beta"
         ],
     },
     registry: [
@@ -91,8 +91,8 @@ export const HOST_CHROME_CANARY: Host<"chrome_canary"> = {
             undefined,
         darwin: [], // TODO
         linux: [
+            "google-chrome-canary",
             "/usr/bin/google-chrome-canary",
-            "google-chrome-canary"
         ],
     },
     registry: [
