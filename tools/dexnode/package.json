@@ -1,6 +1,6 @@
 {
   "name": "dexnode",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Run NodeJS with logging options needed by Deopt Explorer",
   "bin": {
     "dexnode": "bin/dexnode"
@@ -14,13 +14,13 @@
   "author": "Ron Buckton <ron.buckton@microsoft.com>",
   "license": "MIT",
   "dependencies": {
-    "semver": "^7.3.8"
+    "semver": "^7.3.8",
+    "winreg": "^1.2.4"
   },
   "devDependencies": {
     "@types/semver": "^7.3.13",
     "@types/winreg": "^1.2.32",
-    "typescript": "^4.9.5",
-    "winreg": "^1.2.4"
+    "typescript": "^4.9.5"
   },
   "scripts": {
     "compile": "tsc -b",
