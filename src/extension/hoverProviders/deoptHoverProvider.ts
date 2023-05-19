@@ -15,6 +15,7 @@ import { getCanonicalUri } from "../services/canonicalPaths";
 import { openedLog } from "../services/currentLogFile";
 import { entryContainsPosition } from "./utils";
 import { RangeMap } from "../../core/collections/rangeMap";
+import { unwrapScriptSource } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 
 const LINE_RANGE = 5;
 
@@ -34,7 +35,10 @@ export class DeoptHoverProvider implements HoverProvider {
             if (entry) return entry[1];
         }
 
-        const file = getCanonicalUri(document.uri);
+        const uri = unwrapScriptSource(document.uri).uri;
+        if (!uri) return;
+
+        const file = getCanonicalUri(uri);
         const line = position.line + 1;
         const startLine = line - LINE_RANGE;
         const endLine = line + LINE_RANGE;

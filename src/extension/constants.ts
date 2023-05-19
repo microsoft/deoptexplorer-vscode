@@ -6,6 +6,7 @@ import { ImmutableEnumSet } from "../core/collections/enumSet";
 export const extensionName = "deoptexplorer";
 export const extensionUIName = "Deopt Explorer";
 export const supportedLanguages: readonly string[] = ["javascript", "javascriptreact", "typescript", "typescriptreact"];
+export const debuggerType = extensionName;
 
 export namespace commands {
     export const cancel = `${extensionName}.cancel` as const;
@@ -325,6 +326,7 @@ export namespace schemes {
     export const map = `${extensionName}-map` as const;
     export const functionHistory = `${extensionName}-function` as const;
     export const profileNode = `${extensionName}-profilenode` as const;
+    export const source = `${extensionName}source` as const;
 }
 
 export namespace storage {

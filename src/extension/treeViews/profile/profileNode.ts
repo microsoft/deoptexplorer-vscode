@@ -2,12 +2,14 @@
 // Licensed under the MIT License.
 
 import { CancellationToken, SymbolKind, ThemeIcon, TreeItem, TreeItemCollapsibleState, window } from "vscode";
-import { ProfileViewNodeSnapshot } from "../../model/profileViewNodeSnapshot";
+import { markdown } from "../../../core/markdown";
+import { FunctionState } from "../../../third-party-derived/v8/enums/functionState";
+import { DynamicFuncCodeEntry } from "../../../third-party-derived/v8/tools/codeentry";
 import type { ProfileViewNode } from "../../../third-party-derived/v8/tools/profile_view";
 import * as constants from "../../constants";
-import { markdown } from "../../../core/markdown";
+import { getScriptSourceUri } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
 import { formatMilliseconds } from "../../formatting/numbers";
-import { isIgnoredFile } from "../../services/canonicalPaths";
+import { ProfileViewNodeSnapshot } from "../../model/profileViewNodeSnapshot";
 import { setShowDecorations, setShowLineTicks, showDecorations } from "../../services/context";
 import { setCurrentProfileViewNodeSnapshot } from "../../services/stateManager";
 import { typeSafeCommand } from "../../vscode/commands";
@@ -16,8 +18,6 @@ import { BaseNode } from "../common/baseNode";
 import { createTreeItem } from "../createTreeItem";
 import { getUriForProfileNode } from "./profileNodeFileDecorationProvider";
 import type { ProfileTreeDataProvider } from "./profileTreeDataProvider";
-import { DynamicFuncCodeEntry } from "../../../third-party-derived/v8/tools/codeentry";
-import { FunctionState } from "../../../third-party-derived/v8/enums/functionState";
 
 /**
  * Represents a conceptual tree node for a cpu profile node.
@@ -46,7 +46,7 @@ export class ProfileNode extends BaseNode {
         const location = entry.filePosition && entry.pickLocation(entry.filePosition.uri) || functionName.filePosition;
         const collapsibleState = this.node.children.length ? TreeItemCollapsibleState.Collapsed : TreeItemCollapsibleState.None;
         return createTreeItem(functionName.name, collapsibleState, {
-            contextValue: location && !isIgnoredFile(location.uri) && this.node.lineTicks.length ? "profile-node+ticks" : "profile-node",
+            contextValue: location && this.node.lineTicks.length ? "profile-node+ticks" : "profile-node",
             resourceUri: getUriForProfileNode(this.node),
             iconPath: this.getIconPath(),
             description:
@@ -79,6 +79,8 @@ export class ProfileNode extends BaseNode {
         if (commandName === constants.commands.profile.showLineTickDecorationsForNode) {
             const location = this.node.entry.filePosition ?? this.node.entry.functionName.filePosition;
             if (!location) return;
+            const uri = getScriptSourceUri(location.uri, this.provider.log?.sources);
+            if (!uri) return;
             setCurrentProfileViewNodeSnapshot(new ProfileViewNodeSnapshot(this.provider.log, this.node));
             await Promise.all([
                 // show the "Line Ticks" tree view
@@ -88,7 +90,7 @@ export class ProfileNode extends BaseNode {
                 setShowDecorations(showDecorations.add(constants.ShowDecorations.LineTicks)),
 
                 // open the function in the editor
-                window.showTextDocument(location.uri, { preview: true, selection: location.range }),
+                window.showTextDocument(uri, { preview: true, selection: location.range }),
             ]);
             return;
         }
@@ -126,12 +128,15 @@ export class ProfileNode extends BaseNode {
                     null,
             ]}`;
         }
-        if (item.command === undefined && location && !isIgnoredFile(location.uri)) {
-            item.command = typeSafeCommand({
-                title: "open",
-                command: "vscode.open",
-                arguments: [location.uri, { preview: true, selection: location.range }]
-            });
+        if (item.command === undefined && location) {
+            const uri = getScriptSourceUri(location.uri, this.provider.log?.sources);
+            if (uri) {
+                item.command = typeSafeCommand({
+                    title: "open",
+                    command: "vscode.open",
+                    arguments: [uri, { preview: true, selection: location.range }]
+                });
+            }
         }
         return item;
     }

@@ -10,6 +10,8 @@ import { UriComparer, UriEqualer, uriExtname, UriSerializer } from "../../core/u
 import { compareNullable, equateNullable, hashNullable } from "../../core/utils";
 import { formatRange, RangeComparer, RangeEqualer, RangeSerializer, tryParseTrailingRange } from "./range";
 import { formatUri, FormatUriOptions, pathOrUriStringToUri, UNKNOWN_URI } from "./uri";
+import { Sources } from "../../core/sources";
+import { getScriptSourceLocation, getScriptSourceUri } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 
 export const UNKNOWN_LOCATION = new Location(UNKNOWN_URI, new Position(0, 0));
 
@@ -64,11 +66,12 @@ export interface FormatLocationMarkdownOptions extends FormatUriOptions {
     label?: string;
     title?: string;
     schemes?: { allow?: string[], deny?: string[] };
+    linkSources?: Sources;
 }
 
 const defaultSchemes = { deny: ["node"] };
 
-export function formatLocationMarkdown(location: Location | undefined, { as = "uri", skipEncoding, relativeTo, include = "position-or-range", trusted = false, label, title, schemes = defaultSchemes }: FormatLocationMarkdownOptions = { }) {
+export function formatLocationMarkdown(location: Location | undefined, { as = "uri", skipEncoding, relativeTo, include = "position-or-range", trusted = false, label, title, schemes = defaultSchemes, linkSources }: FormatLocationMarkdownOptions = { }) {
     const md = trusted ? markdown.trusted : markdown;
     if (!location) {
         return md``;
@@ -80,9 +83,14 @@ export function formatLocationMarkdown(location: Location | undefined, { as = "u
         return md`${label}`;
     }
 
+    const linkLocation = linkSources ? getScriptSourceLocation(location, linkSources) : location;
+    if (!linkLocation) {
+        return md`${label}`;
+    }
+
     const linkInclude = typeof include === "object" ? include.link ?? labelInclude : include;
-    const link = linkInclude === "none" ? formatLocation(location, { as: "uri", include: linkInclude }) :
-        formatUri(location.uri.with({ fragment: formatRange(location.range, { include: linkInclude, delimiter: ",", prefix: false })}), { as: "uri"})
+    const link = linkInclude === "none" ? formatLocation(linkLocation, { as: "uri", include: linkInclude }) :
+        formatUri(linkLocation.uri.with({ fragment: formatRange(location.range, { include: linkInclude, delimiter: ",", prefix: false })}), { as: "uri" })
 
     const titleInclude = typeof include === "object" ? include.title ?? linkInclude : include;
     title ??= formatLocation(location, { as: "file", skipEncoding: true, include: titleInclude });

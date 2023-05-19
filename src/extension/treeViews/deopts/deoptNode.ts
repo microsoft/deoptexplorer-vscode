@@ -11,6 +11,8 @@ import { formatLocation } from "../../vscode/location";
 import { BaseNode } from "../common/baseNode";
 import { createTreeItem } from "../createTreeItem";
 import { DeoptTreeDataProvider } from "./deoptTreeDataProvider";
+import { TypeSafeCommand } from "../../vscode/commands";
+import { getScriptSourceUri } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
 
 export class DeoptNode extends BaseNode {
     private _functionReference: FunctionReference | null | undefined;
@@ -59,6 +61,22 @@ export class DeoptNode extends BaseNode {
         return deoptReason;
     }
 
+    private getCommand(): TypeSafeCommand | undefined {
+        if (!this.deopt.referenceLocation) return undefined;
+        const uri = getScriptSourceUri(this.deopt.referenceLocation.uri, this.provider.log?.sources);
+        return uri && {
+            title: "Go to Deopt",
+            command: "vscode.open",
+            arguments: [
+                uri,
+                {
+                    preview: true,
+                    selection: this.deopt.referenceLocation.range
+                }
+            ]
+        };
+    }
+
     protected override createTreeItem() {
         const label = this.formatLabel();
         const relativeTo = this.provider.log && { log: this.provider.log, ignoreIfBasename: true };
@@ -66,17 +84,7 @@ export class DeoptNode extends BaseNode {
         return createTreeItem(label, TreeItemCollapsibleState.None, {
             contextValue: "",
             description: description,
-            command: this.deopt.referenceLocation && {
-                title: "Go to Deopt",
-                command: "vscode.open",
-                arguments: [
-                    this.deopt.referenceLocation.uri,
-                    {
-                        preview: true,
-                        selection: this.deopt.referenceLocation.range
-                    }
-                ]
-            }
+            command: this.getCommand(),
         });
     }
 

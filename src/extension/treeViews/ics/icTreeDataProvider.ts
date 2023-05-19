@@ -9,10 +9,11 @@ import { UriComparer, UriEqualer } from "../../../core/uri";
 import { getNullableComparer, getNullableEqualer } from "../../../core/utils";
 import { formatIcState, IcState } from "../../../third-party-derived/v8/enums/icState";
 import * as constants from "../../constants";
+import { getScriptSourceUri } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
 import { FunctionReference } from "../../model/functionReference";
 import type { LogFile } from "../../model/logFile";
 import { formatLocationMarkdown } from "../../vscode/location";
-import { formatUri } from "../../vscode/uri";
+import { formatUriMarkdown } from "../../vscode/uri";
 import { BaseNodeProvider } from "../common/baseNodeProvider";
 import { GroupingNode, GroupingOptions } from "../common/groupingNode";
 import { IcNode } from "./icNode";
@@ -37,11 +38,13 @@ export class IcTreeDataProvider extends BaseNodeProvider {
     }
 
     private _summarizeHitCount(elements: readonly IcNode[], state?: IcState) {
-        return `${from(elements)
+        const count = from(elements)
             .selectMany(n => n.ic.updates)
             .select(u => u.newState)
             .through(state === undefined ? identity : q => q.where(s => s === state))
-            .count()}`;
+            .count();
+
+        return `${count}`;
     }
 
     private _groupByFile: GroupingOptions<IcNode, Uri | undefined, GroupingNode<IcNode, IcState> | undefined> = {
@@ -52,13 +55,17 @@ export class IcTreeDataProvider extends BaseNodeProvider {
         },
 
         keyEqualer: getNullableEqualer(UriEqualer),
+
         keySelector: (node) => node.file,
 
+        iconPath: ThemeIcon.File,
+
         label: (key) => key ?? "(unknown)",
-        iconPath: () => ThemeIcon.File,
+
         description: (_, elements, parent) =>
             this.sortBy === constants.SortICs.ByLocation ? this._summarizeStates(elements) :
-            this._summarizeHitCount(elements, parent?.key),
+                this._summarizeHitCount(elements, parent?.key),
+
         tooltip: (key, elements, parent) => {
             const lines: MarkdownString[] = [];
 
@@ -71,15 +78,17 @@ export class IcTreeDataProvider extends BaseNodeProvider {
                     .select(u => u.newState)
                     .through(parent === undefined ? identity : q => q.where(s => s === parent.key))
                     .count();
-            lines.push(markdown`**hit count:** ${hitCount}  \n`);
+
+            lines.push(markdown.trusted`**hit count:** ${hitCount}  \n`);
 
             const worstState =
                 from(elements)
                 .select(n => n.state)
                 .max() ?? IcState.NO_FEEDBACK;
-            lines.push(markdown`**worst state:** ${formatIcState(worstState)}  \n`);
 
-            return markdown`${formatUri(key, { as: "file" })}\n\n${lines}`;
+            lines.push(markdown.trusted`**worst state:** ${formatIcState(worstState)}  \n`);
+
+            return markdown.trusted`${formatUriMarkdown(key, { as: "file", skipEncoding: true, linkSources: this.log?.sources, trusted: true })}\n\n${lines}`;
         },
 
         sorter: (q) =>
@@ -87,18 +96,16 @@ export class IcTreeDataProvider extends BaseNodeProvider {
     };
 
     private _groupByFunction: GroupingOptions<IcNode, FunctionReference | undefined, GroupingNode<IcNode, IcState> | undefined> = {
+
         context: (_, parent) =>
             parent?.groupingOptions === this._groupByFile &&
             parent.parent instanceof GroupingNode && parent.parent.groupingOptions === this._groupByState ? parent.parent :
                 undefined,
 
         keyEqualer: getNullableEqualer(FunctionReference.equaler),
+
         keySelector: (node) => node.functionReference,
 
-        label: (key) => key?.name ?? "(no function)",
-        description: (_, elements, grandparent) =>
-            this.sortBy === constants.SortICs.ByLocation ? this._summarizeStates(elements) :
-            this._summarizeHitCount(elements, grandparent?.key),
         iconPath: (key) => {
             switch (key?.symbolKind) {
                 case SymbolKind.Function: return new ThemeIcon("symbol-function");
@@ -112,11 +119,18 @@ export class IcTreeDataProvider extends BaseNodeProvider {
                 default: return new ThemeIcon("symbol-misc");
             }
         },
+
+        label: (key) => key?.name ?? "(no function)",
+
+        description: (_, elements, grandparent) =>
+            this.sortBy === constants.SortICs.ByLocation ? this._summarizeStates(elements) :
+                this._summarizeHitCount(elements, grandparent?.key),
+
         tooltip: (key, elements, grandparent) => {
             if (key) {
                 const lines: MarkdownString[] = [];
                 const relativeTo = this.log && { log: this.log, ignoreIfBasename: true };
-                lines.push(markdown`**file:** ${formatLocationMarkdown(key.location, { as: "file", relativeTo, include: "position", skipEncoding: true })}  \n`);
+                lines.push(markdown`**file:** ${formatLocationMarkdown(key.location, { as: "file", relativeTo, include: "position", skipEncoding: true, linkSources: this.log?.sources })}  \n`);
 
                 const hitCount =
                     this.sortBy === constants.SortICs.ByLocation ?
@@ -127,29 +141,36 @@ export class IcTreeDataProvider extends BaseNodeProvider {
                         .select(u => u.newState)
                         .through(grandparent === undefined ? identity : q => q.where(s => s === grandparent.key))
                         .count();
+
                 lines.push(markdown`**hit count:** ${hitCount}  \n`);
 
                 const worstState =
                     from(elements)
                     .select(n => n.state)
                     .max() ?? IcState.NO_FEEDBACK;
+
                 lines.push(markdown`**worst state:** ${formatIcState(worstState)}  \n`);
 
                 return markdown`${key.name}\n\n${lines}`;
             }
         },
-        command: (key) =>
-            key?.location && !this.log?.generatedPaths.has(key.location.uri) ? {
+
+        command: (key) => {
+            if (!key?.location || this.log?.generatedPaths.has(key.location.uri)) return;
+
+            const uri = getScriptSourceUri(key.location.uri, this.log?.sources);
+            return uri && {
                 title: "",
                 command: "vscode.open",
                 arguments: [
-                    key.location.uri,
+                    uri,
                     {
                         preview: true,
                         selection: key.location.range
                     }
                 ]
-            } : undefined,
+            };
+        },
 
         sorter: (q) =>
             q
@@ -163,9 +184,11 @@ export class IcTreeDataProvider extends BaseNodeProvider {
         keySelector: node => node.state,
 
         label: (key) => formatIcState(key),
+
         description: (key, elements) =>
             this.sortBy === constants.SortICs.ByLocation ? this._summarizeHitCount(elements) :
             this._summarizeHitCount(elements, key),
+
         iconPath: (key) =>
             key === IcState.MEGAMORPHIC ? new ThemeIcon("warning", new ThemeColor("list.errorForeground")) :
             key === IcState.POLYMORPHIC ? new ThemeIcon("versions", new ThemeColor("list.warningForeground")) :

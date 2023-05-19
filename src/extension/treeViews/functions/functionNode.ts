@@ -5,7 +5,9 @@ import { from } from "@esfx/iter-query";
 import { SymbolKind, ThemeIcon, TreeItemCollapsibleState, Uri } from "vscode";
 import { FunctionEntry } from "../../../third-party-derived/deoptigate/functionEntry";
 import { FunctionState, isOptimizedFunctionState } from "../../../third-party-derived/v8/enums/functionState";
+import { getScriptSourceUri, wrapScriptSource } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
 import { FunctionReference } from "../../model/functionReference";
+import { TypeSafeCommand } from "../../vscode/commands";
 import { formatLocation } from "../../vscode/location";
 import { BaseNode } from "../common/baseNode";
 import { createTreeItem } from "../createTreeItem";
@@ -34,28 +36,6 @@ export class FunctionNode extends BaseNode {
         return `${this.func.functionName} (${this.func.updates.length})`;
     }
 
-    protected override createTreeItem() {
-        const label = this.formatLabel();
-        const relativeTo = this.provider.log && { log: this.provider.log, ignoreIfBasename: true };
-        const description = formatLocation(this.func.referenceLocation, { as: "file", skipEncoding: true, relativeTo });
-        return createTreeItem(label, TreeItemCollapsibleState.None, {
-            description: description,
-            iconPath: this.getIconPath(),
-            contextValue: "",
-            command: this.functionReference?.location && {
-                title: "Go to Function",
-                command: "vscode.open",
-                arguments: [
-                    this.functionReference.location.uri,
-                    {
-                        preview: true,
-                        selection: this.functionReference.location.range
-                    }
-                ]
-            }
-        });
-    }
-
     private getIconPath() {
         switch (this.func?.symbolKind) {
             case SymbolKind.Function: return new ThemeIcon("symbol-function");
@@ -67,5 +47,34 @@ export class FunctionNode extends BaseNode {
             case SymbolKind.Field: return new ThemeIcon("symbol-field");
             case SymbolKind.Constructor: return new ThemeIcon("symbol-constructor");
         }
+    }
+
+    private getCommand(): TypeSafeCommand | undefined {
+        if (!this.functionReference?.location) return undefined;
+        const uri = getScriptSourceUri(this.functionReference.location.uri, this.provider.log?.sources);
+        return uri && {
+            title: "Go to Function",
+            command: "vscode.open",
+            arguments: [
+                uri,
+                {
+                    preview: true,
+                    selection: this.functionReference.location.range
+                }
+            ]
+        };
+    }
+
+    protected override createTreeItem() {
+        const label = this.formatLabel();
+        const relativeTo = this.provider.log && { log: this.provider.log, ignoreIfBasename: true };
+        const description = formatLocation(this.func.referenceLocation, { as: "file", skipEncoding: true, relativeTo });
+
+        return createTreeItem(label, TreeItemCollapsibleState.None, {
+            description: description,
+            iconPath: this.getIconPath(),
+            contextValue: "",
+            command: this.getCommand(),
+        });
     }
 }

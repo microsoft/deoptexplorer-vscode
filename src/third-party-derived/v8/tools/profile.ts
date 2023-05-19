@@ -290,7 +290,7 @@ export class Profile {
         entry.start_pos ??= startPos;
         entry.end_pos ??= endPos;
         entry.script ??= script;
-        entry.filePosition ??= script?.url && new Location(script.url, script.lineMap.positionAt(startPos));
+        entry.filePosition ??= script?.uri && new Location(script.uri, script.lineMap.positionAt(startPos));
 
         if (!entry?.isJSFunction?.()) return;
 
@@ -344,7 +344,7 @@ export class Profile {
                     let inline_entry = cached_inline_entries.get(cache_key);
                     if (!inline_entry) {
                         inline_entry = new DynamicFuncCodeEntry(this.sources_, 0, entry.type, pos_info.shared, FunctionState.Inlined);
-                        inline_entry.fallbackFilePosition = start_pos_info.position && pos_info.script.url && new Location(pos_info.script.url, start_pos_info.position);
+                        inline_entry.fallbackFilePosition = start_pos_info.position && pos_info.script.uri && new Location(pos_info.script.uri, start_pos_info.position);
                         inline_entry.start_pos = pos_info.shared.start_pos;
                         inline_entry.end_pos = pos_info.shared.end_pos;
                         inline_entry.script = pos_info.script;

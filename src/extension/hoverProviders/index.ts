@@ -8,6 +8,7 @@ import { VSDisposableStack } from "../vscode/disposable";
 import { DeoptHoverProvider } from "./deoptHoverProvider";
 import { FunctionStateHoverProvider } from "./functionStateHoverProvider";
 import { ICHoverProvider } from "./icHoverProvider";
+import * as constants from "../constants";
 
 export function activateHoverProviders(context: ExtensionContext) {
     const disposables = new VSDisposableStack();
@@ -19,7 +20,7 @@ export function activateHoverProviders(context: ExtensionContext) {
         deoptProvider.resetCache();
         functionStateProvider.resetCache();
     };
-    const selectors = supportedLanguages.map(language => ({ scheme: "file", language }));
+    const selectors = supportedLanguages.flatMap(language => [{ scheme: "file", language }, { scheme: constants.schemes.source }]);
     disposables.use(languages.registerHoverProvider(selectors, icProvider));
     disposables.use(languages.registerHoverProvider(selectors, deoptProvider));
     disposables.use(languages.registerHoverProvider(selectors, functionStateProvider));

@@ -22,6 +22,7 @@ import { currentProfileViewNodeSnapshot } from "../services/stateManager";
 import { quartiles } from "../utils/math";
 import { VSDisposableStack } from "../vscode/disposable";
 import { createDecorationType, getTextEditors } from "./utils";
+import { unwrapScriptSource } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 
 export class ProfilerDecorations {
     private _showProfilerDecorations: "active" | "visible" | "none" = showDecorations.has(ShowDecorations.Profiler) ? "visible" : "none";
@@ -204,7 +205,9 @@ export class ProfilerDecorations {
     }
 
     private async _fillLineTickDecorations(editor: TextEditor, decorationsMap: Map<TextEditorDecorationType, RangeMap<Range | DecorationOptions>>, snapshot: ProfileViewNodeSnapshot, token: CancellationToken) {
-        const uri = editor.document.uri;
+        const uri = unwrapScriptSource(editor.document.uri).uri;
+        if (!uri) return;
+
         const fileUri = getCanonicalUri(uri);
 
         const lineTicks = snapshot.tryGetMappedLineTicks() ?? await snapshot.getMappedLineTicksAsync(token)

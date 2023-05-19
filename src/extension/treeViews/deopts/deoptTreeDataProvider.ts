@@ -13,6 +13,8 @@ import { LocationComparer } from "../../vscode/location";
 import { BaseNodeProvider } from "../common/baseNodeProvider";
 import { GroupingNode, GroupingOptions } from "../common/groupingNode";
 import { DeoptNode } from "./deoptNode";
+import { getScriptSourceUri } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
+import path from "path";
 
 const PAGE_SIZE = 100;
 
@@ -22,10 +24,13 @@ const PAGE_SIZE = 100;
 export class DeoptTreeDataProvider extends BaseNodeProvider {
     private _groupByFile: GroupingOptions<DeoptNode, Uri | undefined> = {
         keyEqualer: getNullableEqualer(UriEqualer),
+
         keySelector: node => node.file,
 
         label: (key) => key ?? "(unknown)",
+
         description: (_, elements) => `${elements.length}`,
+
         iconPath: ThemeIcon.File,
 
         sorter: q =>
@@ -44,9 +49,11 @@ export class DeoptTreeDataProvider extends BaseNodeProvider {
 
     private _groupByFunction: GroupingOptions<DeoptNode, FunctionReference | undefined> = {
         keyEqualer: getNullableEqualer(FunctionReference.equaler),
+
         keySelector: node => node.functionReference,
 
         label: (key) => key?.name ?? "(unknown)",
+
         description: (_, elements) => {
             switch (this.sortBy) {
                 case constants.SortDeopts.ByKind:
@@ -57,6 +64,7 @@ export class DeoptTreeDataProvider extends BaseNodeProvider {
                     return `${kind} (${elements.length})`;
             }
         },
+
         iconPath: (key) => {
             switch (key?.symbolKind) {
                 case SymbolKind.Function: return new ThemeIcon("symbol-function");
@@ -70,17 +78,22 @@ export class DeoptTreeDataProvider extends BaseNodeProvider {
                 default: return new ThemeIcon("symbol-misc");
             }
         },
-        command: (key) => key?.location && ({
-            title: "",
-            command: "vscode.open",
-            arguments: [
-                key.location.uri,
-                {
-                    preview: true,
-                    selection: key.location.range
-                }
-            ]
-        }),
+
+        command: (key) => {
+            if (!key?.location) return;
+            const uri = getScriptSourceUri(key.location.uri, this.log?.sources);
+            return uri && {
+                title: "",
+                command: "vscode.open",
+                arguments: [
+                    uri,
+                    {
+                        preview: true,
+                        selection: key.location.range
+                    }
+                ]
+            };
+        },
 
         sorter: (q) =>
             this.sortBy === constants.SortDeopts.ByLocation ?
@@ -103,13 +116,9 @@ export class DeoptTreeDataProvider extends BaseNodeProvider {
 
     private _groupByDeoptimizeKind: GroupingOptions<DeoptNode, DeoptimizeKind | undefined> = {
         keySelector: (node) => node.worstBailoutType,
-
         label: (key) => key === undefined ? "(unknown)" : formatDeoptimizeKind(key),
         description: (_, elements) => `${elements.length}`,
-
-        sorter: q =>
-            q
-            .orderBy(g => g.key, DeoptimizeKindComparer)
+        sorter: q => q .orderBy(g => g.key, DeoptimizeKindComparer)
     };
 
     private _log?: LogFile;

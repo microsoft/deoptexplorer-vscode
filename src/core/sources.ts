@@ -4,14 +4,14 @@
 import * as path from "path";
 import * as ts from "typescript";
 import { MessageItem, Uri, window, workspace } from "vscode";
-import { getCanonicalUri, isIgnoredFile, walkUpContainingDirectories } from "../extension/services/canonicalPaths";
-import { readFileAsync, tryReadFileAsync } from "./fs";
+import { getCanonicalUri, walkUpContainingDirectories } from "../extension/services/canonicalPaths";
 import { fileUriToPath } from "../extension/vscode/uri";
-import { LineMap } from "./lineMap";
 import { StringMap } from "./collections/stringMap";
 import { StringSet } from "./collections/stringSet";
-import { extractSourceMappingURL, getInlineSourceMapData, SourceMap } from "./sourceMap";
+import { readFileAsync, tryReadFileAsync } from "./fs";
+import { LineMap } from "./lineMap";
 import { Script } from "./script";
+import { extractSourceMappingURL, getInlineSourceMapData, SourceMap } from "./sourceMap";
 import { ensureUriTrailingDirectorySeparator, relativeUriFragment, resolveUri, uriExtname } from "./uri";
 
 export type OkFileResolution = { readonly result: "ok" };
@@ -44,6 +44,7 @@ const fileMissing: MissingFileResolution = Object.freeze({ result: "missing" as 
 
 const pickLocationItem: MessageItem = { title: "Find..." };
 const ignoreFileItem: MessageItem = { title: "Skip", isCloseAffordance: true };
+const ignoreAllFileItem: MessageItem = { title: "Skip all" };
 
 interface DirectoryRedirection {
     readonly dirname: Uri;
@@ -59,6 +60,7 @@ export class Sources {
     private _sourceMaps = new StringMap<Uri, SourceMap | Uri | "no-sourcemap">(uriToString);
     private _resolutions = new StringMap<Uri, InternalFileResolution>(uriToString);
     private _directoryRedirections = new StringMap<Uri, DirectoryRedirection>(uriToString);
+    private _ignoreMissing = false;
 
     static readonly FILE_OK = fileOk;
     static readonly FILE_SKIP = fileSkip;
@@ -94,11 +96,11 @@ export class Sources {
     }
 
     getScript(url: Uri) {
-        let script = this._scriptUrlToScript.get(url);
-        if (!script) {
-            const resolved = this._resolveFile(url);
-            return resolved && this._scriptUrlToScript.get(resolved);
-        }
+        const script = this._scriptUrlToScript.get(url);
+        if (script) return script;
+
+        const resolved = this._resolveFile(url);
+        return resolved && this._scriptUrlToScript.get(resolved);
     }
 
     getScriptId(url: Uri) {
@@ -106,13 +108,13 @@ export class Sources {
     }
 
     getScriptUrl(scriptId: number) {
-        return this._scriptIdToScript.get(scriptId)?.url;
+        return this._scriptIdToScript.get(scriptId)?.uri;
     }
 
     addScript(script: Script) {
-        if (script.url) this.delete(script.url);
+        if (script.uri) this.delete(script.uri);
         this._scriptIdToScript.set(script.scriptId, script);
-        if (script.url) this._scriptUrlToScript.set(script.url, script);
+        if (script.uri) this._scriptUrlToScript.set(script.uri, script);
     }
 
     // #endregion
@@ -157,10 +159,6 @@ export class Sources {
             return this._getExistingContentWorker(resolved);
         }
 
-        if (isIgnoredFile(file)) {
-            return undefined;
-        }
-
         await this.resolveAsync(file);
 
         resolved = this._resolveFile(file);
@@ -176,7 +174,6 @@ export class Sources {
 
     private _getExistingResolutionWorker(file: Uri): InternalFileResolution | undefined {
         if (this._scriptUrlToScript.has(file)) return fileOk;
-        if (isIgnoredFile(file)) return fileSkip;
         return this._resolutions.get(file);
     }
 
@@ -194,10 +191,10 @@ export class Sources {
         if (resolution && !(onMissing && resolution.result === "missing")) {
             return this._getFileResolution(resolution);
         }
-        if (isIgnoredFile(file)) return fileSkip;
     }
 
     private async _tryResolveUsingFileSystem(file: Uri): Promise<FileResolution | undefined> {
+        if (file.scheme !== "file") return undefined;
         const content = await tryReadFileAsync(file);
         if (content !== undefined) {
             return this._recordOkResolution(file, fileOk, content);
@@ -205,6 +202,7 @@ export class Sources {
     }
 
     private async _tryResolveUsingDirectoryRedirection(file: Uri): Promise<FileResolution | undefined> {
+        if (file.scheme !== "file") return undefined;
         for (const dirname of walkUpContainingDirectories(file)) {
             const directory = this._directoryRedirections.get(dirname);
             if (directory) {
@@ -217,12 +215,25 @@ export class Sources {
         }
     }
 
+    resetIgnoreMissing() {
+        this._ignoreMissing = false;
+    }
+
     private async _tryResolveUsingUiResolution(file: Uri, onMissing: UserFileResolver | "prompt" | undefined): Promise<FileResolution | undefined> {
         if (onMissing === "prompt") {
-            const messageResult = await window.showErrorMessage(`File '${workspace.asRelativePath(file)}' could not be found.`, { modal: true }, pickLocationItem, ignoreFileItem);
+            const messageResult = this._ignoreMissing ?
+                ignoreAllFileItem :
+                await window.showErrorMessage(`File '${workspace.asRelativePath(file)}' could not be found.`, { modal: true }, pickLocationItem, ignoreFileItem, ignoreAllFileItem);
+
             if (!messageResult || messageResult === ignoreFileItem) {
                 return this._recordSkipResolution(file, fileSkip);
             }
+
+            if (messageResult === ignoreAllFileItem) {
+                this._ignoreMissing = true;
+                return this._recordSkipResolution(file, fileSkip);
+            }
+
             const openResult = await window.showOpenDialog({
                 canSelectFiles: true,
                 defaultUri: file,
@@ -230,9 +241,11 @@ export class Sources {
                     { "Source Maps": ["map"] } :
                     { "Scripts": ["js", "jsx", "ts", "tsx"] }
             });
-            if (!openResult?.length || isIgnoredFile(openResult[0].fsPath)) {
+
+            if (!openResult?.length) {
                 return this._recordSkipResolution(file, fileSkip);
             }
+
             const redirect = getCanonicalUri(openResult[0]);
             return this._recordRedirectResolution(file, redirect, await readFileAsync(redirect));
         }
@@ -375,7 +388,7 @@ export class Sources {
     async getLineMapAsync(file: Uri, onMissing?: UserFileResolver | "prompt") {
         let resolved = this._resolveFile(file);
         if (resolved === undefined) {
-            if (isIgnoredFile(file)) {
+            if (file.scheme !== "file") {
                 return undefined;
             }
 
@@ -446,7 +459,7 @@ export class Sources {
     async getSourceMapAsync(file: Uri, onMissing?: UserFileResolver | "prompt"): Promise<SourceMap | "no-sourcemap"> {
         let resolved = this._resolveFile(file);
         if (resolved === undefined) {
-            if (isIgnoredFile(file)) {
+            if (file.scheme !== "file") {
                 return "no-sourcemap";
             }
 
@@ -527,7 +540,7 @@ export class Sources {
     async getSourceFileAsync(file: Uri, onMissing?: UserFileResolver | "prompt") {
         let resolved = this._resolveFile(file);
         if (resolved === undefined) {
-            if (isIgnoredFile(file)) {
+            if (file.scheme !== "file") {
                 return undefined;
             }
 

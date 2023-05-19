@@ -2,14 +2,14 @@
 // Licensed under the MIT License.
 
 import { from } from "@esfx/iter-query";
-import { FunctionName } from "../../model/functionName";
+import { html } from "../../../core/html";
 import { formatFunctionState } from "../../../third-party-derived/v8/enums/functionState";
-import { LogFile } from "../../model/logFile";
 import { ViewBuilder } from "../../../third-party-derived/v8/tools/profile_view";
 import { ProfileShowMode } from "../../constants";
-import { html } from "../../../core/html";
+import { isOpenableScriptUri } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
 import { formatMilliseconds } from "../../formatting/numbers";
-import { isIgnoredFile } from "../../services/canonicalPaths";
+import { FunctionName } from "../../model/functionName";
+import { LogFile } from "../../model/logFile";
 import { renderLinkToFile } from "../utils";
 
 export function renderFunctionsBySelfTime(log: LogFile, topCount: number) {
@@ -27,12 +27,12 @@ export function renderFunctionsBySelfTime(log: LogFile, topCount: number) {
                 node,
                 functionName: FunctionName.parse(node.internalFuncName)
             }))
-            .where(({ functionName }) => !!functionName.filePosition && !isIgnoredFile(functionName.filePosition.uri))
+            .where(({ functionName }) => !!functionName.filePosition && isOpenableScriptUri(functionName.filePosition.uri, log.sources))
             .orderByDescending(({ node }) => node.selfTime)
             .thenBy(({ functionName }) => functionName.name)
             .take(topCount)
             .select(({ node, functionName }) => ({ node, functionName, entry: log.findFunctionEntryByFunctionName(functionName) }))
-            .select(({ node, functionName, entry }) => html`<li>${entry?.referenceLocation ? renderLinkToFile(functionName.name, entry.referenceLocation) : functionName.name} (${formatMilliseconds(node.selfTime)}) [${functionName.state ? formatFunctionState(functionName.state) : "External"}]</li>`)
+            .select(({ node, functionName, entry }) => html`<li>${entry?.referenceLocation ? renderLinkToFile(functionName.name, entry.referenceLocation, { linkSources: log.sources }) : functionName.name} (${formatMilliseconds(node.selfTime)}) [${functionName.state ? formatFunctionState(functionName.state) : "External"}]</li>`)
             .defaultIfEmpty(html`<em>none found</em>`)
     }</ol>
     </section>

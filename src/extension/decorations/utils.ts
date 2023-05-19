@@ -33,5 +33,5 @@ export function getAllTextEditors() {
 export function getTextEditors(kind: "visible" | "active" | "none") {
     const editors = new Set<TextEditor>(kind === "visible" ? window.visibleTextEditors : undefined);
     if (kind === "active" && window.activeTextEditor) editors.add(window.activeTextEditor);
-    return [...editors];
+    return [...editors].filter(editor => editor.document.uri.scheme !== "output");
 }

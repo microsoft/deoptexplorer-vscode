@@ -27,12 +27,13 @@ import { StringSet } from "../../core/collections/stringSet";
 import { SourceLocation } from "../../core/sourceMap";
 import { Sources } from "../../core/sources";
 import { TimeDelta, TimeTicks } from "../../core/time";
+import { resolveUri } from "../../core/uri";
 import { V8Version } from "../../core/v8Version";
 import { DeoptEntry, DeoptEntryUpdate } from "../../third-party-derived/deoptigate/deoptEntry";
 import { FunctionEntry, FunctionEntryUpdate } from "../../third-party-derived/deoptigate/functionEntry";
 import { IcEntry, IcEntryUpdate } from "../../third-party-derived/deoptigate/icEntry";
 import { kNullAddress } from "../../third-party-derived/v8/constants";
-import { CodeKind, formatCodeKind, parseCodeKind } from "../../third-party-derived/v8/enums/codeKind";
+import { CodeKind, parseCodeKind } from "../../third-party-derived/v8/enums/codeKind";
 import { DeoptimizeKind, parseDeoptimizeKind } from "../../third-party-derived/v8/enums/deoptimizeKind";
 import { FunctionState, parseFunctionState } from "../../third-party-derived/v8/enums/functionState";
 import { IcState, parseIcState } from "../../third-party-derived/v8/enums/icState";
@@ -56,12 +57,11 @@ import { MemoryCategory } from "../model/memoryCategory";
 import { MemoryEntry } from "../model/memoryEntry";
 import { MemoryOverview } from "../model/memoryOverview";
 import { measureAsync, measureSync, output } from "../outputChannel";
-import { getCanonicalUri, isIgnoredFile } from "../services/canonicalPaths";
+import { getCanonicalUri } from "../services/canonicalPaths";
 import { LocationComparer } from "../vscode/location";
 import { messageOnlyProgress } from "../vscode/progress";
 import { isPathOrUriString, pathOrUriStringToUri } from "../vscode/uri";
 import { VersionedLogReader } from "./v8/versionedLogReader";
-import { resolveUri } from "../../core/uri";
 
 const constructorRegExp = /\n - constructor: (0x[a-fA-F0-9]+) <JSFunction ([a-zA-Z$_][a-zA-Z$_0-9]*)(?: \(sfi = ([a-fA-F0-9]+)\))?/;
 const typeRegExp = /\n - type: (\w+)\r?\n/;
@@ -670,7 +670,7 @@ export class LogProcessor {
                             break;
                     }
 
-                    if (!isIgnoredFile(entry.filePosition.uri)) {
+                    if (this._sources.has(entry.filePosition.uri)) {
                         this._sourcePaths.add(entry.filePosition.uri);
                         switch (entry.kind) {
                             case "function": this.getFileEntry(entry.filePosition.uri).functions.push(entry); break;
@@ -680,7 +680,7 @@ export class LogProcessor {
                     }
 
                     if (entry.generatedFilePosition) {
-                        if (!isIgnoredFile(entry.generatedFilePosition.uri)) {
+                        if (this._sources.has(entry.generatedFilePosition.uri)) {
                             this._generatedPaths.add(entry.generatedFilePosition.uri);
                             switch (entry.kind) {
                                 case "function": this.getFileEntry(entry.generatedFilePosition.uri).functions.push(entry); break;
