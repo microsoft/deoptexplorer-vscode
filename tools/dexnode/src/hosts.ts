@@ -4,10 +4,10 @@
 import { Options } from "./args.js";
 import { Host } from "./host.js";
 import { HostFlags } from "./hostFlags.js";
-import { HOST_CHROME_STABLE } from "./hosts/chrome.js";
+import { HOST_CHROME_BETA, HOST_CHROME_CANARY, HOST_CHROME_DEV, HOST_CHROME_STABLE } from "./hosts/chrome.js";
 import { HOST_DENO } from "./hosts/deno.js";
 import { HOST_ELECTRON } from "./hosts/electron.js";
-import { HOST_MSEDGE_STABLE } from "./hosts/msedge.js";
+import { HOST_MSEDGE_BETA, HOST_MSEDGE_CANARY, HOST_MSEDGE_DEV, HOST_MSEDGE_STABLE } from "./hosts/msedge.js";
 import { HOST_NODEJS } from "./hosts/nodejs.js";
 import { regQuery, which } from "./util.js";
 import Registry = require("winreg");
@@ -17,7 +17,13 @@ export const HOSTS = [
     HOST_DENO,
     HOST_ELECTRON,
     HOST_CHROME_STABLE,
+    HOST_CHROME_BETA,
+    HOST_CHROME_DEV,
+    HOST_CHROME_CANARY,
     HOST_MSEDGE_STABLE,
+    HOST_MSEDGE_BETA,
+    HOST_MSEDGE_DEV,
+    HOST_MSEDGE_CANARY,
 ] as const;
 
 async function * getExecPathCandidates(host: Host) {
