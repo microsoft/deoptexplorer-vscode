@@ -2,15 +2,21 @@
 // Licensed under the MIT License.
 
 import { Deferred } from "@esfx/async-deferred";
+import { delay } from "@esfx/async-delay";
 import { CancellationError, CancellationToken, Disposable, ExtensionContext, ProgressLocation, Uri, window, workspace } from "vscode";
 import { assert } from "../../core/assert";
+import { ImmutableEnumSet } from "../../core/collections/enumSet";
+import { readLines, tryStatAsync } from "../../core/fs";
+import { UriEqualer } from "../../core/uri";
+import { equateNullable } from "../../core/utils";
+import { createWindowsCppEntriesProvider } from "../../platforms/win32";
+import { CppEntriesProvider } from "../../third-party-derived/v8/tools/cppEntriesProvider";
 import { LogProcessor } from "../components/logProcessor";
+import * as constants from "../constants";
 import { Entry } from "../model/entry";
 import { LogFile } from "../model/logFile";
-import * as constants from "../constants";
 import { measureAsync } from "../outputChannel";
-import { equateNullable } from "../../core/utils";
-import { readLines, tryStatAsync } from "../../core/fs";
+import { VSDisposableStack } from "../vscode/disposable";
 import { LocationEqualer, parseLocation } from "../vscode/location";
 import { scaleProgress } from "../vscode/progress";
 import { getCanonicalLocation, getCanonicalUri } from "./canonicalPaths";
@@ -18,62 +24,71 @@ import { setLogStatus, setShowDecorations } from "./context";
 import { emitters } from "./events";
 import { cancelPendingOperations, cancelPendingUIOperation } from "./operationManager";
 import * as storage from "./storage";
-import { UriEqualer } from "../../core/uri";
-import { delay } from "@esfx/async-delay";
-import { ImmutableEnumSet } from "../../core/collections/enumSet";
-import { CppEntriesProvider } from "../../third-party-derived/v8/tools/cppEntriesProvider";
-import { createWindowsCppEntriesProvider } from "../../platforms/win32";
 
 export let openedFile: Uri | undefined;
 export let openedLog: LogFile | undefined;
 
 let currentContext: ExtensionContext | undefined;
+// let debugSession: DebugSession | undefined;
 
 let waitForLogResolved = false;
 let waitForLogDeferred = new Deferred<LogFile>();
 
-export async function openLogFile(uri: Uri | undefined, force: boolean) {
+export async function openLogFile(uri: Uri | undefined) {
     assert(currentContext !== undefined);
-    let uriIn = uri;
+
+    cancelPendingUIOperation();
+
+    // If a file wasn't provided, prompt for one.
+    if (!uri) {
+        const files = await window.showOpenDialog({
+            canSelectFiles: true,
+            canSelectFolders: false,
+            canSelectMany: false,
+            filters: { "V8 Logs": ["log"] }
+        });
+        if (files === undefined || files.length === 0) return;
+        uri = files[0];
+    }
+
+    await openLogFileWorker(uri);
+}
+
+async function openLogFileWorker(uri: Uri) {
     let ok = false;
     try {
-        cancelPendingUIOperation();
-
-        if (!uriIn) {
-            const files = await window.showOpenDialog({
-                canSelectFiles: true,
-                canSelectFolders: false,
-                canSelectMany: false,
-                filters: { "V8 Logs": ["log"] }
-            });
-            if (files === undefined || files.length === 0) return;
-            uriIn = files[0];
-        }
-
-        const uri = uriIn;
         closeLogFile();
+
+        // Set log status and hide all decorations.
         await Promise.all([
             setLogStatus(constants.LogStatus.Opening),
             setShowDecorations(ImmutableEnumSet.empty())
         ]);
+
+        // signal that a log file will be opened and wait a short delay for UI updates
         emitters.willOpenLogFile({ uri });
         await delay(100);
 
+        // read in the log file with progress reporting
         openedLog = await measureAsync("parse log file", () => window.withProgress({
             title: constants.extensionName,
             location: ProgressLocation.Notification,
             cancellable: true
         }, async (progress, token) => {
-            const file = getCanonicalUri(uri);
-
             progress.report({ message: "Processing log..." });
 
+            // Get the canonical URI for the file
+            const file = getCanonicalUri(uri);
+
+            // Try to load a native CppEntriesProvider on Windows.
+            // NOTE: Not working on newer electron builds.
             let cppEntriesProvider: CppEntriesProvider | undefined;
             if (process.platform === "win32") {
                 try {
                     cppEntriesProvider = await createWindowsCppEntriesProvider({
                         globalStorageUri: currentContext?.globalStorageUri
                     });
+                    if (token.isCancellationRequested) return;
                 }
                 catch (e) {
                     console.error("Failed to load win32 native binaries. They may be out of date and do not match the current electron ABI.");
@@ -81,14 +96,31 @@ export async function openLogFile(uri: Uri | undefined, force: boolean) {
                 }
             }
 
+            // Read the log
             const processor = new LogProcessor({
                 excludeNatives: !workspace.getConfiguration("deoptexplorer").get("includeNatives", false),
                 globalStorageUri: currentContext?.globalStorageUri,
                 cppEntriesProvider,
             });
             const stats = await tryStatAsync(file);
-            const log = await processor.process(readLines(file), scaleProgress(progress, 0.6), token, stats?.size || undefined);
+            const log = await processor.process(
+                readLines(file),
+                scaleProgress(progress, 0.6),
+                token,
+                stats?.size || undefined);
             if (token.isCancellationRequested) return;
+
+            // // Start a debugger
+            // await debug.startDebugging(undefined, {
+            //     type: constants.extensionName,
+            //     request: "attach",
+            //     name: "Deopt Explorer",
+            // }, {
+            //     suppressDebugStatusbar: true,
+            //     suppressDebugToolbar: true,
+            //     suppressDebugView: true,
+            //     suppressSaveBeforeStart: true,
+            // });
 
             progress.report({ increment: 100, message: "Log parsed" });
             return log;
@@ -148,6 +180,10 @@ export function waitForLog(token?: CancellationToken) {
 
 export function closeLogFile() {
     if (openedFile) {
+        // if (debug.activeDebugSession?.type === constants.extensionName) {
+        //     debug.stopDebugging();
+        // }
+
         emitters.didCloseLogFile({ uri: openedFile });
         cancelPendingOperations();
         openedFile = undefined;
@@ -178,11 +214,26 @@ export function findEntry(id: string) {
 }
 
 export function activateCurrentLogFileService(context: ExtensionContext) {
+    const stack = new VSDisposableStack();
+
     currentContext = context;
-    return Disposable.from(
-        new Disposable(() => {
-            closeLogFile();
-            currentContext = undefined;
-        })
-    );
+    stack.defer(() => { currentContext = undefined; });
+
+    // stack.use(debug.onDidStartDebugSession(session => {
+    //     if (session.type === constants.debuggerType) {
+    //         if (debugSession) {
+    //             debug.stopDebugging(debugSession);
+    //         }
+    //         debugSession = session;
+    //     }
+    // }));
+
+    // stack.use(debug.onDidTerminateDebugSession(session => {
+    //     if (session === debugSession) {
+    //         debugSession = undefined;
+    //     }
+    // }));
+
+    stack.defer(closeLogFile);
+    return stack;
 }

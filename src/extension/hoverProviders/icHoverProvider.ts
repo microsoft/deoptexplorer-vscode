@@ -17,6 +17,7 @@ import { getCanonicalUri } from "../services/canonicalPaths";
 import { openedLog } from "../services/currentLogFile";
 import { CommandUri } from "../vscode/commandUri";
 import { entryContainsPosition } from "./utils";
+import { getScriptSourceUri, unwrapScriptSource } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 
 const LINE_RANGE = 5;
 
@@ -36,7 +37,10 @@ export class ICHoverProvider implements HoverProvider {
             if (entry) return entry[1];
         }
 
-        const file = getCanonicalUri(document.uri);
+        const uri = unwrapScriptSource(document.uri).uri;
+        if (!uri) return;
+
+        const file = getCanonicalUri(uri);
         const line = position.line + 1;
         const startLine = line - LINE_RANGE;
         const endLine = line + LINE_RANGE;
@@ -102,7 +106,10 @@ function getLastPropertySource(map: MapEntry) {
     const source = map.getMapSource();
     if (source) {
         const pos = source.filePosition.range.start;
-        return markdown.trusted` | [${source.functionName}](${source.filePosition.uri.with({ fragment: `${pos.line + 1},${pos.character + 1}` })})`;
+        const uri = getScriptSourceUri(source.filePosition.uri, openedLog?.sources);
+        return uri ?
+            markdown.trusted` | [${source.functionName}](${uri.with({ fragment: `${pos.line + 1},${pos.character + 1}` })})` :
+            markdown.trusted` ${source.functionName}`;
     }
     return "";
 }

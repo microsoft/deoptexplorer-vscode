@@ -12,6 +12,8 @@ import { formatLocation } from "../../vscode/location";
 import { BaseNode } from "../common/baseNode";
 import { createTreeItem } from "../createTreeItem";
 import { IcTreeDataProvider } from "./icTreeDataProvider";
+import { TypeSafeCommand } from "../../vscode/commands";
+import { getScriptSourceUri, wrapScriptSource } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
 
 export class IcNode extends BaseNode {
     private _functionReference: FunctionReference | null | undefined;
@@ -49,37 +51,6 @@ export class IcNode extends BaseNode {
         return `${this.formatLabelCommon()} (${this.ic.updates.length})`;
     }
 
-    protected override createTreeItem() {
-        const label = this.formatLabel();
-        const relativeTo = this.provider.log && { log: this.provider.log, ignoreIfBasename: true };
-        const description = formatLocation(this.ic.referenceLocation, { as: "file", skipEncoding: true, relativeTo, include: "position" });
-        return createTreeItem(label, TreeItemCollapsibleState.None, {
-            contextValue: "",
-            description: description,
-            iconPath: this.getIconPath(),
-            command: this.ic.referenceLocation && {
-                title: "Go to IC",
-                command: "vscode.open",
-                arguments: [
-                    this.ic.referenceLocation.uri,
-                    {
-                        preview: true,
-                        selection: this.ic.referenceLocation.range
-                    }
-                ]
-            }
-        });
-    }
-
-    override resolveTreeItem(treeItem: TreeItem, token: CancellationToken): ProviderResult<TreeItem> {
-        const lines: MarkdownString[] = [];
-        // TODO: function name and file
-        lines.push(markdown`**hit count:** ${this.ic.updates.length}  \n`);
-
-        treeItem.tooltip = markdown`${this.formatLabelCommon()}\n\n${lines}`;
-        return treeItem;
-    }
-
     private getIconPath() {
         switch (this.ic.getWorstUpdate()?.type) {
             case IcType.LoadGlobalIC: return new ThemeIcon("symbol-variable", new ThemeColor("symbolIcon.fieldForeground"));
@@ -91,5 +62,42 @@ export class IcNode extends BaseNode {
             case IcType.StoreInArrayLiteralIC: return new ThemeIcon("symbol-array");
             case undefined: return new ThemeIcon("symbol-misc");
         }
+    }
+
+    private getCommand(): TypeSafeCommand | undefined {
+        if (!this.ic.referenceLocation) return undefined;
+        const uri = getScriptSourceUri(this.ic.referenceLocation.uri, this.provider.log?.sources);
+        return uri && {
+            title: "Go to IC",
+            command: "vscode.open",
+            arguments: [
+                uri,
+                {
+                    preview: true,
+                    selection: this.ic.referenceLocation.range
+                }
+            ]
+        };
+    }
+
+    protected override createTreeItem() {
+        const label = this.formatLabel();
+        const relativeTo = this.provider.log && { log: this.provider.log, ignoreIfBasename: true };
+        const description = formatLocation(this.ic.referenceLocation, { as: "file", skipEncoding: true, relativeTo, include: "position" });
+        return createTreeItem(label, TreeItemCollapsibleState.None, {
+            contextValue: "",
+            description: description,
+            iconPath: this.getIconPath(),
+            command: this.getCommand(),
+        });
+    }
+
+    override resolveTreeItem(treeItem: TreeItem, token: CancellationToken): ProviderResult<TreeItem> {
+        const lines: MarkdownString[] = [];
+        // TODO: function name and file
+        lines.push(markdown`**hit count:** ${this.ic.updates.length}  \n`);
+
+        treeItem.tooltip = markdown`${this.formatLabelCommon()}\n\n${lines}`;
+        return treeItem;
     }
 }

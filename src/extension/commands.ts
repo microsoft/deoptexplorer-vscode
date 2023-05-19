@@ -109,7 +109,7 @@ export function activateCommands(context: ExtensionContext) {
             cancelPendingOperations();
             const lock = await openMutex.lock(cancellationTokenToCancelable(diskOperationToken));
             try {
-                await openLogFile(uri, /*force*/ false);
+                await openLogFile(uri);
             }
             catch (e) {
                 closeLogFile();
@@ -128,7 +128,7 @@ export function activateCommands(context: ExtensionContext) {
             cancelPendingOperations();
             const lock = await openMutex.lock(cancellationTokenToCancelable(diskOperationToken));
             try {
-                await openLogFile(file, /*force*/ true);
+                await openLogFile(file);
             }
             catch (e) {
                 closeLogFile();

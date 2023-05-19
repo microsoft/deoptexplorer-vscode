@@ -5,7 +5,6 @@ import { identity } from "@esfx/fn";
 import { from } from "@esfx/iter-query";
 import { Location, Position, Uri } from "vscode";
 import { StringMap } from "../../core/collections/stringMap";
-import { isSupportedUri } from "../languages";
 import { getCanonicalUri } from "../services/canonicalPaths";
 import { createFinder } from "../components/finder";
 import { Sources } from "../../core/sources";
@@ -86,8 +85,6 @@ export class LogFile {
     }
 
     findEntriesContainingPosition(uri: Uri, position: Position) {
-        if (!isSupportedUri(uri)) return [];
-
         const file = getCanonicalUri(uri);
         let finders = this._fileEntryFinders.get(file);
         if (!finders) {

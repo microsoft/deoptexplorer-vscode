@@ -4,23 +4,23 @@
 import { from } from "@esfx/iter-query";
 import * as path from "path";
 import { Disposable, ExtensionContext, Uri, ViewColumn, Webview, WebviewPanel, window } from "vscode";
+import { formatAddress } from "../../core/address";
 import { assert } from "../../core/assert";
+import { html } from "../../core/html";
+import { FunctionEntry } from "../../third-party-derived/deoptigate/functionEntry";
 import { formatCodeKind } from "../../third-party-derived/v8/enums/codeKind";
 import { formatDeoptimizeKind } from "../../third-party-derived/v8/enums/deoptimizeKind";
-import { FunctionEntry } from "../../third-party-derived/deoptigate/functionEntry";
 import { formatFunctionState } from "../../third-party-derived/v8/enums/functionState";
 import { formatIcState } from "../../third-party-derived/v8/enums/icState";
 import { formatIcType } from "../../third-party-derived/v8/enums/icType";
-import { LogFile } from "../model/logFile";
-import { formatAddress } from "../../core/address";
 import * as constants from "../constants";
-import { html } from "../../core/html";
 import { formatMillisecondsHighPrecision } from "../formatting/numbers";
+import { LogFile } from "../model/logFile";
+import { getCanonicalLocation } from "../services/canonicalPaths";
 import { openedLog } from "../services/currentLogFile";
 import { events } from "../services/events";
 import { parseLocation } from "../vscode/location";
 import { renderLinkToFile } from "./utils";
-import { getCanonicalLocation } from "../services/canonicalPaths";
 
 function generateFunctionViewHtml(entry: FunctionEntry, log: LogFile, webview: Webview) {
     return html`<!DOCTYPE html>
@@ -36,7 +36,7 @@ function generateFunctionViewHtml(entry: FunctionEntry, log: LogFile, webview: W
 <body>
     <h1>${entry.functionName}</h1>
     <ul>
-        <li>Location: ${entry.referenceLocation ? renderLinkToFile(`${path.basename(entry.referenceLocation.uri.fsPath)}:${entry.referenceLocation.range.start.line + 1}:${entry.referenceLocation.range.start.character + 1}`, entry.referenceLocation, { title: entry.referenceLocation.uri.fsPath }) : "<unknown>"}</li>
+        <li>Location: ${entry.referenceLocation ? renderLinkToFile(`${path.basename(entry.referenceLocation.uri.fsPath)}:${entry.referenceLocation.range.start.line + 1}:${entry.referenceLocation.range.start.character + 1}`, entry.referenceLocation, { title: entry.referenceLocation.uri.fsPath, linkSources: log.sources }) : "<unknown>"}</li>
     </ul>
     <table cellpadding=0 cellspacing=5>
     <thead>
@@ -56,8 +56,8 @@ function generateFunctionViewHtml(entry: FunctionEntry, log: LogFile, webview: W
                 event.event === "moved" ? "Moved" :
                 event.event === "deleted" ? "Deleted" :
                 event.event === "sfi-moved" ? "SFI Moved" :
-                event.event === "deopt" ? renderLinkToFile(`${formatDeoptimizeKind(event.update.bailoutType)} Deopt`, event.entry.referenceLocation, { viewColumn: ViewColumn.One}) :
-                event.event === "ic" ? renderLinkToFile(formatIcType(event.update.type), event.entry.referenceLocation, { viewColumn: ViewColumn.One}) :
+                event.event === "deopt" ? renderLinkToFile(`${formatDeoptimizeKind(event.update.bailoutType)} Deopt`, event.entry.referenceLocation, { viewColumn: ViewColumn.One, linkSources: log.sources }) :
+                event.event === "ic" ? renderLinkToFile(formatIcType(event.update.type), event.entry.referenceLocation, { viewColumn: ViewColumn.One, linkSources: log.sources }) :
                 assert(false)
             }</td>
             <td>${

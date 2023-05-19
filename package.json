@@ -956,7 +956,8 @@
 				"id": "deoptexplorer-v8-map",
 				"aliases": [
 					"V8 Map"
-				]
+				],
+				"extensions": [".v8-map"]
 			}
 		],
 		"grammars": [
@@ -1485,6 +1486,7 @@
 		"@esfx/ref": "^1.1.0-alpha.202305082104",
 		"@js-temporal/polyfill": "^0.4.3",
 		"@vscode/codicons": "^0.0.32",
+		"@vscode/debugadapter": "^1.59.0",
 		"chokidar": "^3.4.0",
 		"decimal.js-light": "^2.5.1",
 		"ffi-napi": "^4.0.3",

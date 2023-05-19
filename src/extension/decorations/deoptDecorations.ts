@@ -13,6 +13,7 @@ import { openedLog } from "../services/currentLogFile";
 import { events } from "../services/events";
 import { VSDisposableStack } from "../vscode/disposable";
 import { createDecorationType, getTextEditors } from "./utils";
+import { unwrapScriptSource } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 
 export class DeoptDecorations {
     private _showDecorations: "active" | "visible" | "none" = showDecorations.has(ShowDecorations.Deopts) ? "visible" : "none";
@@ -68,7 +69,9 @@ export class DeoptDecorations {
     private _show() {
         if (!openedLog) return;
         for (const editor of getTextEditors(this._showDecorations)) {
-            const uri = editor.document.uri;
+            const uri = unwrapScriptSource(editor.document.uri).uri;
+            if (!uri) continue;
+
             const fileUri = getCanonicalUri(uri);
             const entries = openedLog.files.get(fileUri);
             const deopts = entries?.deopts;

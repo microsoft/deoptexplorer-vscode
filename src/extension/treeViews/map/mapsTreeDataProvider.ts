@@ -18,6 +18,7 @@ import { formatUriMarkdown } from "../../vscode/uri";
 import { BaseNodeProvider } from "../common/baseNodeProvider";
 import { GroupingNode, GroupingOptions } from "../common/groupingNode";
 import { MapNode } from "./mapNode";
+import path from "path";
 
 const PAGE_SIZE = 500;
 
@@ -37,6 +38,7 @@ export class MapsTreeDataProvider extends BaseNodeProvider {
             .toMap(([constructorName]) => constructorName, ([, constructorEntries]) => constructorEntries),
 
         keyEqualer: MapConstructorKey.equaler,
+
         keySelector: ({ map }, ambiguousGroups) => new MapConstructorKey(
             map.constructorName,
             map.constructorEntry,
@@ -45,17 +47,20 @@ export class MapsTreeDataProvider extends BaseNodeProvider {
         ),
 
         label: (key) => `${key}`,
+
         description: (_, entries) => `${entries.length}`,
+
         tooltip: (key) => {
             const lines: MarkdownString[] = [];
             if (key.constructorEntry) {
                 const relativeTo = this.log && { log: this.log, ignoreIfBasename: true };
-                lines.push(markdown`**file:** ${formatLocationMarkdown(key.constructorEntry?.filePosition, { as: "file", relativeTo: relativeTo })}`);
+                lines.push(markdown`**file:** ${formatLocationMarkdown(key.constructorEntry?.filePosition, { as: "file", relativeTo: relativeTo, linkSources: this.log?.sources })}`);
             }
             return markdown`${key.name}\n\n${lines}`;
         },
 
         contextValue: "map-constructor",
+
         iconPath: new ThemeIcon("symbol-class"),
 
         sorter: (q) =>
@@ -76,7 +81,7 @@ export class MapsTreeDataProvider extends BaseNodeProvider {
 
         label: (key) => key ?? "(unknown)",
         description: (_, elements) => `${elements.length}`,
-        tooltip: (key) => key ? markdown`${uriBasename(key)}\n\n**file:** ${formatUriMarkdown(key, { as: "file" })}` : undefined,
+        tooltip: (key) => key ? markdown`${uriBasename(key)}\n\n**file:** ${formatUriMarkdown(key, { as: "file", linkSources: this.log?.sources })}` : undefined,
 
         contextValue: "map-function-file",
         iconPath: ThemeIcon.File,
@@ -108,8 +113,8 @@ export class MapsTreeDataProvider extends BaseNodeProvider {
             const lines: MarkdownString[] = [];
             const relativeTo = this.log && { log: this.log, ignoreIfBasename: true };
             const file =
-                key.file && key.position ? formatLocationMarkdown(new Location(key.file, key.position), { as: "file", relativeTo }) :
-                key.file ? formatUriMarkdown(key.file, { as: "file", relativeTo }) :
+                key.file && key.position ? formatLocationMarkdown(new Location(key.file, key.position), { as: "file", relativeTo, linkSources: this.log?.sources }) :
+                key.file ? formatUriMarkdown(key.file, { as: "file", relativeTo, linkSources: this.log?.sources }) :
                 undefined;
 
             if (file) {

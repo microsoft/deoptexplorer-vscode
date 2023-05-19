@@ -2,30 +2,10 @@
 // Licensed under the MIT License.
 
 import * as fs from "fs";
-import * as path from "path";
 import { fileURLToPath, URL } from "url";
 import { Disposable, ExtensionContext, Location, Uri } from "vscode";
-import { isDosPath, isFileSystemLocation, normalizeDosPathRoot, normalizePathPosix, normalizeSlashesPosix, normalizeSlashesWindows } from "../../core/paths";
+import { isFileSystemLocation, normalizePathPosix } from "../../core/paths";
 import { isUriString, resolveUri } from "../../core/uri";
-import { formatUri } from "../vscode/uri";
-
-const validExtensionRegExp = /\.(jsx?|tsx?)$/i;
-const backslashRegExp = /\\/g;
-const forwardslashRegExp = /\\/g;
-const lowerDosPathRegExp = /^([a-z]):/g;
-const dosPathRegExp = /^([a-z]):/i;
-const uriProtocolRegExp = /^[a-z][-a-z0-9+.]*:/i;
-
-/**
- * Tests whether a file is one we ignore
- */
-export function isIgnoredFile(file: string | Uri | undefined) {
-    if (file instanceof Uri) file = formatUri(file, { as: "file" });
-    if (typeof file !== "string") return true;
-    if (!path.isAbsolute(file)) return true;
-    if (!validExtensionRegExp.test(file)) return true;
-    return false;
-}
 
 declare const canonicalPath: unique symbol;
 declare const canonicalUri: unique symbol;
@@ -55,11 +35,11 @@ export function getCanonicalPath(file: string): CanonicalPath {
     if (isUriString(file)) {
         const url = new URL(file);
         if (url.protocol === "file:") {
-            file = fileURLToPath(file);
+            file = fileURLToPath(url);
         }
     }
 
-    if (isIgnoredFile(file)) {
+    if (isUriString(file)) {
         canonicalPath = normalizePathPosix(file) as CanonicalPath;
     }
     else if (fs.realpathSync.native) {

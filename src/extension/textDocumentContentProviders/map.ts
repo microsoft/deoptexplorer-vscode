@@ -14,8 +14,8 @@ import { TimeDelta, TimeTicks } from "../../core/time";
 import { FunctionEntry } from "../../third-party-derived/deoptigate/functionEntry";
 import { MapEvent } from "../../third-party-derived/v8/enums/mapEvent";
 import * as constants from "../constants";
+import { getScriptSourceLocation, getScriptSourceUri } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 import { MapEntry, MapEntryUpdate, MapId, MapProperty, MapReference, SymbolName } from "../model/mapEntry";
-import { isIgnoredFile } from "../services/canonicalPaths";
 import { openedLog } from "../services/currentLogFile";
 import { events } from "../services/events";
 import { typeSafeExecuteCommand } from "../vscode/commands";
@@ -119,7 +119,10 @@ class MapDocumentContentProvider implements TextDocumentContentProvider, Definit
                 const pos = prop.source.filePosition.range.start;
                 writer.write(`    ${prefix}${link}${suffix}`);
                 writer.writeLine();
-                documentLinks.push(new DocumentLink(range, prop.source.filePosition.uri.with({ fragment: `${pos.line + 1},${pos.character + 1}` })));
+                const uri = getScriptSourceUri(prop.source.filePosition.uri, openedLog?.sources);
+                if (uri) {
+                    documentLinks.push(new DocumentLink(range, uri.with({ fragment: `${pos.line + 1},${pos.character + 1}` })));
+                }
                 lastSource = prop.source;
             }
 
@@ -166,13 +169,16 @@ class MapDocumentContentProvider implements TextDocumentContentProvider, Definit
                         {
                             text: location,
                             onWrite: (position) => {
-                                if (update.filePosition && !isIgnoredFile(update.filePosition.uri)) {
-                                    const line = writer.line + position.line;
-                                    const start = position.character + (update.functionName?.length ?? 0) + 1;
-                                    const end = start + formatLocation(update.filePosition, { as: "file", include: "position" }).length;
-                                    const range = new Range(line, start, line, end);
-                                    const pos = update.filePosition.range.start;
-                                    documentLinks.push(new DocumentLink(range, update.filePosition.uri.with({ fragment: `${pos.line + 1},${pos.character + 1}` })));
+                                if (update.filePosition) {
+                                    const uri = getScriptSourceUri(update.filePosition.uri, openedLog?.sources);
+                                    if (uri) {
+                                        const line = writer.line + position.line;
+                                        const start = position.character + (update.functionName?.length ?? 0) + 1;
+                                        const end = start + formatLocation(update.filePosition, { as: "file", include: "position" }).length;
+                                        const range = new Range(line, start, line, end);
+                                        const pos = update.filePosition.range.start;
+                                        documentLinks.push(new DocumentLink(range, uri.with({ fragment: `${pos.line + 1},${pos.character + 1}` })));
+                                    }
                                 }
                             }
                         }
@@ -256,15 +262,17 @@ class MapDocumentContentProvider implements TextDocumentContentProvider, Definit
 
         for (const ref of map.referencedBy) {
             if (ref.kind === "ic") {
-                const location = ref.entry.getReferenceLocation("source");
+                const location = getScriptSourceLocation(ref.entry.getReferenceLocation("source"), openedLog?.sources);
                 if (location) locations.push(location);
             }
             else if (ref.kind === "property") {
-                const location = getReferenceLocationForMapPropertyType(ref.property);
+                let location = getReferenceLocationForMapPropertyType(ref.property);
+                if (location) location = getScriptSourceLocation(location, openedLog?.sources);
                 if (location) locations.push(location);
             }
             else if (ref.kind === "map") {
-                const location = getReferenceLocationForBaseMapInExtendsClause(mapId, ref.map);
+                let location = getReferenceLocationForBaseMapInExtendsClause(mapId, ref.map);
+                if (location) location = getScriptSourceLocation(location, openedLog?.sources);
                 if (location) locations.push(location);
             }
         }
@@ -435,8 +443,11 @@ export async function showMap(mapId: MapId, viewColumn?: ViewColumn) {
 export async function showMapAsReference(mapIds: MapId[], uri: Uri, position: Position) {
     mapIds = mapIds.filter(mapId => !!openedLog?.maps.has(mapId));
     if (mapIds.length) {
-        await typeSafeExecuteCommand("editor.action.showReferences", uri, position, mapIds.map(mapId =>
-            new Location(getUriForMap(mapId), new Position(0, 0))));
+        const openUri = getScriptSourceUri(uri, openedLog?.sources);
+        if (openUri) {
+            await typeSafeExecuteCommand("editor.action.showReferences", openUri, position, mapIds.map(mapId =>
+                new Location(getUriForMap(mapId), new Position(0, 0))));
+        }
     }
 }
 

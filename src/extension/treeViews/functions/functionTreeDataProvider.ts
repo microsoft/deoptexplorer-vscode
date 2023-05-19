@@ -2,12 +2,13 @@
 // Licensed under the MIT License.
 
 import { from, Query } from "@esfx/iter-query";
-import { SymbolKind, ThemeIcon } from "vscode";
+import path from "path";
+import { ThemeIcon } from "vscode";
 import { UriComparer, UriEqualer } from "../../../core/uri";
 import { getNullableComparer, getNullableEqualer } from "../../../core/utils";
 import { formatFunctionState, FunctionState } from "../../../third-party-derived/v8/enums/functionState";
-import { FunctionReference } from "../../model/functionReference";
 import type { LogFile } from "../../model/logFile";
+import { formatUriMarkdown } from "../../vscode/uri";
 import { BaseNodeProvider } from "../common/baseNodeProvider";
 import { GroupingNode } from "../common/groupingNode";
 import { FunctionNode } from "./functionNode";
@@ -30,6 +31,7 @@ export class FunctionsTreeDataProvider extends BaseNodeProvider {
                 keyEqualer: getNullableEqualer(UriEqualer),
                 label: file => file ?? "(unknown)",
                 iconPath: () => ThemeIcon.File,
+                tooltip: file => file ? formatUriMarkdown(file, { as: "file", skipEncoding: true, linkSources: this.log?.sources }) : undefined,
                 sorter: q => q.orderBy(g => g.key, getNullableComparer(UriComparer))
             }),
             GroupingNode.createGrouping({

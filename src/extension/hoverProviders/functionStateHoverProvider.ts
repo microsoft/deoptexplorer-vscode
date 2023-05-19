@@ -17,6 +17,7 @@ import { getCanonicalUri } from "../services/canonicalPaths";
 import { openedLog } from "../services/currentLogFile";
 import { CommandUri } from "../vscode/commandUri";
 import { entryContainsPosition } from "./utils";
+import { unwrapScriptSource } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 
 const LINE_RANGE = 5;
 
@@ -36,7 +37,10 @@ export class FunctionStateHoverProvider implements HoverProvider {
             if (entry) return entry[1];
         }
 
-        const file = getCanonicalUri(document.uri);
+        const uri = unwrapScriptSource(document.uri).uri;
+        if (!uri) return;
+
+        const file = getCanonicalUri(uri);
         const line = position.line + 1;
         const startLine = line - LINE_RANGE;
         const endLine = line + LINE_RANGE;

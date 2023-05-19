@@ -12,6 +12,7 @@ import { activateCoreServices } from "./services";
 import { activateTextDocumentContentProviders } from "./textDocumentContentProviders";
 import { activateTreeViews } from "./treeViews";
 import { activateWebviews } from "./webviewViews";
+import { activateFileSystemProviders } from "./fileSystemProviders";
 
 export async function activate(context: ExtensionContext) {
     // 'dbghelp' should only be loaded on Windows platforms
@@ -34,7 +35,8 @@ export async function activate(context: ExtensionContext) {
             activateHoverProviders(context),
             await activateTreeViews(context),
             activateTextDocumentContentProviders(context),
-            activateWebviews(context),
+            activateFileSystemProviders(context),
+            activateWebviews(context)
         );
     }
     catch (e) {

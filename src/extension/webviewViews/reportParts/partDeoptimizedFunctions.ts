@@ -24,7 +24,7 @@ export function renderDeoptimizedFunctions(log: LogFile, topCount: number) {
             .orderByDescending(({ optimizedCount }) => optimizedCount)
             .take(topCount)
             .select(({ func, file }) => html`
-            <li>${renderLinkToFile(func.functionName, func.pickReferenceLocation(file))} (${from(func.updates).count(update => isOptimizedFunctionState(update.state))})</li>`)
+            <li>${renderLinkToFile(func.functionName, func.pickReferenceLocation(file), { linkSources: log.sources })} (${from(func.updates).count(update => isOptimizedFunctionState(update.state))})</li>`)
             .defaultIfEmpty(html`<em>none found</em>`)
         }</ol>
     </section>`;

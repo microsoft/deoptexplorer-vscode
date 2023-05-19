@@ -10,6 +10,7 @@ import { formatLocation } from "../../vscode/location";
 import { BaseNode } from "../common/baseNode";
 import { createTreeItem } from "../createTreeItem";
 import { LineTickTreeDataProvider } from "./lineTickTreeDataProvider";
+import { getScriptSourceUri } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
 
 export class LineTickNode extends BaseNode {
     constructor(
@@ -31,13 +32,14 @@ export class LineTickNode extends BaseNode {
         const parentTime = this.provider.node?.selfTime ?? 1;
         const selfTime = this.lineTick.hitCount * avgDuration;
         const selfPercent = selfTime * 100 / parentTime;
+        const uri = getScriptSourceUri(location.uri, openedLog?.sources);
         return createTreeItem(this.lineTick.file, TreeItemCollapsibleState.None, {
             label: `${relative}:${this.lineTick.line}`,
             description: `${formatMilliseconds(selfTime)} (${selfPercent.toFixed(1)}%)`,
-            command: {
+            command: uri && {
                 title: "open",
                 command: "vscode.open",
-                arguments: [location.uri, { preview: true, selection: location.range }]
+                arguments: [uri, { preview: true, selection: location.range }]
             }
         });
     }

@@ -60,7 +60,7 @@ export class MapNode extends BaseNode {
             const relativeTo = this.provider.log && { log: this.provider.log, ignoreIfBasename: true };
             lines.push(
                 markdown`**function:** ${source.functionName}  \n`,
-                markdown`**file:** ${formatLocationMarkdown(this.map.getMapFilePosition(), { as: "file", relativeTo })}  \n`
+                markdown`**file:** ${formatLocationMarkdown(this.map.getMapFilePosition(), { as: "file", relativeTo, linkSources: this.provider.log?.sources })}  \n`
             );
         }
 
