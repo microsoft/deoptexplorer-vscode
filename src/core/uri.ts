@@ -18,12 +18,12 @@ export function ensureUriTrailingDirectorySeparator(uri: Uri): Uri {
 }
 
 const isWindows = process.platform === "win32";
-const uriPathStartRegExp = /^(?:[\\/](?:[a-z](?:[:|]|%3a|%7c)[\\/]?)|[a-z](?:[:|]|%3a|%7c)[\\/]?)/i;
+const uriPathStartRegExp = /^(?:[\\/](?:[a-z](?:[:|]|%3a|%7c)[\\/]?)?|[a-z](?:[:|]|%3a|%7c)[\\/]?)/i;
 const uriSlashesRegExp = /[\\/]/g;
 const uriPartDosRootRegExp = /^[a-z](?:[:|]|%3a|%7c)$/i;
 const uriPartSingleDotRegExp = /^(?:\.|%2e)$/i;
 const uriPartDoubleDotRegExp = /^(?:\.|%2e){2}$/i;
-const uriNonNormalizedSegmentRegExp = /(?:^|[\\/])(?:\.|%2e){2}(?:$|[\\/])|\\/i;
+const uriNonNormalizedSegmentRegExp = /(?:^|[\\/])(?:\.|%2e){1,2}(?:$|[\\/])|\\/i;
 const uriNormalizedRootRegExp = /^\/(?![a-z](?:[:|]|%3[aA]|%7[cC])|[A-Z](?:[|]|%3[aA]|%7[cC]))(?:[A-Z]:\/)?/;
 
 type PathParts = [root: string, ...rest: string[]];
@@ -131,7 +131,7 @@ function isReducedPath(path: string) {
     return !uriNonNormalizedSegmentRegExp.test(path);
 }
 
-function reducePath(path: string): string {
+export function reducePath(path: string): string {
     return isReducedPath(path) ? path : joinPathParts(reducePathParts(splitPath(path)));
 }
 

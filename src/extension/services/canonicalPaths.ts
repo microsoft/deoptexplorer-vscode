@@ -5,7 +5,8 @@ import * as fs from "fs";
 import { fileURLToPath, URL } from "url";
 import { Disposable, ExtensionContext, Location, Uri } from "vscode";
 import { isFileSystemLocation, normalizePathPosix } from "../../core/paths";
-import { isUriString, resolveUri } from "../../core/uri";
+import { isUriString, reducePath, resolveUri } from "../../core/uri";
+import { VSDisposableStack } from "../vscode/disposable";
 
 declare const canonicalPath: unique symbol;
 declare const canonicalUri: unique symbol;
@@ -17,59 +18,44 @@ export type CanonicalUri = Uri & { [canonicalUri]: never, fsPath: CanonicalPath,
 export type CanonicalUriString = string & { [canonicalUriString]: never };
 export type CanonicalLocation = Location & { readonly uri: CanonicalUri };
 
-const canonicalPathCache = new Map<string, CanonicalPath>();
+let canonicalPathCache: Map<string, CanonicalPath> | undefined;
+
+function tryRealpath(file: string) {
+    try {
+        // Use `realpathSync.native`, if available, to get the correct casing.
+        if (fs.realpathSync.native) {
+            return fs.realpathSync.native(file);
+        }
+
+        // Fall back to `realpathSync`
+        return fs.realpathSync(file); 
+
+    }
+    catch {
+        return undefined;
+    }
+}
 
 /**
  * Gets the canonical file system path for the provided file.
- * @param file A string or `file:` URI.
+ * @param file A string.
  * @returns A string representing the canonical form of the provided path.
- * @deprecated Use {@link getCanonicalUri} instead.
  */
-export function getCanonicalPath(file: string): CanonicalPath {
-    let canonicalPath = canonicalPathCache.get(file);
+function getCanonicalPath(file: string): CanonicalPath {
+    let canonicalPath = canonicalPathCache?.get(file);
     if (canonicalPath !== undefined) {
         return canonicalPath;
     }
 
-    const originalFileString = file;
-    if (isUriString(file)) {
-        const url = new URL(file);
-        if (url.protocol === "file:") {
-            file = fileURLToPath(url);
-        }
-    }
-
-    if (isUriString(file)) {
-        canonicalPath = normalizePathPosix(file) as CanonicalPath;
-    }
-    else if (fs.realpathSync.native) {
-        // Use `realpathSync.native`, if available, to get the correct casing.
-        canonicalPath = normalizePathPosix(fs.realpathSync.native(file)) as CanonicalPath;
-    }
-    else {
-        // Fall back to `realpathSync`, and only correct the casing of the root path
-        canonicalPath = normalizePathPosix(fs.realpathSync(file)) as CanonicalPath;
-    }
-
-    canonicalPathCache.set(file, canonicalPath);
-    if (originalFileString !== file) {
-        canonicalPathCache.set(originalFileString, canonicalPath);
-    }
-
+    const realPath = tryRealpath(file) ?? file;
+    const reducedPath = reducePath(realPath);
+    canonicalPath = normalizePathPosix(reducedPath) as CanonicalPath;
+    canonicalPathCache?.set(file, canonicalPath);
     return canonicalPath;
 }
 
 /**
- * Gets a canonical URI from the provided URI and optional base.
- *
- * NOTE: Uses URL resolution semantics, so `getCanonicalUri(".", "file:///C%3A/foo/bar")`
- * returns a `Uri` for `"file:///C%3A/foo/"`, unlike `Uri.joinPath` which works more like
- * Node.js's `path.join`.
- *
- * - `getCanonicalUri(".", "file:///C%3A/foo/bar")` → `"file:///C%3A/foo/"`
- * - `getCanonicalUri("./", "file:///C%3A/foo/bar")` → `"file:///C%3A/foo/"`
- * - `getCanonicalUri("..", "file:///C%3A/foo/bar")` → `"file:///C%3A/"`
- * - `getCanonicalUri("../", "file:///C%3A/foo/bar")` → `"file:///C%3A/"`
+ * Gets a canonical URI from the provided URI.
  */
 export function getCanonicalUri(uri: Uri) {
     if (uri.scheme === "file") {
@@ -100,7 +86,8 @@ export function* walkUpContainingDirectories(file: Uri) {
 }
 
 export function activateCanonicalPaths(context: ExtensionContext) {
-    return new Disposable(() => {
-        canonicalPathCache.clear();
-    });
+    canonicalPathCache = new Map();
+    const stack = new VSDisposableStack();
+    stack.defer(() => { canonicalPathCache = undefined!; });
+    return stack;
 }
