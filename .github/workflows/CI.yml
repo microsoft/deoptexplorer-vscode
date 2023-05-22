@@ -65,12 +65,20 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         npm_config_arch: ${{ matrix.npm_config_arch }}
         npm_config_devdir: ".node-gyp"
+    - run: |
+        /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        echo ">>> Started xvfb"
+      name: start xvfb
+      if: ${{ matrix.os }} == 'ubuntu-latest'
+    - run: npm run test
+      env:
+        npm_config_arch: ${{ matrix.npm_config_arch }}
+        npm_config_devdir: ".node-gyp"
     - run: npx vsce ls
       env:
         npm_config_arch: ${{ matrix.npm_config_arch }}
         npm_config_devdir: ".node-gyp"
-    - run: |
-        npx vsce package ${{ matrix.target_option }}
+    - run: npx vsce package ${{ matrix.target_option }}
       env:
         npm_config_arch: ${{ matrix.npm_config_arch }}
         npm_config_devdir: ".node-gyp"

@@ -1457,7 +1457,7 @@
 		]
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run clean && npm run test && npm run webpack-release",
+		"vscode:prepublish": "npm run clean && npm run webpack-release",
 		"syntax": "node scripts/syntax.js",
 		"webpack": "npm run syntax && webpack --mode development",
 		"webpack-dev": "npm run syntax && webpack --mode development --watch",
