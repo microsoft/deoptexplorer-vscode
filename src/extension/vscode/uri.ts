@@ -2,15 +2,16 @@
 // Licensed under the MIT License.
 
 import { Uri } from "vscode";
-import { markdown, MarkdownString } from "../../core/markdown";
+import { markdown } from "../../core/markdown";
 import { isDosPath, normalizePathPosix, normalizePathWindows } from "../../core/paths";
+import { Sources } from "../../core/sources";
 import { isUriString, relativeUriFragment, resolveUri } from "../../core/uri";
+import * as constants from "../constants";
+import { getScriptSourceUri } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 import { LogFile } from "../model/logFile";
 import { CanonicalPath, CanonicalUri, CanonicalUriString, getCanonicalPath, getCanonicalUri } from "../services/canonicalPaths";
-import { Sources } from "../../core/sources";
-import { getScriptSourceUri } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 
-export const UNKNOWN_URI = Uri.parse("unknown:");
+export const UNKNOWN_URI = Uri.parse(`${constants.schemes.unknown}:`);
 
 const isWindows = process.platform === "win32";
 

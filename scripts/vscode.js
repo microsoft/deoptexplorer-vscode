@@ -1,2 +1,4 @@
-// module.exports = require("module").createRequireFromPath(__dirname)("vscode");
-module.exports = process.__requireVSCode();
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+module.exports = global.vscode;

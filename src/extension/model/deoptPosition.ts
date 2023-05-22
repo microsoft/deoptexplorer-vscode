@@ -25,10 +25,11 @@ export class DeoptPosition {
         let match = deoptPositionRegExp.exec(text);
         if (match) {
             const filePosition = getCanonicalLocation(parseLocation(match[1], /*strict*/ false));
-            const inlinedAt: Location[] = [];
+            let inlinedAt: Location[] | undefined;
             let rest = match[2];
             while (rest) {
                 assert(match = inlinedAtRegExp.exec(rest));
+                inlinedAt ??= [];
                 inlinedAt.push(getCanonicalLocation(parseLocation(match[1], /*strict*/ false)));
                 rest = rest.slice(match[0].length);
             }

@@ -6,12 +6,12 @@ import { ref } from "@esfx/ref";
 import { Location, Position, Uri } from "vscode";
 import { markdown } from "../../core/markdown";
 import { KnownSerializedType, RegisteredSerializer, registerKnownSerializer } from "../../core/serializer";
+import { Sources } from "../../core/sources";
 import { UriComparer, UriEqualer, uriExtname, UriSerializer } from "../../core/uri";
 import { compareNullable, equateNullable, hashNullable } from "../../core/utils";
+import { getScriptSourceLocation } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 import { formatRange, RangeComparer, RangeEqualer, RangeSerializer, tryParseTrailingRange } from "./range";
-import { formatUri, FormatUriOptions, pathOrUriStringToUri, UNKNOWN_URI } from "./uri";
-import { Sources } from "../../core/sources";
-import { getScriptSourceLocation, getScriptSourceUri } from "../fileSystemProviders/scriptSourceFileSystemProvider";
+import { formatUri, FormatUriOptions, isPathOrUriString, pathOrUriStringToUri, UNKNOWN_URI } from "./uri";
 
 export const UNKNOWN_LOCATION = new Location(UNKNOWN_URI, new Position(0, 0));
 
@@ -25,10 +25,19 @@ export function parseLocation(text: string, strict?: boolean) {
     const out_prefixLength = ref.out<number>();
     const range = tryParseTrailingRange(text, out_prefixLength);
     if (range) {
-        const uri = text.slice(0, out_prefixLength.value);
-        return new Location(strict ? Uri.parse(uri, /*strict*/ true) : pathOrUriStringToUri(uri), range);
+        const uriString = text.slice(0, out_prefixLength.value);
+        const uri =
+            strict ? Uri.parse(uriString, /*strict*/ true) : 
+            isPathOrUriString(uriString) ? pathOrUriStringToUri(uriString) :
+            UNKNOWN_URI.with({ path: encodeURIComponent(uriString) });
+        return new Location(uri, range);
     }
-    return new Location(strict ? Uri.parse(text, /*strict*/ true) : pathOrUriStringToUri(text), new Position(0, 0));
+
+    const uri =
+        strict ? Uri.parse(text, /*strict*/ true) :
+        isPathOrUriString(text) ? pathOrUriStringToUri(text) :
+        UNKNOWN_URI.with({ path: encodeURIComponent(text) });
+    return new Location(uri, new Position(0, 0));
 }
 
 export interface FormatLocationOptions extends FormatUriOptions {

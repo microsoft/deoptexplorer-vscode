@@ -16,7 +16,8 @@ async function main() {
 		const extensionTestsPath = path.resolve(__dirname, './start');
 
 		// Download VS Code, unzip it and run the integration test
-		await runTests({ extensionDevelopmentPath, extensionTestsPath });
+		// NOTE: Using 1.75.0 explicitly as newer versions seem to be crashing on startup
+		await runTests({ version: "1.75.0", extensionDevelopmentPath, extensionTestsPath });
 	} catch {
 		console.error('Failed to run tests');
 		process.exit(1);
