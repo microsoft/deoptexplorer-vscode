@@ -323,10 +323,11 @@ export const enum ShowDecorations {
 }
 
 export namespace schemes {
-    export const map = `${extensionName}-map` as const;
-    export const functionHistory = `${extensionName}-function` as const;
-    export const profileNode = `${extensionName}-profilenode` as const;
-    export const source = `${extensionName}source` as const;
+    export const map = `${extensionName}+map` as const;
+    export const functionHistory = `${extensionName}+function` as const;
+    export const profileNode = `${extensionName}+profilenode` as const;
+    export const source = `${extensionName}+source` as const;
+    export const unknown = `unknown` as const;
 }
 
 export namespace storage {
