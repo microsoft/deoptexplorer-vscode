@@ -2,6 +2,7 @@
 .vscode/**
 .vscode-test/**
 docs/**
+out/**
 node_modules
 
 # @esfx/equatable and dependencies:

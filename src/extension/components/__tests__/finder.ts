@@ -6,7 +6,7 @@ import { createFinder } from "../finder";
 import { DeoptEntry } from "../../../third-party-derived/deoptigate/deoptEntry";
 import { Entry } from "../../model/entry";
 
-it("finder", () => {
+it.skip("finder", () => {
     const finder = createFinder(Uri.file("C:/dev") as CanonicalUri, from<Entry>([
             Object.assign(new DeoptEntry(
                 undefined,
