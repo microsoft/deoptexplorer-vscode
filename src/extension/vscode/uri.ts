@@ -9,7 +9,7 @@ import { isUriString, relativeUriFragment, resolveUri } from "../../core/uri";
 import * as constants from "../constants";
 import { getScriptSourceUri } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 import { LogFile } from "../model/logFile";
-import { CanonicalPath, CanonicalUri, CanonicalUriString, getCanonicalPath, getCanonicalUri } from "../services/canonicalPaths";
+import { CanonicalPath, CanonicalUri, CanonicalUriString, getCanonicalUri } from "../services/canonicalPaths";
 
 export const UNKNOWN_URI = Uri.parse(`${constants.schemes.unknown}:`);
 
@@ -53,7 +53,8 @@ export function pathToFileUri(file: string, canonicalize: true): CanonicalUri;
  */
 export function pathToFileUri(file: string, canonicalize?: boolean): Uri;
 export function pathToFileUri(file: string, canonicalize?: boolean) {
-    return Uri.file(normalizePathPosix(canonicalize ? getCanonicalPath(file) : file));
+    const uri = Uri.file(normalizePathPosix(file));
+    return canonicalize ? getCanonicalUri(uri) : uri;
 }
 
 const fsAbsolutePathStartRegExp = /^(?:[\\/]|[a-z]:)/i;
@@ -86,7 +87,7 @@ export function uriToPathOrUriString(uri: CanonicalUri): CanonicalPath | Canonic
 export function uriToPathOrUriString(uri: Uri, canonicalize: true): CanonicalPath | CanonicalUriString;
 export function uriToPathOrUriString(uri: Uri, canonicalize?: boolean): string;
 export function uriToPathOrUriString(uri: Uri, canonicalize?: boolean) {
-    if (uri.scheme === "file") return canonicalize ? getCanonicalPath(uri.fsPath) : normalizePathPosix(uri.fsPath);
+    if (uri.scheme === "file") return normalizePathPosix((canonicalize ? getCanonicalUri(uri) : uri).fsPath);
     return (canonicalize ? resolveUri(uri) : uri).toString();
 }
 

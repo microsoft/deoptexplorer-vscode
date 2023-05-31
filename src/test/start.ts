@@ -18,7 +18,9 @@ export async function run(testsRoot: string, reportTestResults: (error?: Error, 
 
     for (const testResult of cliResult.results.testResults) {
         for (const assertResult of testResult.testResults) {
-            console.log(` • ${assertResult.ancestorTitles} - ${assertResult.title} [${assertResult.status}]`);
+            if (assertResult.status === "failed") {
+                console.error(` • ${assertResult.ancestorTitles} - ${assertResult.title} [${assertResult.status}]`);
+            }
         }
     }
 
