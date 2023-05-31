@@ -2,10 +2,9 @@
 // Licensed under the MIT License.
 
 import * as fs from "fs";
-import { fileURLToPath, URL } from "url";
-import { Disposable, ExtensionContext, Location, Uri } from "vscode";
+import { ExtensionContext, Location, Uri } from "vscode";
 import { isFileSystemLocation, normalizePathPosix } from "../../core/paths";
-import { isUriString, reducePath, resolveUri } from "../../core/uri";
+import { reducePath, resolveUri } from "../../core/uri";
 import { VSDisposableStack } from "../vscode/disposable";
 
 declare const canonicalPath: unique symbol;
