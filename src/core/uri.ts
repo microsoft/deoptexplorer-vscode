@@ -35,9 +35,9 @@ const BACKSLASH = "\\".charCodeAt(0);
 const SLASH = "/".charCodeAt(0);
 const COLON = ":".charCodeAt(0);
 
-function splitPath(path: string): PathParts {
+export function splitUriPath(path: string): PathParts {
     if (path === "") return EMPTY_PATH;
-    if (path === "/") return POSIX_ROOT_PATH;
+    if (path === "/" || path === "\\") return POSIX_ROOT_PATH;
 
     // If path is not missing, it must start with a path separator or a DOS drive root.
     let root = uriPathStartRegExp.exec(path)?.[0];
@@ -46,21 +46,16 @@ function splitPath(path: string): PathParts {
     }
 
     // If the first segment is a DOS drive root, clean up the path and make it the root
-    if (root.length > 1) {
+    const rootLength = root.length;
+    if (rootLength > 1) {
         const ch = root.charCodeAt(0);
         const driveLetter = root.charCodeAt(ch === SLASH || ch === BACKSLASH ? 1 : 0);
-        if (root.length !== 4 ||
-            ch !== SLASH ||
-            driveLetter & 0b100000 ||
-            root.charCodeAt(2) !== COLON ||
-            root.charCodeAt(3) !== SLASH) {
-            root = String.fromCharCode(SLASH, driveLetter & ~0b100000, COLON, SLASH);
-        }
+        root = String.fromCharCode(SLASH, driveLetter & ~0b100000, COLON, SLASH);
     }
 
     // Split on any unencoded slash ('\' or '/')
-    if (root.length === path.length) return [root];
-    return [root, ...path.slice(root.length).split(uriSlashesRegExp)];
+    if (rootLength === path.length) return [root];
+    return [root, ...path.slice(rootLength).split(uriSlashesRegExp)];
 }
 
 function joinPathParts(path: PathParts) {
@@ -73,7 +68,7 @@ function joinPathParts(path: PathParts) {
 function reducePathParts(path: PathParts): PathParts {
     // Path can be missing (i.e. `http://foo.com`)
     if (path === EMPTY_PATH) return path;
-    
+
     // Shortcut for `/`
     if (path === POSIX_ROOT_PATH) return path;
 
@@ -81,25 +76,29 @@ function reducePathParts(path: PathParts): PathParts {
 
     let part: string | undefined; // Keep track of the last part to ensure a trailing '/' if necessary (see below).
     let resolvedPath: string[] | undefined;
+    let lastPartWasDotOrDotDot = false;
     for (let i = 1; i < path.length; i++) {
         part = path[i];
         if (uriPartDoubleDotRegExp.test(part)) { // for '..', shorten the path
+            lastPartWasDotOrDotDot = true;
             resolvedPath ??= path.slice(1, i);
             resolvedPath.pop();
             continue;
         }
 
         if (uriPartSingleDotRegExp.test(part)) { // for '.', skip the part
+            lastPartWasDotOrDotDot = true;
             resolvedPath ??= path.slice(1, i);
             continue;
         }
 
         // append the segment
+        lastPartWasDotOrDotDot = false;
         resolvedPath?.push(part);
     }
 
     // if the last segment was '.' or '..', append an empty segment so that we preserve a trailing '/'
-    if (part === "." || part === "..") {
+    if (lastPartWasDotOrDotDot) {
         // resolved must be defined if we encountered a `.` or `..`.
         assert(resolvedPath);
         resolvedPath.push("");
@@ -114,7 +113,7 @@ function reducePathParts(path: PathParts): PathParts {
     return path;
 }
 
-function isReducedPath(path: string) {
+function isReducedPathFast(path: string) {
     if (path === "" || path === "/") return true;
     const root = uriPathStartRegExp.exec(path)?.[0];
     if (!root) return true;
@@ -132,7 +131,7 @@ function isReducedPath(path: string) {
 }
 
 export function reducePath(path: string): string {
-    return isReducedPath(path) ? path : joinPathParts(reducePathParts(splitPath(path)));
+    return isReducedPathFast(path) ? path : joinPathParts(reducePathParts(splitUriPath(path)));
 }
 
 /**
@@ -257,9 +256,9 @@ export function relativeUriFragment(from: Uri, to: Uri) {
             // if either argument is not rooted, we cannot compute a relative path
             return to.toString();
         }
-        
+
         // if the path does not match, we must compute a relative path
-        const relative = relativePathParts(splitPath(from.path), splitPath(to.path));
+        const relative = relativePathParts(splitUriPath(from.path), splitUriPath(to.path));
         return formatUriFragment("path", "", joinPathParts(relative), to.query, to.fragment);
     }
     if (to.query !== from.query) {
@@ -322,8 +321,8 @@ export function computeCommonBaseDirectory(files: Iterable<Uri>) {
             return undefined;
         }
 
-        let parts = splitPath(file.path);
-        if (!isReducedPath(file.path)) {
+        let parts = splitUriPath(file.path);
+        if (!isReducedPathFast(file.path)) {
             parts = reducePathParts(parts);
         }
 
