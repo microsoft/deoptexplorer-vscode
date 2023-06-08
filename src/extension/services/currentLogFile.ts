@@ -9,7 +9,7 @@ import { ImmutableEnumSet } from "../../core/collections/enumSet";
 import { readLines, tryStatAsync } from "../../core/fs";
 import { UriEqualer } from "../../core/uri";
 import { equateNullable } from "../../core/utils";
-import { createWindowsCppEntriesProvider } from "../../platforms/win32";
+import { WindowsCppEntriesProvider } from "../../platforms/win32/windowsCppEntriesProvider";
 import { CppEntriesProvider } from "../../third-party-derived/v8/tools/cppEntriesProvider";
 import { LogProcessor } from "../components/logProcessor";
 import * as constants from "../constants";
@@ -80,20 +80,13 @@ async function openLogFileWorker(uri: Uri) {
             // Get the canonical URI for the file
             const file = getCanonicalUri(uri);
 
-            // Try to load a native CppEntriesProvider on Windows.
-            // NOTE: Not working on newer electron builds.
+            // Try to load a native CppEntriesProvider on Windows
             let cppEntriesProvider: CppEntriesProvider | undefined;
             if (process.platform === "win32") {
-                try {
-                    cppEntriesProvider = await createWindowsCppEntriesProvider({
-                        globalStorageUri: currentContext?.globalStorageUri
-                    });
-                    if (token.isCancellationRequested) return;
-                }
-                catch (e) {
-                    console.error("Failed to load win32 native binaries. They may be out of date and do not match the current electron ABI.");
-                    console.error(e);
-                }
+                cppEntriesProvider = new WindowsCppEntriesProvider({
+                    globalStorageUri: currentContext?.globalStorageUri,
+                    extensionUri: currentContext?.extensionUri,
+                });
             }
 
             // Read the log

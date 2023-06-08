@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { lazy } from "@esfx/fn";
+// TODO: Most of this isn't working anymore in the latest VS Code because `ref-napi` and `ffi-napi` haven't been
+//       updated to support newer versions of electron.
+
 import { randomBytes } from "crypto";
 import * as ffi from "ffi-napi";
 import * as ref from "ref-napi";
-import { Disposable, ExtensionContext, Uri } from "vscode";
+import { Uri } from "vscode";
 import { tryExec } from "../../../core/utils";
 import { ArrayType } from "./ref-array";
 import { StructType } from "./ref-struct";
@@ -289,246 +291,8 @@ export const PSYMBOL_REGISTERED_CALLBACK = ffi.Function(BOOL, [
 ]);
 export type PSYMBOL_REGISTERED_CALLBACK = ref.UnderlyingType<typeof PSYMBOL_REGISTERED_CALLBACK>;
 
-
-export function SymInitialize(
-    handle: HANDLE,
-    userSearchPath: PCSTR = null,
-    invadeProcess: BOOL = false
-): BOOL {
-    return dbghelp().SymInitialize(
-        handle,
-        userSearchPath,
-        invadeProcess
-    );
-}
-
-export function SymCleanup(
-    handle: HANDLE
-): BOOL {
-    return dbghelp().SymCleanup(
-        handle
-    );
-}
-
-export function SymGetOptions(): DWORD {
-    return dbghelp().SymGetOptions();
-}
-
-export function SymSetOptions(
-    opts: DWORD
-): DWORD {
-    return dbghelp().SymSetOptions(
-        opts
-    );
-}
-
-export function SymLoadModuleEx(
-    hProcess:   HANDLE,
-    hFile:      HANDLE,
-    ImageName:  PCSTR,
-    ModuleName: PCSTR,
-    BaseOfDll:  DWORD64,
-    DllSize:    DWORD,
-    Data:       PVOID,
-    Flags:      DWORD
-): DWORD64 {
-    return dbghelp().SymLoadModuleEx(
-        hProcess,
-        hFile,
-        ImageName,
-        ModuleName,
-        BaseOfDll,
-        DllSize,
-        Data,
-        Flags
-    );
-}
-
-export function SymGetModuleInfo64(
-    hProcess:   HANDLE,
-    qwAddr:     DWORD64,
-    ModuleInfo: PIMAGEHLP_MODULE64
-) {
-    return dbghelp().SymGetModuleInfo64(
-        hProcess,
-        qwAddr,
-        ModuleInfo
-    );
-}
-
-export function SymUnloadModule64(
-    hProcess:   HANDLE,
-    BaseOfDll:  DWORD64
-) {
-    return dbghelp().SymUnloadModule64(
-        hProcess,
-        BaseOfDll
-    );
-}
-
-export function SymGetSearchPath(
-    hProcess: HANDLE,
-    SearchPath: PSTR,
-    SearchPathLength: DWORD
-): BOOL {
-    return dbghelp().SymGetSearchPath(
-        hProcess,
-        SearchPath,
-        SearchPathLength
-    );
-}
-
-export function SymGetSearchPathW(
-    hProcess: HANDLE,
-    SearchPath: PWSTR,
-    SearchPathLength: DWORD
-): BOOL {
-    return dbghelp().SymGetSearchPathW(
-        hProcess,
-        SearchPath,
-        SearchPathLength
-    );
-}
-
-export function SymSetSearchPath(
-    hProcess: HANDLE,
-    SearchPath: PCSTR
-): BOOL {
-    return dbghelp().SymSetSearchPath(
-        hProcess,
-        SearchPath
-    );
-}
-
-export function SymSetSearchPathW(
-    hProcess: HANDLE,
-    SearchPath: PCWSTR
-): BOOL {
-    return dbghelp().SymSetSearchPathW(
-        hProcess,
-        SearchPath
-    );
-}
-
-export function SymEnumerateModules64(
-    hProcess:               HANDLE,
-    EnumModulesCallback:    PSYM_ENUMMODULES_CALLBACK64,
-    UserContext:            PVOID,
-) {
-    return dbghelp().SymEnumerateModules64(
-        hProcess,
-        EnumModulesCallback,
-        UserContext
-    );
-}
-
-export function SymEnumSymbols(
-    hProcess:               HANDLE,
-    BaseOfDll:              ULONG64,
-    Mask:                   PCSTR,
-    EnumSymbolsCallback:    PSYM_ENUMERATESYMBOLS_CALLBACK,
-    UserContext:            PVOID
-): BOOL {
-    return dbghelp().SymEnumSymbols(
-        hProcess,
-        BaseOfDll,
-        Mask,
-        EnumSymbolsCallback,
-        UserContext
-    );
-}
-
-export function SymFromAddr(
-    hProcess: HANDLE,
-    Address: DWORD64,
-    Displacement: PDWORD64,
-    Symbol: PSYMBOL_INFO
-): BOOL {
-    return dbghelp().SymFromAddr(
-        hProcess,
-        Address,
-        Displacement,
-        Symbol
-    );
-}
-
-export function SymFromAddrW(
-    hProcess: HANDLE,
-    Address: DWORD64,
-    Displacement: PDWORD64,
-    Symbol: PSYMBOL_INFOW
-): BOOL {
-    return dbghelp().SymFromAddrW(
-        hProcess,
-        Address,
-        Displacement,
-        Symbol
-    );
-}
-
-export function SymNext(
-    hProcess: HANDLE,
-    si: PSYMBOL_INFO
-): BOOL {
-    return dbghelp().SymNext(
-        hProcess,
-        si
-    );
-}
-
-export function SymNextW(
-    hProcess: HANDLE,
-    si: PSYMBOL_INFOW
-): BOOL {
-    return dbghelp().SymNextW(
-        hProcess,
-        si
-    );
-}
-
-export function SymRegisterCallback64(
-    hProcess: HANDLE,
-    CallbackFunction: PSYMBOL_REGISTERED_CALLBACK,
-    UserContext: PVOID
-): BOOL {
-    return dbghelp().SymRegisterCallback64(
-        hProcess,
-        CallbackFunction,
-        UserContext
-    );
-}
-
-export function SymGetLineFromAddr64(
-    hProcess: HANDLE,
-    qwAddr: DWORD64,
-    pdwDisplacement: PDWORD,
-    Line64: PIMAGEHLP_LINE64
-): BOOL {
-    return dbghelp().SymGetLineFromAddr64(
-        hProcess,
-        qwAddr,
-        pdwDisplacement,
-        Line64
-    );
-}
-
-export function UnDecorateSymbolName(
-    name:               PCSTR,
-    outputString:       PSTR,
-    maxStringLength:    DWORD,
-    flags:              DWORD
-): DWORD {
-    return dbghelp().UnDecorateSymbolName(
-        name,
-        outputString,
-        maxStringLength,
-        flags
-    );
-}
-
 let extensionUri: Uri | undefined;
 
-let _dbghelp = lazy(dbghelpFactory);
 function dbghelpFactory() {
     if (process.platform !== "win32") return undefined;
     if (extensionUri === undefined) return undefined;
@@ -723,40 +487,6 @@ function dbghelpFactory() {
     });
 }
 
-function dbghelp() {
-    const dbghelp = _dbghelp();
-    if (!dbghelp) throw new ReferenceError("Module could not be loaded. Check `isAvailable()` before calling dbghelp apis.");
-    return dbghelp;
-}
-
-export function isAvailable() {
-    return _dbghelp() !== undefined;
-}
-
-/** Create a unique handle to act as a process handle. */
-export function createSimpleHandle() {
-    const buffer = Buffer.alloc(ref.sizeof.pointer);
-    buffer.writeBigInt64LE(BigInt(1));
-    buffer.type = ref.refType(ref.types.void);
-    return buffer as HANDLE;
-}
-
-/** Create a unique handle to act as a process handle. */
-export function createRandomHandle() {
-    const buffer = randomBytes(ref.sizeof.pointer);
-    buffer.type = ref.refType(ref.types.void);
-    return buffer as HANDLE;
-}
-
-export function activateDbgHelp(extension: ExtensionContext) {
-    extensionUri = extension.extensionUri;
-    _dbghelp = lazy(dbghelpFactory);
-    return new Disposable(() => {
-        extensionUri = undefined;
-        _dbghelp = lazy(dbghelpFactory);
-    });
-}
-
 export const SYMOPT_CASE_INSENSITIVE =              0x00000001;
 export const SYMOPT_UNDNAME =                       0x00000002;
 export const SYMOPT_DEFERRED_LOADS =                0x00000004;
@@ -814,3 +544,452 @@ export const UNDNAME_NO_ARGUMENTS =                 0x00002000; // Do not undeco
 export const UNDNAME_NO_SPECIAL_SYMS =              0x00004000; // Do not undecorate special names, such as vtable, vcall, vector, metatype, and so on.
 export const UNDNAME_NO_TYPE_PREFIX =               0x00008000; // Disable enum/class/struct/union prefix
 export const UNDNAME_NO_PTR64_EXPANSION =           0x00020000; // Disable expansion of __ptr64 keyword
+
+export class Dbghelp {
+    #dbghelp;
+
+    constructor(extensionUri: Uri) {
+        if (process.platform !== "win32") {
+            throw new Error("Wrong platform");
+        }
+
+        const dbghelpFile =
+            process.arch === "x64" ? Uri.joinPath(extensionUri, "bin/x64/dbghelp.dll").fsPath :
+            process.arch === "x86" ? Uri.joinPath(extensionUri, "bin/x86/dbghelp.dll").fsPath :
+            undefined;
+
+        if (!dbghelpFile) {
+            throw new Error("Unsupported architecture");
+        }
+
+        this.#dbghelp = ffi.Library(dbghelpFile, {
+            // https://docs.microsoft.com/en-us/windows/win32/api/dbghelp/nf-dbghelp-syminitialize
+            // BOOL IMAGEAPI SymInitialize(
+            //   HANDLE hProcess,
+            //   PCSTR  UserSearchPath,
+            //   BOOL   fInvadeProcess
+            // );
+            SymInitialize: [BOOL, [
+                HANDLE, // hProcess
+                PCSTR,  // UserSearchPath
+                BOOL,   // fInvadeProcess
+            ]],
+
+            // https://docs.microsoft.com/en-us/windows/win32/api/dbghelp/nf-dbghelp-symcleanup
+            // BOOL IMAGEAPI SymCleanup(
+            //   HANDLE hProcess
+            // );
+            SymCleanup: [BOOL, [
+                HANDLE, // hProcess
+            ]],
+
+            // https://docs.microsoft.com/en-us/windows/win32/api/dbghelp/nf-dbghelp-symgetoptions
+            // DWORD IMAGEAPI SymGetOptions();
+            SymGetOptions: [DWORD, []],
+
+            // https://docs.microsoft.com/en-us/windows/win32/api/dbghelp/nf-dbghelp-symsetoptions
+            // DWORD IMAGEAPI SymSetOptions(
+            //   DWORD SymOptions
+            // );
+            SymSetOptions: [DWORD, [
+                DWORD,  // SymOptions
+            ]],
+
+            SymGetSearchPath: [BOOL, [
+                HANDLE, // hProcess,
+                PSTR,   // SearchPath,
+                DWORD,  // SearchPathLength
+            ]],
+
+            SymGetSearchPathW: [BOOL, [
+                HANDLE, // hProcess,
+                PWSTR,  // SearchPath,
+                DWORD,  // SearchPathLength
+            ]],
+
+            SymSetSearchPath: [BOOL, [
+                HANDLE, // hProcess,
+                PCSTR,  // SearchPath
+            ]],
+
+            SymSetSearchPathW: [BOOL, [
+                HANDLE, // hProcess,
+                PCWSTR, // SearchPath
+            ]],
+
+            // https://docs.microsoft.com/en-us/windows/win32/api/dbghelp/nf-dbghelp-symloadmoduleex
+            // DWORD64 IMAGEAPI SymLoadModuleEx(
+            //   HANDLE        hProcess,
+            //   HANDLE        hFile,
+            //   PCSTR         ImageName,
+            //   PCSTR         ModuleName,
+            //   DWORD64       BaseOfDll,
+            //   DWORD         DllSize,
+            //   PMODLOAD_DATA Data,
+            //   DWORD         Flags
+            // );
+            SymLoadModuleEx: [DWORD64, [
+                HANDLE,     // hProcess
+                HANDLE,     // hFile
+                PCSTR,      // ImageName
+                PCSTR,      // ModuleName
+                DWORD64,    // BaseOfDll
+                DWORD,      // DllSize
+                PVOID,      // Data
+                DWORD,      // Flags
+            ]],
+
+            // https://docs.microsoft.com/en-us/windows/win32/api/dbghelp/nf-dbghelp-symgetmoduleinfo64
+            // BOOL IMAGEAPI SymGetModuleInfo64(
+            //   HANDLE             hProcess,
+            //   DWORD64            qwAddr,
+            //   PIMAGEHLP_MODULE64 ModuleInfo
+            // );
+            SymGetModuleInfo64: [BOOL, [
+                HANDLE,             // hProcess
+                DWORD64,            // qwAddr
+                PIMAGEHLP_MODULE64, // ModuleInfo
+            ]],
+
+            // https://docs.microsoft.com/en-us/windows/win32/api/dbghelp/nf-dbghelp-symunloadmodule64
+            // BOOL IMAGEAPI SymUnloadModule64(
+            //   HANDLE  hProcess,
+            //   DWORD64 BaseOfDll
+            // );
+            SymUnloadModule64: [BOOL, [
+                HANDLE,     // hProcess
+                DWORD64,    // BaseOfDll
+            ]],
+
+            // https://docs.microsoft.com/en-us/windows/win32/api/dbghelp/nf-dbghelp-symenumsymbols
+            // BOOL IMAGEAPI SymEnumSymbols(
+            //   HANDLE                         hProcess,
+            //   ULONG64                        BaseOfDll,
+            //   PCSTR                          Mask,
+            //   PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback,
+            //   PVOID                          UserContext
+            // );
+            SymEnumSymbols: [BOOL, [
+                HANDLE,                         // hProcess
+                ULONG64,                        // BaseOfDll
+                PCSTR,                          // Mask
+                PSYM_ENUMERATESYMBOLS_CALLBACK, // EnumSymbolsCallback
+                PVOID,                          // UserContext
+            ]],
+
+            SymFromAddr: [BOOL, [
+                HANDLE, // hProcess
+                DWORD64, // Address
+                PDWORD64, // Displacement
+                PSYMBOL_INFO, // Symbol
+            ]],
+
+            SymFromAddrW: [BOOL, [
+                HANDLE, // hProcess
+                DWORD64, // Address
+                PDWORD64, // Displacement
+                PSYMBOL_INFOW, // Symbol
+            ]],
+
+            SymNext: [BOOL, [
+                HANDLE, // hProcess
+                PSYMBOL_INFO, // si
+            ]],
+
+            SymNextW: [BOOL, [
+                HANDLE, // hProcess
+                PSYMBOL_INFOW, // si
+            ]],
+
+            SymEnumerateModules64: [BOOL, [
+                HANDLE,                         // hProcess
+                PSYM_ENUMMODULES_CALLBACK64,    // EnumModulesCallback,
+                PVOID,                          // UserContext
+            ]],
+
+            SymRegisterCallback64: [BOOL, [
+                HANDLE, // hProcess
+                PSYMBOL_REGISTERED_CALLBACK, // CallbackFunction
+                PVOID,  // UserContext
+            ]],
+
+            // BOOL IMAGEAPI SymGetLineFromAddr64(
+            //   HANDLE           hProcess,
+            //   DWORD64          qwAddr,
+            //   PDWORD           pdwDisplacement,
+            //   PIMAGEHLP_LINE64 Line64
+            // );
+            SymGetLineFromAddr64: [BOOL, [
+                HANDLE,
+                DWORD64,
+                PDWORD,
+                PIMAGEHLP_LINE64,
+            ]],
+
+            // https://docs.microsoft.com/en-us/windows/win32/api/dbghelp/nf-dbghelp-undecoratesymbolname
+            // DWORD IMAGEAPI UnDecorateSymbolName(
+            //   PCSTR name,
+            //   PSTR  outputString,
+            //   DWORD maxStringLength,
+            //   DWORD flags
+            // )
+            UnDecorateSymbolName: [DWORD, [
+                PCSTR,  // name
+                PSTR,   // outputString
+                DWORD,  // maxStringLength
+                DWORD,  // flags
+            ]]
+        });
+    }
+
+    SymInitialize(
+        handle: HANDLE,
+        userSearchPath: PCSTR = null,
+        invadeProcess: BOOL = false
+    ): BOOL {
+        return this.#dbghelp.SymInitialize(
+            handle,
+            userSearchPath,
+            invadeProcess
+        );
+    }
+
+    SymCleanup(
+        handle: HANDLE
+    ): BOOL {
+        return this.#dbghelp.SymCleanup(
+            handle
+        );
+    }
+
+    SymGetOptions(): DWORD {
+        return this.#dbghelp.SymGetOptions();
+    }
+
+    SymSetOptions(
+        opts: DWORD
+    ): DWORD {
+        return this.#dbghelp.SymSetOptions(
+            opts
+        );
+    }
+
+    SymLoadModuleEx(
+        hProcess:   HANDLE,
+        hFile:      HANDLE,
+        ImageName:  PCSTR,
+        ModuleName: PCSTR,
+        BaseOfDll:  DWORD64,
+        DllSize:    DWORD,
+        Data:       PVOID,
+        Flags:      DWORD
+    ): DWORD64 {
+        return this.#dbghelp.SymLoadModuleEx(
+            hProcess,
+            hFile,
+            ImageName,
+            ModuleName,
+            BaseOfDll,
+            DllSize,
+            Data,
+            Flags
+        );
+    }
+
+    SymGetModuleInfo64(
+        hProcess:   HANDLE,
+        qwAddr:     DWORD64,
+        ModuleInfo: PIMAGEHLP_MODULE64
+    ) {
+        return this.#dbghelp.SymGetModuleInfo64(
+            hProcess,
+            qwAddr,
+            ModuleInfo
+        );
+    }
+
+    SymUnloadModule64(
+        hProcess:   HANDLE,
+        BaseOfDll:  DWORD64
+    ) {
+        return this.#dbghelp.SymUnloadModule64(
+            hProcess,
+            BaseOfDll
+        );
+    }
+
+    SymGetSearchPath(
+        hProcess: HANDLE,
+        SearchPath: PSTR,
+        SearchPathLength: DWORD
+    ): BOOL {
+        return this.#dbghelp.SymGetSearchPath(
+            hProcess,
+            SearchPath,
+            SearchPathLength
+        );
+    }
+
+    SymGetSearchPathW(
+        hProcess: HANDLE,
+        SearchPath: PWSTR,
+        SearchPathLength: DWORD
+    ): BOOL {
+        return this.#dbghelp.SymGetSearchPathW(
+            hProcess,
+            SearchPath,
+            SearchPathLength
+        );
+    }
+
+    SymSetSearchPath(
+        hProcess: HANDLE,
+        SearchPath: PCSTR
+    ): BOOL {
+        return this.#dbghelp.SymSetSearchPath(
+            hProcess,
+            SearchPath
+        );
+    }
+
+    SymSetSearchPathW(
+        hProcess: HANDLE,
+        SearchPath: PCWSTR
+    ): BOOL {
+        return this.#dbghelp.SymSetSearchPathW(
+            hProcess,
+            SearchPath
+        );
+    }
+
+    SymEnumerateModules64(
+        hProcess:               HANDLE,
+        EnumModulesCallback:    PSYM_ENUMMODULES_CALLBACK64,
+        UserContext:            PVOID,
+    ) {
+        return this.#dbghelp.SymEnumerateModules64(
+            hProcess,
+            EnumModulesCallback,
+            UserContext
+        );
+    }
+
+    SymEnumSymbols(
+        hProcess:               HANDLE,
+        BaseOfDll:              ULONG64,
+        Mask:                   PCSTR,
+        EnumSymbolsCallback:    PSYM_ENUMERATESYMBOLS_CALLBACK,
+        UserContext:            PVOID
+    ): BOOL {
+        return this.#dbghelp.SymEnumSymbols(
+            hProcess,
+            BaseOfDll,
+            Mask,
+            EnumSymbolsCallback,
+            UserContext
+        );
+    }
+
+    SymFromAddr(
+        hProcess: HANDLE,
+        Address: DWORD64,
+        Displacement: PDWORD64,
+        Symbol: PSYMBOL_INFO
+    ): BOOL {
+        return this.#dbghelp.SymFromAddr(
+            hProcess,
+            Address,
+            Displacement,
+            Symbol
+        );
+    }
+
+    SymFromAddrW(
+        hProcess: HANDLE,
+        Address: DWORD64,
+        Displacement: PDWORD64,
+        Symbol: PSYMBOL_INFOW
+    ): BOOL {
+        return this.#dbghelp.SymFromAddrW(
+            hProcess,
+            Address,
+            Displacement,
+            Symbol
+        );
+    }
+
+    SymNext(
+        hProcess: HANDLE,
+        si: PSYMBOL_INFO
+    ): BOOL {
+        return this.#dbghelp.SymNext(
+            hProcess,
+            si
+        );
+    }
+
+    SymNextW(
+        hProcess: HANDLE,
+        si: PSYMBOL_INFOW
+    ): BOOL {
+        return this.#dbghelp.SymNextW(
+            hProcess,
+            si
+        );
+    }
+
+    SymRegisterCallback64(
+        hProcess: HANDLE,
+        CallbackFunction: PSYMBOL_REGISTERED_CALLBACK,
+        UserContext: PVOID
+    ): BOOL {
+        return this.#dbghelp.SymRegisterCallback64(
+            hProcess,
+            CallbackFunction,
+            UserContext
+        );
+    }
+
+    SymGetLineFromAddr64(
+        hProcess: HANDLE,
+        qwAddr: DWORD64,
+        pdwDisplacement: PDWORD,
+        Line64: PIMAGEHLP_LINE64
+    ): BOOL {
+        return this.#dbghelp.SymGetLineFromAddr64(
+            hProcess,
+            qwAddr,
+            pdwDisplacement,
+            Line64
+        );
+    }
+
+    UnDecorateSymbolName(
+        name:               PCSTR,
+        outputString:       PSTR,
+        maxStringLength:    DWORD,
+        flags:              DWORD
+    ): DWORD {
+        return this.#dbghelp.UnDecorateSymbolName(
+            name,
+            outputString,
+            maxStringLength,
+            flags
+        );
+    }
+
+    /** Create a unique handle to act as a process handle. */
+    createSimpleHandle() {
+        const buffer = Buffer.alloc(ref.sizeof.pointer);
+        buffer.writeBigInt64LE(BigInt(1));
+        buffer.type = ref.refType(ref.types.void);
+        return buffer as HANDLE;
+    }
+
+    /** Create a unique handle to act as a process handle. */
+    createRandomHandle() {
+        const buffer = randomBytes(ref.sizeof.pointer);
+        buffer.type = ref.refType(ref.types.void);
+        return buffer as HANDLE;
+    }
+}

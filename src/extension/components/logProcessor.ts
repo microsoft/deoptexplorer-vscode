@@ -786,10 +786,10 @@ export class LogProcessor {
     // #region functions
 
     // event source: https://github.com/v8/v8/blob/01c670e416310453b01533a85057a3e2db3ac64f/src/logging/log.cc#L1087
-    private processSharedLibrary(libName: string, startAddress: Address, endAddress: Address, aslrSlide: number, token: CancellationToken | undefined) {
+    private async processSharedLibrary(libName: string, startAddress: Address, endAddress: Address, aslrSlide: number, token: CancellationToken | undefined) {
         const entry = this._profile.addLibrary(libName, startAddress, endAddress);
         this._codeTypes.set(entry.getName(), CodeType.SharedLib);
-        this._cppEntriesProvider.parseVmSymbols(libName, startAddress, endAddress, aslrSlide, (name, startAddress, endAddress) => {
+        await this._cppEntriesProvider.parseVmSymbols(libName, startAddress, endAddress, aslrSlide, (name, startAddress, endAddress) => {
             this._profile.addStaticCode(`${name} ${libName}`, startAddress, endAddress);
             this._codeTypes.set(name, CodeType.Cpp);
         }, this._messageOnlyProgress, token);

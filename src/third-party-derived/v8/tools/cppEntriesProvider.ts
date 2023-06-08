@@ -48,8 +48,8 @@ export interface FuncInfo {
 }
 
 export class CppEntriesProvider {
-    parseVmSymbols(libName: string, libStart: Address, libEnd: Address, libASLRSlide: number, processorFunc: (name: string, start: Address, end: Address) => void, progress: Progress<string> | undefined, token: CancellationToken | undefined) {
-        this.loadSymbols(libName, libStart, libEnd, progress, token);
+    async parseVmSymbols(libName: string, libStart: Address, libEnd: Address, libASLRSlide: number, processorFunc: (name: string, start: Address, end: Address) => void, progress: Progress<string> | undefined, token: CancellationToken | undefined) {
+        await this.loadSymbols(libName, libStart, libEnd, progress, token);
 
         let lastUnknownSize: FuncInfo | undefined;
         let lastAdded: FuncInfo | undefined;
@@ -114,7 +114,7 @@ export class CppEntriesProvider {
         addEntry({ name: '', start: libEnd } as FuncInfo);
     }
 
-    protected loadSymbols(libName: string, libStart: Address, libEnd: Address, progress: Progress<string> | undefined, token: CancellationToken | undefined) {
+    protected loadSymbols(libName: string, libStart: Address, libEnd: Address, progress: Progress<string> | undefined, token: CancellationToken | undefined): void | Promise<void> {
     }
 
     protected parseNextLine(): FuncInfo | false | null {

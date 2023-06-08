@@ -25,7 +25,8 @@ const config = {
     "ffi-napi": "commonjs ffi-napi",
   },
   resolve: {
-    extensions: ['.ts', '.js']
+    extensions: ['.ts', '.js'],
+    extensionAlias: { '.js': ['.js', '.ts'] },
   },
   module: {
     rules: [

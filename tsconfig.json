@@ -3,6 +3,7 @@
 		"module": "commonjs",
 		"target": "es2018",
 		"lib": ["esnext"],
+		"moduleResolution": "nodenext",
 		"outDir": "out",
 		"rootDir": "src",
 		"sourceMap": true,

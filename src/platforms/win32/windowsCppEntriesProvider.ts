@@ -1,29 +1,23 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Disposable, DisposableStack } from "@esfx/disposable";
 import * as cp from "child_process";
 import { randomInt } from "crypto";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import * as ref from "ref-napi";
 import * as semver from "semver";
-import { CancellationError, CancellationToken, Progress, Uri, workspace } from "vscode";
+import { CancellationToken, Progress, Uri, workspace } from "vscode";
 import { Address, parseAddress, toAddress } from "../../core/address";
 import { tryReaddirSync } from "../../core/fs";
+import { output } from "../../extension/outputChannel";
 import { kNullAddress } from "../../third-party-derived/v8/constants";
 import { FuncInfo, WindowsCppEntriesProvider as V8WindowsCppEntriesProvider } from "../../third-party-derived/v8/tools/cppEntriesProvider";
-import { output } from "../../extension/outputChannel";
-import * as dbghelp from "./api/dbghelp";
-import * as kernel32 from "./api/kernel32";
-import { PSTR, sizeof } from "./api/win32";
 import * as winnt from "./api/winnt";
-
-// Whether to download symbols from the Microsoft public symbol store, but this can be very slow...
-const USE_MS_PUBLIC_SYMBOL_STORE = false;
+import { tryCreateDbghelpWrapper } from "./dbghelpLoader";
 
 export interface WindowsCppEntriesProviderOptions {
+    extensionUri?: Uri;
     targetRootFS?: string;
     removeTemplates?: boolean;
     globalStorageUri?: Uri;
@@ -37,22 +31,22 @@ export interface WindowsCppEntriesProviderOptions {
 export class WindowsCppEntriesProvider extends V8WindowsCppEntriesProvider {
     private removeTemplates?: boolean;
     private _symbols: string | FuncInfo[] = "";
-    // private aslr = false;
     private libStart = kNullAddress;
-    // private libEnd = kNullAddress;
     private symbolsFormat: "map" | "dumpbin-map" | undefined;
     private dumpbinPath: string | null | undefined;
     private imageBase = toAddress(0);
     private imageBaseChecked = false;
-    private symbolNameBuffer: Buffer | undefined;
     private moduleType?: string;
     private globalStorageUri?: Uri;
     private useDbghelp?: boolean;
+    private extensionUri?: Uri;
+    private dbghelpWrapper: import("./dbghelpWrapper.js").DbghelpWrapper | undefined;
 
-    constructor({ targetRootFS, removeTemplates, globalStorageUri, useDbghelp, dumpbinExe }: WindowsCppEntriesProviderOptions = {}) {
+    constructor({ targetRootFS, removeTemplates, globalStorageUri, useDbghelp, dumpbinExe, extensionUri }: WindowsCppEntriesProviderOptions = {}) {
         super({ targetRootFS });
         this.removeTemplates = removeTemplates;
         this.globalStorageUri = globalStorageUri;
+        this.extensionUri = extensionUri;
         this.dumpbinPath = dumpbinExe;
         this.useDbghelp = useDbghelp;
     }
@@ -119,15 +113,17 @@ export class WindowsCppEntriesProvider extends V8WindowsCppEntriesProvider {
     static readonly DLL_IMAGE_BASE_32 = toAddress(0x010000000);
     static readonly DLL_IMAGE_BASE_64 = toAddress(0x180000000);
 
-    protected loadSymbols(libName: string, libStart: Address, libEnd: Address, progress: Progress<string> | undefined, token: CancellationToken | undefined) {
-        if (this.targetRootFS) libName = path.resolve(this.targetRootFS, libName);
+    protected async loadSymbols(libName: string, libStart: Address, libEnd: Address, progress: Progress<string> | undefined, token: CancellationToken | undefined) {
+        if (this.targetRootFS) {
+            libName = path.resolve(this.targetRootFS, libName);
+        }
+
         const { dir, ext, name, base } = path.parse(libName);
-        this.moduleType = ext.toLowerCase();
-        // this.aslr = false;
-        this.libStart = libStart;
-        // this.libEnd = libEnd;
         this._symbols = "";
+        this.moduleType = ext.toLowerCase();
+        this.libStart = libStart;
         this.symbolsFormat = undefined;
+
         const headers = winnt.getImageHeaders(libName);
         if (!headers) {
             output.warn(`shared library '${libName}' was not a valid PE image.`);
@@ -191,141 +187,14 @@ export class WindowsCppEntriesProvider extends V8WindowsCppEntriesProvider {
             }
         }
 
-        // NOTE: Using DbgHelp directly doesn't quite work yet
-        if (this.useDbghelp !== false && hasPdb && dbghelp.isAvailable()) {
-            for (const { using, fail } of Disposable.scope()) try {
-                const deferrals = using(new DisposableStack());
-                try {
-                    const hProcess = dbghelp.createSimpleHandle();
-
-                    // Initialize dbghelp
-                    const fInitialized = dbghelp.SymInitialize(hProcess);
-                    if (!fInitialized) {
-                        kernel32.Win32Error.throwIfNotSuccess();
-                    }
-                    else {
-                        // Ensure we cleanup dbghelp
-                        deferrals.use(() => { if (!dbghelp.SymCleanup(hProcess)) throw new kernel32.Win32Error(); });
-                    }
-
-                    let prevOptions = dbghelp.SymGetOptions();
-                    let options = prevOptions & ~dbghelp.SYMOPT_UNDNAME;
-
-                    // TODO: Should I specify SYMOPT_SECURE depending on whether the workspace is trusted? If I specify\
-                    // SYMOPT_SECURE, it cannot be unset later...
-                    options = options
-                        | dbghelp.SYMOPT_INCLUDE_32BIT_MODULES
-                        | dbghelp.SYMOPT_ALLOW_ABSOLUTE_SYMBOLS
-                        | dbghelp.SYMOPT_AUTO_PUBLICS
-                        | dbghelp.SYMOPT_DEFERRED_LOADS
-                        // | dbghelp.SYMOPT_NO_IMAGE_SEARCH
-                        | dbghelp.SYMOPT_FAIL_CRITICAL_ERRORS
-                        | dbghelp.SYMOPT_LOAD_LINES // TODO: Make this configurable?
-                        | dbghelp.SYMOPT_NO_UNQUALIFIED_LOADS // Prevents symbols from being loaded when the caller
-                                                              // examines symbols across multiple modules. Examine only
-                                                              // the module whose symbols have already been loaded.
-                        | dbghelp.SYMOPT_FAVOR_COMPRESSED
-                        | dbghelp.SYMOPT_EXACT_SYMBOLS
-                        | dbghelp.SYMOPT_UNDNAME
-                        ;
-
-                    if (progress) {
-                        options |= dbghelp.SYMOPT_DEBUG;
-                    }
-
-                    dbghelp.SymSetOptions(options >>> 0);
-
-                    if (!fInitialized) {
-                        // ensure we restore previous options
-                        deferrals.use(() => { dbghelp.SymSetOptions(prevOptions); });
-                    }
-
-                    // NOTE: This section would allow us to download symbols from the Microsoft public symbol store, but
-                    // this can be very slow...
-                    if (USE_MS_PUBLIC_SYMBOL_STORE && this.globalStorageUri) {
-                        const pSearchPath = Buffer.alloc(260) as PSTR;
-                        if (!dbghelp.SymGetSearchPath(hProcess, pSearchPath, 260)) {
-                            throw new kernel32.Win32Error();
-                        }
-
-                        const searchPath = pSearchPath.readCString();
-                        if (!searchPath.includes("https://msdl.microsoft.com/download/symbols")) {
-                            const searchPaths = searchPath.length ? searchPath.split(";") : [];
-                            const globalStoragePath = this.globalStorageUri.fsPath;
-                            const symbolStoragePath = path.join(globalStoragePath, "symbols");
-                            try { fs.mkdirSync(symbolStoragePath, { recursive: true }); } catch { }
-                            searchPaths.push(`srv*${symbolStoragePath}*https://msdl.microsoft.com/download/symbols`);
-                            if (!dbghelp.SymSetSearchPath(hProcess, searchPaths.join(";"))) {
-                                throw new kernel32.Win32Error();
-                            }
-                            deferrals.use(() => { if (!dbghelp.SymSetSearchPath(hProcess, searchPath)) throw new kernel32.Win32Error(); });
-                        }
-                    }
-
-                    if (progress) {
-                        if (!dbghelp.SymRegisterCallback64(hProcess, (_hProcess, ActionCode, CallbackData, _UserContext) => {
-                            if (token?.isCancellationRequested) throw new CancellationError();
-                            switch (ActionCode) {
-                                case dbghelp.CBA_DEBUG_INFO:
-                                    console.log(ref.readCString(CallbackData));
-                                    return true;
-                                default:
-                                    return false;
-                            }
-                        }, ref.NULL as any as ref.Pointer<null>)) {
-                            throw new kernel32.Win32Error();
-                        }
-                    }
-
-                    // load the library
-                    const base = dbghelp.SymLoadModuleEx(
-                        hProcess,
-                        ref.NULL as any as ref.Pointer<null>,
-                        libName,
-                        null,
-                        libStart,
-                        Number(libEnd - libStart),
-                        ref.NULL as any as ref.Pointer<null>,
-                        0
-                    );
-
-                    if (base === kNullAddress) {
-                        kernel32.Win32Error.throwIfNotSuccess();
-                    }
-                    else {
-                        // ensure we unload the module
-                        deferrals.use(() => { if (!dbghelp.SymUnloadModule64(hProcess, base)) throw new kernel32.Win32Error(); });
-                    }
-
-                    const moduleInfo = dbghelp.IMAGEHLP_MODULE64({ SizeOfStruct: sizeof(dbghelp.IMAGEHLP_MODULE64) });
-                    if (!dbghelp.SymGetModuleInfo64(hProcess, base, moduleInfo.ref())) {
-                        kernel32.Win32Error.throwIfNotSuccess();
-                    }
-
-                    const symbols: FuncInfo[] = [];
-                    if (!dbghelp.SymEnumSymbols(
-                        hProcess,
-                        base,
-                        "*",
-                        (pSymbol) => {
-                            const symbol = pSymbol.deref();
-                            const name = symbol.Name.buffer.readCString();
-                            const rva = symbol.Address - symbol.ModBase;
-                            const start = this.libStart + rva;
-                            const size = symbol.Size ? symbol.Size : undefined;
-
-                            symbols.push({ name, start, size });
-                            return true;
-                        }, ref.NULL as any as ref.Pointer<null>
-                    )) {
-                        throw new kernel32.Win32Error();
-                    }
-                    this._symbols = symbols;
-                }
-                catch (e) {
-                    output.warn(`Unable to load symbols using dbghelp:`, e);
-                }
-            } catch (e) { fail(e); }
+        // If we are explicitly using dbghelp, try to load the FFI
+        if (this.useDbghelp === true && hasPdb && !this._symbols && this.extensionUri) {
+            this.dbghelpWrapper ??= await tryCreateDbghelpWrapper(this.extensionUri);
+            this.dbghelpWrapper?.loadSymbols(libName, libStart, libEnd, {
+                progress,
+                token,
+                globalStorageUri: this.globalStorageUri
+            });
         }
     }
 
@@ -519,21 +388,6 @@ export class WindowsCppEntriesProvider extends V8WindowsCppEntriesProvider {
         return null;
     }
 
-    private undecorateSymbolName(name: string, flags: number) {
-        if (dbghelp.isAvailable()) {
-            this.symbolNameBuffer ??= Buffer.alloc(4096);
-            this.symbolNameBuffer.type ??= ref.types.byte;
-            const bytesWritten = dbghelp.UnDecorateSymbolName(
-                name,
-                this.symbolNameBuffer as ref.Pointer<number>,
-                this.symbolNameBuffer.byteLength,
-                flags);
-            if (bytesWritten > 0) {
-                return this.symbolNameBuffer.toString("utf8", 0, +bytesWritten);
-            }
-        }
-    }
-
     private removeTemplateParameters(name: string) {
         let start = 0;
         let bracketDepth = 0;
@@ -566,29 +420,11 @@ export class WindowsCppEntriesProvider extends V8WindowsCppEntriesProvider {
      *   ?LookupInDescriptor@JSObject@internal@v8@@...arguments info...
      */
     protected unmangleName(name: string) {
-        // Empty or non-mangled name.
-        if (name.length < 1) {
-            return name;
+        if (!this.dbghelpWrapper) {
+            return super.unmangleName(name);
         }
 
-        const flags =
-            dbghelp.UNDNAME_NO_LEADING_UNDERSCORES |
-            dbghelp.UNDNAME_NO_MS_KEYWORDS |
-            dbghelp.UNDNAME_NO_FUNCTION_RETURNS |
-            dbghelp.UNDNAME_NO_ALLOCATION_MODEL |
-            dbghelp.UNDNAME_NO_ALLOCATION_LANGUAGE |
-            dbghelp.UNDNAME_NO_MS_THISTYPE |
-            dbghelp.UNDNAME_NO_CV_THISTYPE |
-            dbghelp.UNDNAME_NO_ACCESS_SPECIFIERS |
-            dbghelp.UNDNAME_NO_THROW_SIGNATURES |
-            dbghelp.UNDNAME_NO_MEMBER_TYPE |
-            dbghelp.UNDNAME_NO_RETURN_UDT_MODEL |
-            dbghelp.UNDNAME_32_BIT_DECODE |
-            dbghelp.UNDNAME_NAME_ONLY |
-            dbghelp.UNDNAME_NO_SPECIAL_SYMS |
-            dbghelp.UNDNAME_NO_TYPE_PREFIX |
-            dbghelp.UNDNAME_NO_PTR64_EXPANSION;
-        let undecorated = this.undecorateSymbolName(name, flags);
+        let undecorated = this.dbghelpWrapper.unmangleName(name);
         if (undecorated === undefined) {
             const prefix = WindowsCppEntriesProvider.SYMBOL_PREFIX_RE.exec(name);
             if (!prefix) {

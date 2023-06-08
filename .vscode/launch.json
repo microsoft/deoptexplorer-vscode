@@ -11,7 +11,7 @@
 			"sourceMaps": true,
 			"smartStep": true,
 			"outFiles": ["${workspaceRoot}/dist/**/*.js"],
-			"skipFiles": ["<node_internals>/**"],
+			"skipFiles": ["<node_internals>/**","${workspaceFolder}/node_modules/tslib/**"],
 			"preLaunchTask": "npm: webpack"
 		},
 		{
@@ -28,7 +28,7 @@
 			},
 			"outFiles": ["${workspaceFolder}/out/**/*.js"],
 			"smartStep": true,
-			"skipFiles": ["<node_internals>/**"],
+			"skipFiles": ["<node_internals>/**","${workspaceFolder}/node_modules/tslib/**"],
 			"preLaunchTask": "npm: compile"
 		},
 	]

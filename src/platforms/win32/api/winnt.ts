@@ -1,19 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import * as ref from "ref-napi";
-import { ArrayType } from "./ref-array";
-import { StructType } from "./ref-struct";
-import { WORD, LONG, DWORD, ULONG, BYTE, ULONGLONG, sizeof } from "./win32";
+import { ArrayType, endianness, PrimitiveType, RuntimeType, StructType } from "@esfx/struct-type";
+import { BYTE, DWORD, LONG, ULONG, ULONGLONG, WORD } from "@esfx/struct-type/win32";
 import * as fs from "fs";
 
 const IMAGE_DOS_SIGNATURE_LE = 0x5a4d;                                              // MZ (in little-endian)
-const IMAGE_DOS_SIGNATURE_BE = 0x4d5a;                                              // MZ (in big-endian)
-const IMAGE_DOS_SIGNATURE = ref.endianness === "LE" ? IMAGE_DOS_SIGNATURE_LE : IMAGE_DOS_SIGNATURE_BE;
-
 const IMAGE_NT_SIGNATURE_LE = 0x00004550;                                           // PE00 (in little-endian)
-const IMAGE_NT_SIGNATURE_BE = 0x50450000;                                           // PE00 (in big-endian)
-const IMAGE_NT_SIGNATURE = ref.endianness === "LE" ? IMAGE_NT_SIGNATURE_LE : IMAGE_NT_SIGNATURE_BE;
 
 export const IMAGE_NT_OPTIONAL_HDR32_MAGIC = 0x10b;
 export const IMAGE_NT_OPTIONAL_HDR64_MAGIC = 0x20b;
@@ -41,6 +34,7 @@ typedef struct _IMAGE_DOS_HEADER {      // DOS .EXE header
     LONG   e_lfanew;                    // File address of new exe header
 } IMAGE_DOS_HEADER, *PIMAGE_DOS_HEADER;
 */
+export type IMAGE_DOS_HEADER = RuntimeType<typeof IMAGE_DOS_HEADER>;
 export const IMAGE_DOS_HEADER = StructType({
     e_magic:    WORD,
     e_cblp:     WORD,
@@ -74,6 +68,7 @@ typedef struct _IMAGE_FILE_HEADER {
     WORD    Characteristics;
 } IMAGE_FILE_HEADER, *PIMAGE_FILE_HEADER;
 */
+export type IMAGE_FILE_HEADER = RuntimeType<typeof IMAGE_FILE_HEADER>;
 export const IMAGE_FILE_HEADER = StructType({
     Machine:                WORD,
     NumberOfSections:       WORD,
@@ -92,6 +87,7 @@ typedef struct _IMAGE_DATA_DIRECTORY {
     ULONG   Size;
 } IMAGE_DATA_DIRECTORY, *PIMAGE_DATA_DIRECTORY;
 */
+export type IMAGE_DATA_DIRECTORY = RuntimeType<typeof IMAGE_DATA_DIRECTORY>;
 export const IMAGE_DATA_DIRECTORY = StructType({
     VirtualAddress: ULONG,
     Size:           ULONG,
@@ -131,8 +127,9 @@ typedef struct _IMAGE_OPTIONAL_HEADER {
     IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
 } IMAGE_OPTIONAL_HEADER32, *PIMAGE_OPTIONAL_HEADER32;
 */
+export type IMAGE_OPTIONAL_HEADER32 = RuntimeType<typeof IMAGE_OPTIONAL_HEADER32>;
 export const IMAGE_OPTIONAL_HEADER32 = StructType({
-    Magic:                          WORD as ref.Type<typeof IMAGE_NT_OPTIONAL_HDR32_MAGIC>,
+    Magic:                          WORD as PrimitiveType<typeof WORD["name"], typeof IMAGE_NT_OPTIONAL_HDR32_MAGIC>,
     MajorLinkerVersion:             BYTE,
     MinorLinkerVersion:             BYTE,
     SizeOfCode:                     DWORD,
@@ -198,8 +195,9 @@ typedef struct _IMAGE_OPTIONAL_HEADER64 {
     IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
 } IMAGE_OPTIONAL_HEADER64, *PIMAGE_OPTIONAL_HEADER64;
 */
+export type IMAGE_OPTIONAL_HEADER64 = RuntimeType<typeof IMAGE_OPTIONAL_HEADER64>;
 export const IMAGE_OPTIONAL_HEADER64 = StructType({
-    Magic:                          WORD as ref.Type<typeof IMAGE_NT_OPTIONAL_HDR64_MAGIC>,
+    Magic:                          WORD as PrimitiveType<typeof WORD["name"], typeof IMAGE_NT_OPTIONAL_HDR64_MAGIC>,
     MajorLinkerVersion:             BYTE,
     MinorLinkerVersion:             BYTE,
     SizeOfCode:                     DWORD,
@@ -245,6 +243,7 @@ typedef struct _IMAGE_NT_HEADERS {
     IMAGE_OPTIONAL_HEADER32 OptionalHeader;
 } IMAGE_NT_HEADERS32, *PIMAGE_NT_HEADERS32;
 */
+export type IMAGE_NT_HEADERS32 = RuntimeType<typeof IMAGE_NT_HEADERS32>;
 export const IMAGE_NT_HEADERS32 = StructType({
     Signature:      DWORD,
     FileHeader:     IMAGE_FILE_HEADER,
@@ -258,6 +257,7 @@ typedef struct _IMAGE_NT_HEADERS64 {
     IMAGE_OPTIONAL_HEADER64 OptionalHeader;
 } IMAGE_NT_HEADERS64, *PIMAGE_NT_HEADERS64;
 */
+export type IMAGE_NT_HEADERS64 = RuntimeType<typeof IMAGE_NT_HEADERS64>;
 export const IMAGE_NT_HEADERS64 = StructType({
     Signature:      DWORD,
     FileHeader:     IMAGE_FILE_HEADER,
@@ -267,31 +267,35 @@ export const IMAGE_NT_HEADERS64 = StructType({
 export function getImageHeaders(file: string) {
     const fd = fs.openSync(file, fs.constants.O_RDONLY);
     try {
-        let bytesRead: number;
-
         // read the DOS header
-        const dos_header_size = sizeof(IMAGE_DOS_HEADER);
-        const dos_header = IMAGE_DOS_HEADER();
-        bytesRead = fs.readSync(fd, dos_header.ref(), { position: 0, length: dos_header_size });
-        if (bytesRead !== dos_header_size || dos_header.e_magic !== IMAGE_DOS_SIGNATURE) {
-            return undefined;
-        }
+        let dos_header: IMAGE_DOS_HEADER | undefined = endianness === "LE" ? new IMAGE_DOS_HEADER() : undefined;
+        const dos_header_size = IMAGE_DOS_HEADER.SIZE;
+        const dos_header_bytes = dos_header ? new Uint8Array(dos_header.buffer) : new Uint8Array(dos_header_size);
+        if (fs.readSync(fd, dos_header_bytes, { position: 0, length: dos_header_size }) === dos_header_size) {
+            dos_header ??= IMAGE_DOS_HEADER.read(dos_header_bytes.buffer, 0, "LE");
+            if (dos_header.e_magic === IMAGE_DOS_SIGNATURE_LE) {
+                // Try to read the NT header as a 32-bit PE
+                let nt_headers32: IMAGE_NT_HEADERS32 | undefined = endianness === "LE" ? new IMAGE_NT_HEADERS32() : undefined;
+                const nt_headers32_size = IMAGE_NT_HEADERS32.SIZE;
+                const nt_headers32_bytes = nt_headers32 ? new Uint8Array(nt_headers32.buffer) : new Uint8Array(nt_headers32_size);
+                if (fs.readSync(fd, nt_headers32_bytes, { position: dos_header.e_lfanew, length: nt_headers32_size }) === nt_headers32_size) {
+                    nt_headers32 ??= IMAGE_NT_HEADERS32.read(nt_headers32_bytes.buffer, 0, "LE");
+                    if (nt_headers32.Signature === IMAGE_NT_SIGNATURE_LE && nt_headers32.OptionalHeader.Magic === IMAGE_NT_OPTIONAL_HDR32_MAGIC) {
+                        return nt_headers32;
+                    }
+                }
 
-        const nt_headers_offset = dos_header.e_lfanew;
-        
-        // read the NT header first as a 32-bit PE
-        const nt_headers32_size = sizeof(IMAGE_NT_HEADERS32);
-        const nt_headers32 = IMAGE_NT_HEADERS32();
-        bytesRead = fs.readSync(fd, nt_headers32.ref(), { position: nt_headers_offset, length: nt_headers32_size });
-        if (bytesRead === nt_headers32_size && nt_headers32.Signature === IMAGE_NT_SIGNATURE && nt_headers32.OptionalHeader.Magic === IMAGE_NT_OPTIONAL_HDR32_MAGIC) {
-            return nt_headers32;
-        }
-
-        const nt_headers64_size = sizeof(IMAGE_NT_HEADERS64);
-        const nt_headers64 = IMAGE_NT_HEADERS64();
-        bytesRead = fs.readSync(fd, nt_headers64.ref(), { position: nt_headers_offset, length: nt_headers64_size });
-        if (bytesRead === nt_headers64_size && nt_headers64.Signature === IMAGE_NT_SIGNATURE && nt_headers64.OptionalHeader.Magic === IMAGE_NT_OPTIONAL_HDR64_MAGIC) {
-            return nt_headers64;
+                // Try to read the NT header as a 64-bit PE
+                let nt_headers64: IMAGE_NT_HEADERS64 | undefined = endianness === "LE" ? new IMAGE_NT_HEADERS64() : undefined;
+                const nt_headers64_size = IMAGE_NT_HEADERS64.SIZE;
+                const nt_headers64_bytes = nt_headers64 ? new Uint8Array(nt_headers64.buffer) : new Uint8Array(nt_headers64_size);
+                if (fs.readSync(fd, nt_headers64_bytes, { position: dos_header.e_lfanew, length: nt_headers64_size }) === nt_headers64_size) {
+                    nt_headers64 ??= IMAGE_NT_HEADERS64.read(nt_headers64_bytes.buffer, 0, "LE");
+                    if (nt_headers64.Signature === IMAGE_NT_SIGNATURE_LE && nt_headers64.OptionalHeader.Magic === IMAGE_NT_OPTIONAL_HDR64_MAGIC) {
+                        return nt_headers64;
+                    }
+                }
+            }
         }
 
         return undefined;
