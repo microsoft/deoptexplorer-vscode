@@ -4,7 +4,8 @@
 import * as path from 'path';
 
 export async function run(testsRoot: string, reportTestResults: (error?: Error, failures?: number) => void): Promise<void> {
-    const { runCLI } = await import("jest");
+    const jest = await import("jest");
+    const runCLI = jest.runCLI ?? jest.default.runCLI;
     const projectRootPath = path.resolve(__dirname, "../..");
     const config = path.resolve(projectRootPath, "jest.config.js");
 

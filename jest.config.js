@@ -11,7 +11,8 @@ module.exports = {
     ],
     moduleNameMapper: {
         "^vscode$": "<rootDir>/scripts/vscode.js",
-        "^@esfx/iter-hierarchy/axis$": "<rootDir>/node_modules/@esfx/iter-hierarchy/dist/cjs/axis.js"
+        "^@esfx/iter-hierarchy/axis$": "<rootDir>/node_modules/@esfx/iter-hierarchy/dist/cjs/axis.js",
+        "^@esfx/struct-type/win32$": "<rootDir>/node_modules/@esfx/struct-type/dist/cjs/win32.js",
     },
     transformIgnorePatterns: ["/node_modules/", "^vscode$"],
     unmockedModulePathPatterns: ["^vscode$"]
