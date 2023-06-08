@@ -20,6 +20,7 @@
 			"name": "Run Extension Tests",
 			"runtimeExecutable": "${execPath}",
 			"args": [
+				"--disable-extensions",
 				"--extensionDevelopmentPath=${workspaceFolder}",
 				"--extensionTestsPath=${workspaceFolder}/out/test/start"
 			],
@@ -28,6 +29,7 @@
 			},
 			"outFiles": ["${workspaceFolder}/out/**/*.js"],
 			"smartStep": true,
+			"autoAttachChildProcesses": true,
 			"skipFiles": ["<node_internals>/**","${workspaceFolder}/node_modules/tslib/**"],
 			"preLaunchTask": "npm: compile"
 		},

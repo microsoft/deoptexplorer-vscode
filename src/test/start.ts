@@ -3,6 +3,20 @@
 
 import * as path from 'path';
 
+declare global {
+    var _VSCODE_NODE_MODULES: any;
+}
+
+if (globalThis._VSCODE_NODE_MODULES) {
+    globalThis._VSCODE_NODE_MODULES = new Proxy(globalThis._VSCODE_NODE_MODULES, {
+        get(target, p, receiver) {
+            if (p === "_isMockFunction") return undefined;
+            return Reflect.get(target, p, receiver);
+        }
+    });
+}
+
+
 export async function run(testsRoot: string, reportTestResults: (error?: Error, failures?: number) => void): Promise<void> {
     const jest = await import("jest");
     const runCLI = jest.runCLI ?? jest.default.runCLI;
