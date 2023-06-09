@@ -6,12 +6,12 @@ import os from "os";
 import path from "path";
 import semver from "semver";
 import { Options } from "./args.js";
-import { canAccess } from "./util.js";
 import { HostFlags } from "./hostFlags.js";
+import { canAppend } from "./util.js";
 
 const NULL_DEVICE =
     process.platform === "win32" ? "\\\\.\\NUL" :
-    canAccess("/dev/null", "write") ? "/dev/null" :
+    canAppend("/dev/null") ? "/dev/null" :
     null;
 
 export type CleanupCallback = () => Promise<void> | void;

@@ -24,6 +24,22 @@ export function canAccess(file: string, mode: "write" | "exec") {
     }
 }
 
+export function canAppend(file: string) {
+    try {
+        const fd = fs.openSync(file, "a");
+        try {
+            const stat = fs.fstatSync(fd);
+            return !!(stat.mode & fs.constants.S_IFREG);
+        }
+        finally {
+            fs.closeSync(fd);
+        }
+    }
+    catch {
+        return false;
+    }
+}
+
 export async function regQuery(hive: string, key: string, valueName: string = Registry.DEFAULT_VALUE) {
     const reg = new Registry({ hive, key });
     const keyExists = await new Promise<boolean>((res, rej) => reg.keyExists((err, exists) => err ? rej(err) : res(exists)));
