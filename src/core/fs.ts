@@ -6,6 +6,7 @@ import { URL } from "url";
 import { TextDecoder } from "util";
 import { FileStat, FileType, Uri, workspace } from "vscode";
 import { assert } from "./assert";
+import { isUriString } from "./uri";
 
 // /**
 //  * Attempts a synchronous stat(2) to get file status.
@@ -124,7 +125,10 @@ async function* vscodeReadLines(file: Uri) {
 export function readFileAsync(file: string): Promise<string>;
 export function readFileAsync(uri: Uri): Promise<string>;
 export async function readFileAsync(uri: Uri | string) {
-    const data = await workspace.fs.readFile(typeof uri === "string" ? Uri.file(uri) : uri);
+    if (typeof uri === "string") {
+        uri = isUriString(uri) ? Uri.parse(uri, /*strict*/ true) : Uri.file(uri);
+    }
+    const data = await workspace.fs.readFile(uri);
     return Buffer.from(data).toString("utf8");
 }
 
@@ -141,5 +145,8 @@ export async function tryReadFileAsync(uri: Uri | string) {
 export function writeFileAsync(file: string, content: string): Promise<void>;
 export function writeFileAsync(uri: Uri, content: string): Promise<void>;
 export async function writeFileAsync(uri: Uri | string, content: string) {
-    await workspace.fs.writeFile(typeof uri === "string" ? Uri.file(uri) : uri, Buffer.from(content, "utf8"));
+    if (typeof uri === "string") {
+        uri = isUriString(uri) ? Uri.parse(uri, /*strict*/ true) : Uri.file(uri);
+    }
+    await workspace.fs.writeFile(uri, Buffer.from(content, "utf8"));
 }

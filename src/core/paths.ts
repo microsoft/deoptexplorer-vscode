@@ -7,10 +7,10 @@ import { Uri } from "vscode";
 import { isUriString } from "./uri";
 
 export function isFileSystemLocation(file: string | Uri | URL) {
-    if (file instanceof Uri) return file.scheme === "file";
-    if (file instanceof URL) return file.protocol === "file:";
+    if (file instanceof Uri) return file.scheme === "file" || file.scheme === "vscode-remote";
+    if (file instanceof URL) return file.protocol === "file:" || file.protocol === "vscode-remote:";
     if (typeof file !== "string") return false;
-    if (isUriString(file)) return file.startsWith("file://");
+    if (isUriString(file)) return file.startsWith("file://") || file.startsWith("vscode-remote://");
     return path.isAbsolute(file);
 }
 
