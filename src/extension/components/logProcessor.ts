@@ -56,7 +56,7 @@ import { MapEntry, MapEntryUpdate, MapId, MapProperty, MapReference, MapReferenc
 import { MemoryCategory } from "../model/memoryCategory";
 import { MemoryEntry } from "../model/memoryEntry";
 import { MemoryOverview } from "../model/memoryOverview";
-import { measureAsync, measureSync, output, warn } from "../outputChannel";
+import { log, measureAsync, measureSync, output, warn } from "../outputChannel";
 import { getCanonicalUri } from "../services/canonicalPaths";
 import { LocationComparer } from "../vscode/location";
 import { messageOnlyProgress } from "../vscode/progress";
@@ -74,8 +74,8 @@ const unusedPropertyFieldsRegExp = /\n - unused property fields: (\d+)\r?\n/;
 // const mapDetailsFieldKeyRegExp = /^ - (?<key>deprecated_map|stable_map|migration_target|dictionary_map|named_interceptor|indexed_interceptor|may_have_interesting_symbols|undetectable|callable|constructor|has_prototype_slot(?: \(non-instance prototype\))?|access_check_needed|non-extensible|prototype_map)$/;
 // const mapDetailsInstanceDescriptorsFieldRegExp = /^ - (?<key>instance descriptors) (?<own>\(own\) )?#(?<count>): (?<value>.*)$/;
 const mapDetailsPropertyLikeRegExp = /^  \[\d+\]:/;
-const mapDetailsPropertyRegExp = /^  \[\d+\]: 0x[a-fA-F0-9]+ <(?<type>String\[#?\d+\]|Symbol): (?<key>[^>]*)> \((?:const )?(?:data|accessor)(?: field(?: \d+)?(?::(?<mnemonic>\w+))?| descriptor)(?:, p: \d+)?(?:, attrs: \[(?<attrs>[W_][E_][C_])\])?\) @ (?:Any|None|Class\((?<classMapAddress>[a-fA-F0-9]+)\))?/;
-const mapDetailsPropertyRegExp2 = /^  \[\d+\]: [a-fA-F0-9]{8}[a-fA-F0-9]{8}?:? \[(?<type>[^\]]+)\] in (?<space>\w+): u?#(?<key>(?:(?! \((?:const )?(?:data|accessor)).)+) \((?:const )?(?:data|accessor)(?: field(?: \d+)?(?::(?<mnemonic>\w+))?| descriptor)(?:, p: \d+)?(?:, attrs: \[(?<attrs>[W_][E_][C_])\])?\) @ (?:Any|None|Class\((?<classMapAddress>[a-fA-F0-9]+)\))?/;
+const mapDetailsPropertyRegExp = /^  \[\d+\]: (?:0x)?[a-fA-F0-9]+:? <(?<type>String\[#?\d+\]|Symbol): (?<key>[^>]*)> \((?:const )?(?:data|accessor)(?: field(?: \d+)?(?::(?<mnemonic>\w+))?| descriptor)(?:, p: \d+)?(?:, attrs: \[(?<attrs>[W_][E_][C_])\])?\) @ (?:Any|None|Class\((?<classMapAddress>[a-fA-F0-9]+)\))?/;
+const mapDetailsPropertyRegExp2 = /^  \[\d+\]: (?:0x)?[a-fA-F0-9]+:? \[(?<type>[^\]]+)\] in (?<space>\w+): u?#(?<key>(?:(?! \((?:const )?(?:data|accessor)).)*) \((?:const )?(?:data|accessor)(?: field(?: \d+)?(?::(?<mnemonic>\w+))?| descriptor)(?:, p: \d+)?(?:, attrs: \[(?<attrs>[W_][E_][C_])\])?\) @ (?:Any|None|Class\((?<classMapAddress>[a-fA-F0-9]+)\))?/;
 
 const enum CodeType {
     Cpp = 0,
@@ -1095,7 +1095,7 @@ export class LogProcessor {
             const match = mapDetailsPropertyRegExp.exec(line)
                 ?? mapDetailsPropertyRegExp2.exec(line);
             if (!match?.groups) {
-                console.log("Unhandled map-details line:", line);
+                warn("'map-details' line does not match the expected format:", line);
                 continue;
             }
 
@@ -1275,14 +1275,14 @@ export class LogProcessor {
     private processNewEvent(name: string, object: Address, size: number) {
         if (size <= 0) {
             if (name !== "CodeRange") {
-                console.log(`skipping 'new' event for category '${name}' with size 0`);
+                log(`skipping 'new' event for category '${name}' with size 0`);
             }
             return;
         }
 
         const existing = this._memory.find(object)?.value;
         if (existing) {
-            console.log(`'new' event for category '${name}' at address ${formatAddress(object)} replaced an existing entry.`);
+            log(`'new' event for category '${name}' at address ${formatAddress(object)} replaced an existing entry.`);
             this._memory.remove(object);
         }
         this._memory.insert(object, new MemoryEntry(name, size));
@@ -1298,12 +1298,12 @@ export class LogProcessor {
     private processDeleteEvent(name: string, object: Address) {
         const existing = this._memory.find(object)?.value;
         if (!existing) {
-            console.log(`'delete' event for category '${name}' at ${formatAddress(object)} referenced an allocation that was not recorded.`);
+            warn(`'delete' event for category '${name}' at ${formatAddress(object)} referenced an allocation that was not recorded.`);
             return;
         }
 
         if (existing.name !== name) {
-            console.log(`'delete' event category '${name}' did not match existing memory category '${existing.name}'.`);
+            warn(`'delete' event category '${name}' did not match existing memory category '${existing.name}'.`);
         }
 
         this._memory.remove(object);
