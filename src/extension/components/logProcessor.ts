@@ -56,7 +56,7 @@ import { MapEntry, MapEntryUpdate, MapId, MapProperty, MapReference, MapReferenc
 import { MemoryCategory } from "../model/memoryCategory";
 import { MemoryEntry } from "../model/memoryEntry";
 import { MemoryOverview } from "../model/memoryOverview";
-import { measureAsync, measureSync, output } from "../outputChannel";
+import { measureAsync, measureSync, output, warn } from "../outputChannel";
 import { getCanonicalUri } from "../services/canonicalPaths";
 import { LocationComparer } from "../vscode/location";
 import { messageOnlyProgress } from "../vscode/progress";
@@ -1149,8 +1149,12 @@ export class LogProcessor {
         const toIndex = toMaps ? toMaps.length - 1 : 0;
         const toId = new MapId(toAddress, toIndex);
         const to = toMaps?.[toIndex];
-        assert(fromAddress === kNullAddress || from);
-        assert(toAddress === kNullAddress || to);
+        if (!(fromAddress === kNullAddress || from)) {
+            warn(`LogProcessor.processMapEvent(): Map not found for source map address ${formatAddress(fromAddress)}`);
+        }
+        if (!(toAddress === kNullAddress || to)) {
+            warn(`LogProcessor.processMapEvent(): Map not found for target map address ${formatAddress(toAddress)}`);
+        }
 
         const name = SymbolName.tryParse(nameString) ?? nameString;
         const update = new MapEntryUpdate(
