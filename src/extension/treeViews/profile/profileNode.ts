@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { markdown } from "#core/markdown.js";
+import { FunctionState } from "#v8/enums/functionState.js";
+import { DynamicFuncCodeEntry } from "#v8/tools/codeentry.js";
+import type { ProfileViewNode } from "#v8/tools/profile_view.js";
 import { CancellationToken, SymbolKind, ThemeIcon, TreeItem, TreeItemCollapsibleState, window } from "vscode";
-import { markdown } from "../../../core/markdown";
-import { FunctionState } from "../../../third-party-derived/v8/enums/functionState";
-import { DynamicFuncCodeEntry } from "../../../third-party-derived/v8/tools/codeentry";
-import type { ProfileViewNode } from "../../../third-party-derived/v8/tools/profile_view";
 import * as constants from "../../constants";
 import { getScriptSourceUri } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
 import { formatMilliseconds } from "../../formatting/numbers";

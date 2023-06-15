@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import { from } from "@esfx/iter-query";
-import { DeoptEntry } from "../../../../third-party-derived/deoptigate/deoptEntry";
-import { DeoptimizeKind } from "../../../../third-party-derived/v8/enums/deoptimizeKind";
+import { DeoptEntry } from "#deoptigate/deoptEntry.js";
+import { DeoptimizeKind } from "#v8/enums/deoptimizeKind.js";
 import { RangeComparer } from "../../../vscode/range";
 import { CategoryNode } from "../common/categoryNode";
 import type { GroupNode } from "../common/groupNode";

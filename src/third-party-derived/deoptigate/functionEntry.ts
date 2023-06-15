@@ -9,19 +9,17 @@
 //  Use of this source code is goverened by the license that can be found
 //  in the LICENSE.deoptigate file.
 
+import { Address } from "#core/address.js";
+import { assertNever } from "#core/assert.js";
+import { Sources } from "#core/sources.js";
+import { TimeTicks } from "#core/time.js";
+import { resolveFunctionLocations } from "#extension/components/locations.js";
+import { LocationKind, ReferenceableEntryBase } from "#extension/model/entry.js";
+import { CodeKind } from "#v8/enums/codeKind.js";
+import { FunctionState } from "#v8/enums/functionState.js";
 import { Location, SymbolKind, Uri } from "vscode";
-import { assertNever } from "../../core/assert";
-import { resolveFunctionLocations } from "../../extension/components/locations";
-import { Sources } from "../../core/sources";
-import { Address } from "../../core/address";
-import { CodeKind } from "../v8/enums/codeKind";
 import { DeoptEntry, DeoptEntryUpdate } from "./deoptEntry";
-import { LocationKind, ReferenceableEntryBase } from "../../extension/model/entry";
-import { FunctionState } from "../v8/enums/functionState";
 import { IcEntry, IcEntryUpdate } from "./icEntry";
-import { TimeTicks } from "../../core/time";
-import { HashMap } from "@esfx/collections-hashmap";
-import { UriEqualer } from "../../core/uri";
 
 export class FunctionEntry extends ReferenceableEntryBase {
     /**

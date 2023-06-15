@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { ImmutableEnumSet } from "#core/collections/enumSet.js";
 import { Disposable, EventEmitter, ExtensionContext, Uri } from "vscode";
+import { GroupDeopts, GroupMaps, LogStatus, MapSortMode, ProfileShowMode, ProfileSortMode, ShowDecorations, ShowICStates, ShowMaps, SortDeopts, SortICs } from "../constants";
 import { LogFile } from "../model/logFile";
 import { ProfileViewNodeSnapshot } from "../model/profileViewNodeSnapshot";
-import { LogStatus, ShowMaps, MapSortMode, ProfileShowMode, ProfileSortMode, ShowDecorations, GroupMaps, GroupDeopts, SortDeopts, SortICs, ShowICStates } from "../constants";
-import { ImmutableEnumSet } from "../../core/collections/enumSet";
 
 export let events!: ReturnType<typeof createEvents>["events"];
 export let emitters!: ReturnType<typeof createEvents>["emitters"];

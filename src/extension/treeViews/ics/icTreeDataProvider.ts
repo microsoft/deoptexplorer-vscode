@@ -3,11 +3,11 @@
 
 import { identity } from "@esfx/fn";
 import { from, Query } from "@esfx/iter-query";
+import { markdown, MarkdownString } from "#core/markdown.js";
+import { UriComparer, UriEqualer } from "#core/uri.js";
+import { getNullableComparer, getNullableEqualer } from "#core/utils.js";
+import { formatIcState, IcState } from "#v8/enums/icState.js";
 import { SymbolKind, ThemeColor, ThemeIcon, Uri } from "vscode";
-import { markdown, MarkdownString } from "../../../core/markdown";
-import { UriComparer, UriEqualer } from "../../../core/uri";
-import { getNullableComparer, getNullableEqualer } from "../../../core/utils";
-import { formatIcState, IcState } from "../../../third-party-derived/v8/enums/icState";
 import * as constants from "../../constants";
 import { getScriptSourceUri } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
 import { FunctionReference } from "../../model/functionReference";

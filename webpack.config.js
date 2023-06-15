@@ -25,13 +25,18 @@ const config = {
     "ffi-napi": "commonjs ffi-napi",
   },
   resolve: {
-    extensions: ['.ts', '.js'],
-    extensionAlias: { '.js': ['.js', '.ts'] },
+    conditionNames: ["require", "node", "ts-loader"],
+    extensions: ['.ts', '.tsx', '.js'],
+    extensionAlias: {
+      '.js': ['.js', '.ts'],
+      '.cjs': ['.cjs', '.cts'],
+      '.mjs': ['.mjs', '.mts']
+    },
   },
   module: {
     rules: [
       {
-        test: /\.ts$/,
+        test: /\.([cm]?ts|tsx)$/,
         exclude: /node_modules/,
         use: [
           {

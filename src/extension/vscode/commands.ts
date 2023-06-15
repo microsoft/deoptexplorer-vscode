@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { deserialize, serialize } from "#core/serializer.js";
 import * as vscode from "vscode";
-import { deserialize, serialize } from "../../core/serializer";
 import { AsCommandArgumentValue } from "../types";
 
 interface EditorGroupLayout {

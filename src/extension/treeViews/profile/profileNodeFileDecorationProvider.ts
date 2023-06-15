@@ -1,10 +1,10 @@
+import { assert } from "#core/assert.js";
+import { deserialize, serialize } from "#core/serializer.js";
+import { FunctionState } from "#v8/enums/functionState.js";
+import { CodeEntry, DynamicFuncCodeEntry } from "#v8/tools/codeentry.js";
+import { ProfileViewNode } from "#v8/tools/profile_view.js";
 import { URLSearchParams } from "url";
 import { CancellationToken, FileDecoration, FileDecorationProvider, Location, ProviderResult, ThemeColor, Uri } from "vscode";
-import { assert } from "../../../core/assert";
-import { deserialize, serialize } from "../../../core/serializer";
-import { FunctionState } from "../../../third-party-derived/v8/enums/functionState";
-import { CodeEntry, DynamicFuncCodeEntry } from "../../../third-party-derived/v8/tools/codeentry";
-import { ProfileViewNode } from "../../../third-party-derived/v8/tools/profile_view";
 import * as constants from "../../constants";
 
 export class ProfileNodeFileDecorationProvider implements FileDecorationProvider {

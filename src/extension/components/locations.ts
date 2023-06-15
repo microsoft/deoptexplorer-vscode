@@ -2,18 +2,18 @@
 // Licensed under the MIT License.
 
 import { from } from "@esfx/iter-query";
+import { assert, assertNever } from "#core/assert.js";
+import { isJavaScriptFile, isTypeScriptFile } from "#core/uri.js";
+import { DeoptEntry } from "#deoptigate/deoptEntry.js";
+import type { FunctionEntry } from "#deoptigate/functionEntry.js";
+import type { IcEntry } from "#deoptigate/icEntry.js";
+import { DeoptimizeKind } from "#v8/enums/deoptimizeKind.js";
+import { IcType } from "#v8/enums/icType.js";
+import { TextDocumentLike } from "#vscode/textDocumentLike.js";
 import * as ts from "typescript";
 import { Location, Position, Range, SymbolKind, Uri } from "vscode";
-import { assert, assertNever } from "../../core/assert";
-import { CharacterCodes } from "../types";
-import { TextDocumentLike } from "../../third-party-derived/vscode/textDocumentLike";
-import { DeoptEntry } from "../../third-party-derived/deoptigate/deoptEntry";
-import { DeoptimizeKind } from "../../third-party-derived/v8/enums/deoptimizeKind";
 import type { Entry, LocationKind } from "../model/entry";
-import type { FunctionEntry } from "../../third-party-derived/deoptigate/functionEntry";
-import type { IcEntry } from "../../third-party-derived/deoptigate/icEntry";
-import { IcType } from "../../third-party-derived/v8/enums/icType";
-import { isJavaScriptFile, isTypeScriptFile } from "../../core/uri";
+import { CharacterCodes } from "../types";
 
 // #region Common
 

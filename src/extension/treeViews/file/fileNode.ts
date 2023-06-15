@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 import { count } from "@esfx/iter-fn";
+import { markdown } from "#core/markdown.js";
+import { IcState } from "#v8/enums/icState.js";
 import { CancellationToken, ProviderResult, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
-import { markdown } from "../../../core/markdown";
-import { IcState } from "../../../third-party-derived/v8/enums/icState";
 import type { Entry } from "../../model/entry";
 import type { FileEntry } from "../../model/fileEntry";
 import type { LogFile } from "../../model/logFile";

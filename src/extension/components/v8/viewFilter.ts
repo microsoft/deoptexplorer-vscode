@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { CallTree, CallTreeNode } from "../../../third-party-derived/v8/tools/calltree";
-import { CodeEntry } from "../../../third-party-derived/v8/tools/codeentry";
+import { CallTree, CallTreeNode } from "#v8/tools/calltree.js";
+import { CodeEntry } from "#v8/tools/codeentry.js";
 
 export interface ViewFilterOptions {
     hideNativeCode?: boolean;

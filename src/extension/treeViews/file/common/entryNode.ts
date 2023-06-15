@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { relativeUriFragment, uriBasename } from "#core/uri.js";
 import { MarkdownString, ThemeIcon, TreeItemCollapsibleState, Uri } from "vscode";
-import { relativeUriFragment, uriBasename } from "../../../../core/uri";
 import type { Entry } from "../../../model/entry";
 import type { LogFile } from "../../../model/logFile";
 import type { CanonicalUri } from "../../../services/canonicalPaths";

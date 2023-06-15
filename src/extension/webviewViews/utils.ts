@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { html, HtmlValue } from "#core/html.js";
+import { Sources } from "#core/sources.js";
 import { Location, ViewColumn } from "vscode";
-import { CommandUri } from "../vscode/commandUri";
-import { html, HtmlValue } from "../../core/html";
-import { Sources } from "../../core/sources";
 import { getScriptSourceUri } from "../fileSystemProviders/scriptSourceFileSystemProvider";
+import { CommandUri } from "../vscode/commandUri";
 
 export interface LinkToFileOptions {
     title?: string;

@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import { from } from "@esfx/iter-query";
-import type { DeoptEntry } from "../../../../third-party-derived/deoptigate/deoptEntry";
-import { DeoptimizeKind, formatDeoptimizeKind } from "../../../../third-party-derived/v8/enums/deoptimizeKind";
+import type { DeoptEntry } from "#deoptigate/deoptEntry.js";
+import { DeoptimizeKind, formatDeoptimizeKind } from "#v8/enums/deoptimizeKind.js";
 import type { BaseNode } from "../../common/baseNode";
 import { GroupNode } from "../common/groupNode";
 import { DeoptCategoryNode } from "./deoptCategoryNode";

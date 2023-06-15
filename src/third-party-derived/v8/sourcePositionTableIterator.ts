@@ -9,8 +9,8 @@
 //  Use of this source code is governed by a BSD-style license that can be
 //  found in the LICENSE.v8 file.
 
-import { assert } from "../../core/assert";
-import { Address, toAddress } from "../../core/address";
+import { Address, toAddress } from "#core/address.js";
+import { assert } from "#core/assert.js";
 import { kNullAddress } from "./constants";
 import { SourcePosition } from "./sourcePosition";
 

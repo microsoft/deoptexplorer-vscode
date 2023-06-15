@@ -1,19 +1,19 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { getCanonicalUri, walkUpContainingDirectories } from "#extension/services/canonicalPaths.js";
+import { fileUriToPath } from "#extension/vscode/uri.js";
 import * as path from "path";
 import * as ts from "typescript";
 import { MessageItem, Uri, window, workspace } from "vscode";
-import { getCanonicalUri, walkUpContainingDirectories } from "../extension/services/canonicalPaths";
-import { fileUriToPath } from "../extension/vscode/uri";
 import { StringMap } from "./collections/stringMap";
 import { StringSet } from "./collections/stringSet";
 import { readFileAsync, tryReadFileAsync } from "./fs";
 import { LineMap } from "./lineMap";
+import { isFileSystemLocation } from "./paths";
 import { Script } from "./script";
 import { extractSourceMappingURL, getInlineSourceMapData, SourceMap } from "./sourceMap";
 import { ensureUriTrailingDirectorySeparator, relativeUriFragment, resolveUri, uriExtname } from "./uri";
-import { isFileSystemLocation } from "./paths";
 
 export type OkLocalFileResolution = { readonly result: "ok", readonly local: true };
 export type OkNonlocalFileResolution = { readonly result: "ok", readonly local: false };

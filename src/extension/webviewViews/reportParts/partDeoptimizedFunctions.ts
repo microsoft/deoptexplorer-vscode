@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 
 import { from } from "@esfx/iter-query";
-import { FunctionState, isOptimizedFunctionState } from "../../../third-party-derived/v8/enums/functionState";
+import { html } from "#core/html.js";
+import { UriEqualer } from "#core/uri.js";
+import { equateNullable } from "#core/utils.js";
+import { isOptimizedFunctionState } from "#v8/enums/functionState.js";
 import { LogFile } from "../../model/logFile";
-import { html } from "../../../core/html";
-import { equateNullable } from "../../../core/utils";
 import { renderLinkToFile } from "../utils";
-import { UriEqualer } from "../../../core/uri";
 
 export function renderDeoptimizedFunctions(log: LogFile, topCount: number) {
     return html`

@@ -1,6 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { Address, parseAddress, toAddress } from "#core/address.js";
+import { tryReaddirSync } from "#core/fs.js";
+import { output } from "#extension/outputChannel.js";
+import { kNullAddress } from "#v8/constants.js";
+import { FuncInfo, WindowsCppEntriesProvider as V8WindowsCppEntriesProvider } from "#v8/tools/cppEntriesProvider.js";
 import * as cp from "child_process";
 import { randomInt } from "crypto";
 import * as fs from "fs";
@@ -8,11 +13,6 @@ import * as os from "os";
 import * as path from "path";
 import * as semver from "semver";
 import { CancellationToken, Progress, Uri, workspace } from "vscode";
-import { Address, parseAddress, toAddress } from "../../core/address";
-import { tryReaddirSync } from "../../core/fs";
-import { output } from "../../extension/outputChannel";
-import { kNullAddress } from "../../third-party-derived/v8/constants";
-import { FuncInfo, WindowsCppEntriesProvider as V8WindowsCppEntriesProvider } from "../../third-party-derived/v8/tools/cppEntriesProvider";
 import * as winnt from "./api/winnt";
 import { tryCreateDbghelpWrapper } from "./dbghelpLoader";
 

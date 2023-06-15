@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import { Disposable } from "@esfx/disposable";
+import { ImmutableEnumSet } from "#core/collections/enumSet.js";
 import { TreeView, Uri, window } from "vscode";
-import { ImmutableEnumSet } from "../../../core/collections/enumSet";
 import * as constants from "../../constants";
 import { LogFile } from "../../model/logFile";
 import { groupDeopts, sortDeopts } from "../../services/context";

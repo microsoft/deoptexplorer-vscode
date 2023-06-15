@@ -2,17 +2,17 @@
 // Licensed under the MIT License.
 
 import { from } from "@esfx/iter-query";
+import { markdown, MarkdownString } from "#core/markdown.js";
+import { DeoptEntry } from "#deoptigate/deoptEntry.js";
+import { DeoptimizeKind, DeoptimizeKindComparer, formatDeoptimizeKind } from "#v8/enums/deoptimizeKind.js";
 import { CancellationToken, ProviderResult, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
-import { markdown, MarkdownString } from "../../../core/markdown";
-import { DeoptEntry } from "../../../third-party-derived/deoptigate/deoptEntry";
-import { DeoptimizeKind, DeoptimizeKindComparer, formatDeoptimizeKind } from "../../../third-party-derived/v8/enums/deoptimizeKind";
+import { getScriptSourceUri } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
 import { FunctionReference } from "../../model/functionReference";
+import { TypeSafeCommand } from "../../vscode/commands";
 import { formatLocation } from "../../vscode/location";
 import { BaseNode } from "../common/baseNode";
 import { createTreeItem } from "../createTreeItem";
 import { DeoptTreeDataProvider } from "./deoptTreeDataProvider";
-import { TypeSafeCommand } from "../../vscode/commands";
-import { getScriptSourceUri } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
 
 export class DeoptNode extends BaseNode {
     private _functionReference: FunctionReference | null | undefined;

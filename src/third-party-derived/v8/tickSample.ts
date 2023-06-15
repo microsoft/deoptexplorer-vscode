@@ -9,11 +9,11 @@
 //  Use of this source code is governed by a BSD-style license that can be
 //  found in the LICENSE.v8 file.
 
-import { assert } from "../../core/assert";
-import { TimeTicks } from "../../core/time";
-import { VmState } from "./enums/vmState";
-import { Address } from "../../core/address";
+import { Address } from "#core/address.js";
+import { assert } from "#core/assert.js";
+import { TimeTicks } from "#core/time.js";
 import { kNullAddress } from "./constants";
+import { VmState } from "./enums/vmState";
 
 // https://github.com/v8/v8/blob/6bbf2dfa5b3bde9a40527268741b739f7d7e4bd0/src/profiler/tick-sample.h
 export class TickSample {

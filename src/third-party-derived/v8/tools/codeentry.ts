@@ -33,22 +33,22 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import { Equaler, Equatable } from "@esfx/equatable";
+import { Address } from "#core/address.js";
+import { assert } from "#core/assert.js";
+import type { Script } from "#core/script.js";
+import { Sources } from "#core/sources.js";
+import { equateNullable, hashNullable } from "#core/utils.js";
+import { EntryBase } from "#extension/model/entry.js";
+import { FunctionName } from "#extension/model/functionName.js";
+import { LocationEqualer } from "#extension/vscode/location.js";
 import { Location } from "vscode";
-import { assert } from "../../../core/assert";
-import { equateNullable, hashNullable } from "../../../core/utils";
-import { LocationEqualer } from "../../../extension/vscode/location";
+import { CodeEntryAndLineNumber } from "../codeEntryAndLineNumber";
+import { kNoColumnInfo, kNoLineNumberInfo, kNoScriptId, kNotInlined } from "../constants";
 import type { CodeKind } from "../enums/codeKind";
-import { EntryBase } from "../../../extension/model/entry";
-import { FunctionName } from "../../../extension/model/functionName";
 import { FunctionState } from "../enums/functionState";
 import { formatLogEventsAndTags, LogEventsAndTags } from "../enums/logEventsAndTags";
-import { Sources } from "../../../core/sources";
-import { Address } from "../../../core/address";
-import { kNoColumnInfo, kNoLineNumberInfo, kNoScriptId, kNotInlined } from "../constants";
-import type { Script } from "../../../core/script";
-import { SourcePositionTable } from "../sourcePositionTable";
 import { ProfileStackTrace } from "../profileStackTrace";
-import { CodeEntryAndLineNumber } from "../codeEntryAndLineNumber";
+import { SourcePositionTable } from "../sourcePositionTable";
 
 export class CodeEntry extends EntryBase {
     declare kind: "code";

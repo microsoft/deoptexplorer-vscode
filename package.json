@@ -24,6 +24,33 @@
 		"IC",
 		"Deoptimization"
 	],
+	"main": "./dist/extension.js",
+	"imports": {
+		"#core/*": {
+			"ts-loader": "./src/core/*",
+			"default": "./out/core/*"
+		},
+		"#extension/*": {
+			"ts-loader": ["./src/extension/*", "./src/extension/*.ts"],
+			"default": ["./out/extension/*", "./out/extension/*.js"]
+		},
+		"#v8/*": {
+			"ts-loader": "./src/third-party-derived/v8/*",
+			"default": "./out/third-party-derived/v8/*"
+		},
+		"#vscode/*": {
+			"ts-loader": "./src/third-party-derived/vscode/*",
+			"default": "./out/third-party-derived/vscode/*"
+		},
+		"#chromium/*": {
+			"ts-loader": "./src/third-party-derived/chromium/*",
+			"default": "./out/third-party-derived/chromium/*"
+		},
+		"#deoptigate/*": {
+			"ts-loader": "./src/third-party-derived/deoptigate/*",
+			"default": "./out/third-party-derived/deoptigate/*"
+		}
+	},
 	"activationEvents": [
 		"onLanguage:deoptexplorer-v8-map",
 		"onCommand:deoptexplorer.log.opens",
@@ -43,7 +70,6 @@
 			"description": "The extension will not attempt to use an executable (i.e., 'dumpbin' or 'nm') to resolve native function symbols."
 		}
 	},
-	"main": "./dist/extension.js",
 	"contributes": {
 		"configuration": {
 			"title": "Deopt Explorer",
@@ -1499,7 +1525,7 @@
 		"source-map": "^0.6.1",
 		"source-map-support": "^0.5.13",
 		"timeago.js": "^4.0.1",
-		"typescript": "^4.2.4"
+		"typescript": "^5.1.3"
 	},
 	"devDependencies": {
 		"@esfx/type-model": "^1.0.0",
@@ -1521,8 +1547,8 @@
 		"plist": "^3.0.2",
 		"rimraf": "^3.0.0",
 		"ts-jest": "^29.1.0",
-		"ts-loader": "^9.4.1",
-		"webpack": "^5.74.0",
-		"webpack-cli": "^4.7.0"
+		"ts-loader": "^9.4.3",
+		"webpack": "^5.87.0",
+		"webpack-cli": "^5.1.4"
 	}
 }

@@ -2,17 +2,17 @@
 // Licensed under the MIT License.
 
 import { from } from "@esfx/iter-query";
+import { formatAddress } from "#core/address.js";
+import { assert } from "#core/assert.js";
+import { html } from "#core/html.js";
+import { FunctionEntry } from "#deoptigate/functionEntry.js";
+import { formatCodeKind } from "#v8/enums/codeKind.js";
+import { formatDeoptimizeKind } from "#v8/enums/deoptimizeKind.js";
+import { formatFunctionState } from "#v8/enums/functionState.js";
+import { formatIcState } from "#v8/enums/icState.js";
+import { formatIcType } from "#v8/enums/icType.js";
 import * as path from "path";
 import { Disposable, ExtensionContext, Uri, ViewColumn, Webview, WebviewPanel, window } from "vscode";
-import { formatAddress } from "../../core/address";
-import { assert } from "../../core/assert";
-import { html } from "../../core/html";
-import { FunctionEntry } from "../../third-party-derived/deoptigate/functionEntry";
-import { formatCodeKind } from "../../third-party-derived/v8/enums/codeKind";
-import { formatDeoptimizeKind } from "../../third-party-derived/v8/enums/deoptimizeKind";
-import { formatFunctionState } from "../../third-party-derived/v8/enums/functionState";
-import { formatIcState } from "../../third-party-derived/v8/enums/icState";
-import { formatIcType } from "../../third-party-derived/v8/enums/icType";
 import * as constants from "../constants";
 import { formatMillisecondsHighPrecision } from "../formatting/numbers";
 import { LogFile } from "../model/logFile";

@@ -9,9 +9,9 @@
 //  Use of this source code is governed by a BSD-style license that can be
 //  found in the LICENSE.v8 file.
 
+import { Script } from "#core/script.js";
 import { Position } from "vscode";
 import { kNoSourcePosition } from "./constants";
-import { Script } from "../../core/script";
 import { SourcePosition } from "./sourcePosition";
 import { SharedFunctionCodeEntry } from "./tools/codeentry";
 

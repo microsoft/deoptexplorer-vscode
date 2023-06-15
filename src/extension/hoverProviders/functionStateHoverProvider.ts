@@ -3,21 +3,21 @@
 
 import { Disposable } from "@esfx/disposable";
 import { from } from "@esfx/iter-query";
+import { RangeMap } from "#core/collections/rangeMap.js";
+import { markdown, MarkdownString } from "#core/markdown.js";
+import { MruCache } from "#core/mruCache.js";
+import { TimeTicksComparer } from "#core/time.js";
+import { FunctionEntry } from "#deoptigate/functionEntry.js";
+import { formatFunctionState, FunctionState, isCompiledFunctionState, isInterpretedFunctionState, isOptimizedFunctionState } from "#v8/enums/functionState.js";
 import { CancellationToken, Hover, HoverProvider, Position, ProviderResult, Range, TextDocument, Uri } from "vscode";
-import { RangeMap } from "../../core/collections/rangeMap";
-import { markdown, MarkdownString } from "../../core/markdown";
-import { MruCache } from "../../core/mruCache";
-import { TimeTicksComparer } from "../../core/time";
-import { FunctionEntry } from "../../third-party-derived/deoptigate/functionEntry";
-import { formatFunctionState, FunctionState, isCompiledFunctionState, isInterpretedFunctionState, isOptimizedFunctionState } from "../../third-party-derived/v8/enums/functionState";
 import * as constants from "../constants";
+import { unwrapScriptSource } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 import { formatMillisecondsHighPrecision } from "../formatting/numbers";
 import { Entry } from "../model/entry";
 import { getCanonicalUri } from "../services/canonicalPaths";
 import { openedLog } from "../services/currentLogFile";
 import { CommandUri } from "../vscode/commandUri";
 import { entryContainsPosition } from "./utils";
-import { unwrapScriptSource } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 
 const LINE_RANGE = 5;
 

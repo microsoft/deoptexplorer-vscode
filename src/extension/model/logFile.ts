@@ -3,22 +3,21 @@
 
 import { identity } from "@esfx/fn";
 import { from } from "@esfx/iter-query";
+import { StringMap } from "#core/collections/stringMap.js";
+import { Sources } from "#core/sources.js";
+import { DeoptEntry } from "#deoptigate/deoptEntry.js";
+import { FunctionEntry } from "#deoptigate/functionEntry.js";
+import { IcEntry } from "#deoptigate/icEntry.js";
+import { Profile } from "#v8/tools/profile.js";
 import { Location, Position, Uri } from "vscode";
-import { StringMap } from "../../core/collections/stringMap";
-import { getCanonicalUri } from "../services/canonicalPaths";
 import { createFinder } from "../components/finder";
-import { Sources } from "../../core/sources";
-import { Profile } from "../../third-party-derived/v8/tools/profile";
-import { DeoptEntry } from "../../third-party-derived/deoptigate/deoptEntry";
+import { getCanonicalUri } from "../services/canonicalPaths";
 import { Entry } from "./entry";
 import { FileEntry } from "./fileEntry";
-import { FunctionEntry } from "../../third-party-derived/deoptigate/functionEntry";
 import { FunctionName } from "./functionName";
-import { IcEntry } from "../../third-party-derived/deoptigate/icEntry";
 import { MapEntry, MapId } from "./mapEntry";
-// import { TimerInfo } from "../../third-party-derived/v8/tools/timerInfo";
-import { V8Version } from "../../core/v8Version";
-import { computeCommonBaseDirectory, relativeUriFragment, uriBasename } from "../../core/uri";
+import { computeCommonBaseDirectory, relativeUriFragment, uriBasename } from "#core/uri.js";
+import { V8Version } from "#core/v8Version.js";
 import { MemoryOverview } from "./memoryOverview";
 
 export class LogFile {

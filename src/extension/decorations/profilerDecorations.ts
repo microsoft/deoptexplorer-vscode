@@ -4,13 +4,14 @@
 import { CancelError } from "@esfx/cancelable";
 import { Disposable } from "@esfx/disposable";
 import { from } from "@esfx/iter-query";
+import { assert } from "#core/assert.js";
+import { RangeMap } from "#core/collections/rangeMap.js";
+import { markdown } from "#core/markdown.js";
+import { UriEqualer } from "#core/uri.js";
+import { FileLineTick } from "#v8/tools/types.js";
 import { CancellationError, CancellationToken, CancellationTokenSource, DecorationOptions, ExtensionContext, OverviewRulerLane, Position, Range, TextEditor, TextEditorDecorationType, window } from "vscode";
-import { assert } from "../../core/assert";
-import { RangeMap } from "../../core/collections/rangeMap";
-import { markdown } from "../../core/markdown";
-import { UriEqualer } from "../../core/uri";
-import { FileLineTick } from "../../third-party-derived/v8/tools/types";
 import { ShowDecorations } from "../constants";
+import { unwrapScriptSource } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 import { formatMilliseconds } from "../formatting/numbers";
 import { ProfileViewNodeSnapshot } from "../model/profileViewNodeSnapshot";
 import { error } from "../outputChannel";
@@ -22,7 +23,6 @@ import { currentProfileViewNodeSnapshot } from "../services/stateManager";
 import { quartiles } from "../utils/math";
 import { VSDisposableStack } from "../vscode/disposable";
 import { createDecorationType, getTextEditors } from "./utils";
-import { unwrapScriptSource } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 
 export class ProfilerDecorations {
     private _showProfilerDecorations: "active" | "visible" | "none" = showDecorations.has(ShowDecorations.Profiler) ? "visible" : "none";

@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 import { from } from "@esfx/iter-query";
+import { FunctionEntry } from "#deoptigate/functionEntry.js";
+import { FunctionState, isOptimizedFunctionState } from "#v8/enums/functionState.js";
 import { SymbolKind, ThemeIcon, TreeItemCollapsibleState, Uri } from "vscode";
-import { FunctionEntry } from "../../../third-party-derived/deoptigate/functionEntry";
-import { FunctionState, isOptimizedFunctionState } from "../../../third-party-derived/v8/enums/functionState";
-import { getScriptSourceUri, wrapScriptSource } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
+import { getScriptSourceUri } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
 import { FunctionReference } from "../../model/functionReference";
 import { TypeSafeCommand } from "../../vscode/commands";
 import { formatLocation } from "../../vscode/location";

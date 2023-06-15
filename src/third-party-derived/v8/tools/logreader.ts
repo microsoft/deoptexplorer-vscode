@@ -33,8 +33,8 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import { CancelError } from "@esfx/cancelable";
+import { Address, parseAddress } from "#core/address.js";
 import { CancellationError, CancellationToken } from "vscode";
-import { Address, parseAddress } from "../../../core/address";
 import { CsvParser } from "./csvparser";
 
 // Parses dummy variable for readability;

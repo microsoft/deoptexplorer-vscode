@@ -5,7 +5,7 @@ import * as path from "path";
 import { Disposable, ExtensionContext, Location, Position, Range, Uri, ViewColumn, Webview, WebviewPanel, window } from "vscode";
 import { LogFile } from "../model/logFile";
 import * as constants from "../constants";
-import { html } from "../../core/html";
+import { html } from "#core/html.js";
 import { openedFile, openedLog } from "../services/currentLogFile";
 import { events } from "../services/events";
 import { createNonce } from "../utils/csp";

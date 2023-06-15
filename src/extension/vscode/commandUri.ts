@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { assert } from "#core/assert.js";
+import { deserialize, serialize } from "#core/serializer.js";
 import { Uri } from "vscode";
-import { assert } from "../../core/assert";
 import { CommandArgumentValue } from "../types";
-import { deserialize, serialize } from "../../core/serializer";
 
 /**
  * Formats a VSCode command URI for use in HTML and Markdown links.

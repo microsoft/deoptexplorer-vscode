@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { FileLineTick } from "#v8/tools/types.js";
 import { TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
-import { FileLineTick } from "../../../third-party-derived/v8/tools/types";
+import { getScriptSourceUri } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
 import { formatMilliseconds } from "../../formatting/numbers";
 import { LogFile } from "../../model/logFile";
 import { openedLog } from "../../services/currentLogFile";
@@ -10,7 +11,6 @@ import { formatLocation } from "../../vscode/location";
 import { BaseNode } from "../common/baseNode";
 import { createTreeItem } from "../createTreeItem";
 import { LineTickTreeDataProvider } from "./lineTickTreeDataProvider";
-import { getScriptSourceUri } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
 
 export class LineTickNode extends BaseNode {
     constructor(

@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 import { from } from "@esfx/iter-query";
+import { markdown } from "#core/markdown.js";
+import { DeoptEntry } from "#deoptigate/deoptEntry.js";
+import { DeoptimizeKind, DeoptimizeKindComparer, formatDeoptimizeKind } from "#v8/enums/deoptimizeKind.js";
 import { CancellationToken, MarkdownString, ProviderResult, TreeItem } from "vscode";
-import { markdown } from "../../../../core/markdown";
-import { DeoptEntry } from "../../../../third-party-derived/deoptigate/deoptEntry";
-import { DeoptimizeKind, DeoptimizeKindComparer, formatDeoptimizeKind } from "../../../../third-party-derived/v8/enums/deoptimizeKind";
 import { openedLog } from "../../../services/currentLogFile";
 import { EntryNode } from "../common/entryNode";
 import { DeoptGroupNode } from "./deoptGroupNode";

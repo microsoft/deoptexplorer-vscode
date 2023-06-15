@@ -10,9 +10,9 @@
 //  found in the LICENSE.v8 file.
 
 import { Comparer } from "@esfx/equatable";
-import { assert } from "../../core/assert";
-import { binarySearchKey } from "../../core/utils";
-import { Address } from "../../core/address";
+import { Address } from "#core/address.js";
+import { assert } from "#core/assert.js";
+import { binarySearchKey } from "#core/utils.js";
 import { kNoLineNumberInfo, kNotInlined, kNullAddress } from "./constants";
 
 class SourcePositionTuple {

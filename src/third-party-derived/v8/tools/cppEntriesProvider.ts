@@ -32,12 +32,12 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import { Address, parseAddress, toAddress } from "#core/address.js";
+import { assert } from "#core/assert.js";
 import * as cp from "child_process";
 import * as fs from "fs";
 import * as os from "os";
 import { CancellationToken, Location, Progress, Uri, workspace } from "vscode";
-import { assert } from "../../../core/assert";
-import { Address, parseAddress, toAddress } from "../../../core/address";
 
 export interface FuncInfo {
     name: string;

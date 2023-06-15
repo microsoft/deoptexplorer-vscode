@@ -9,8 +9,8 @@
 //  Use of this source code is governed by a BSD-style license that can be
 //  found in the LICENSE.v8 file.
 
-import { V8Version } from "../../../core/v8Version";
-import { VersionedEnum } from "../../../core/versionedEnum";
+import { V8Version } from "#core/v8Version.js";
+import { VersionedEnum } from "#core/versionedEnum.js";
 
 export const enum CodeKind {
     // Current as of 6bbf2dfa5b3bde9a40527268741b739f7d7e4bd0 (last changed in 9.2.42)

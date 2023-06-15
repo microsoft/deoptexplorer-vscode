@@ -11,8 +11,8 @@
 
 import { sum } from "@esfx/iter-fn";
 import { ref, Reference } from "@esfx/ref";
+import { html, HtmlString } from "#core/html.js";
 import { createHash } from "crypto";
-import { html, HtmlString } from "../../core/html";
 
 export interface Slice {
     value: number;

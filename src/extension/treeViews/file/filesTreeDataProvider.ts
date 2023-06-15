@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 
 import { from } from "@esfx/iter-query";
+import { StringMap } from "#core/collections/stringMap.js";
+import type { DeoptEntry } from "#deoptigate/deoptEntry.js";
+import type { FunctionEntry } from "#deoptigate/functionEntry.js";
+import type { IcEntry } from "#deoptigate/icEntry.js";
 import type { Uri } from "vscode";
-import { StringMap } from "../../../core/collections/stringMap";
-import type { DeoptEntry } from "../../../third-party-derived/deoptigate/deoptEntry";
-import type { FunctionEntry } from "../../../third-party-derived/deoptigate/functionEntry";
-import type { IcEntry } from "../../../third-party-derived/deoptigate/icEntry";
 import type { Entry } from "../../model/entry";
 import type { LogFile } from "../../model/logFile";
 import { getCanonicalUri } from "../../services/canonicalPaths";

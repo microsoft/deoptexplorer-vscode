@@ -33,7 +33,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import { Reference } from "@esfx/ref";
-import { Address, toAddress } from "../../../core/address";
+import { Address, toAddress } from "#core/address.js";
 import { CodeEntry, DynamicCodeEntry, DynamicFuncCodeEntry, SharedFunctionCodeEntry } from "./codeentry";
 import { SplayTree } from "./splaytree";
 

@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { markdown } from "#core/markdown.js";
+import { isDosPath, normalizePathPosix, normalizePathWindows } from "#core/paths.js";
+import { Sources } from "#core/sources.js";
+import { isUriString, relativeUriFragment, resolveUri } from "#core/uri.js";
 import { Uri } from "vscode";
-import { markdown } from "../../core/markdown";
-import { isDosPath, normalizePathPosix, normalizePathWindows } from "../../core/paths";
-import { Sources } from "../../core/sources";
-import { isUriString, relativeUriFragment, resolveUri } from "../../core/uri";
 import * as constants from "../constants";
 import { getScriptSourceUri } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 import { LogFile } from "../model/logFile";

@@ -9,9 +9,9 @@
 //  Use of this source code is governed by a BSD-style license that can be
 //  found in the LICENSE.v8 file.
 
+import { TimeTicks } from "#core/time.js";
+import { FunctionEntry } from "#deoptigate/functionEntry.js";
 import { CodeKind } from "../enums/codeKind";
-import { FunctionEntry } from "../../deoptigate/functionEntry";
-import { TimeTicks } from "../../../core/time";
 
 /**
  * Represents an code event in a V8 execution timeline.

@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import type { KnownType } from "#core/serializer.js";
 import type * as vscode from "vscode";
 import type { ContextCommandHandler } from "./commands";
-import type { KnownType } from "../core/serializer";
 
 declare const invalid: unique symbol;
 export interface invalid<T, M = "Invalid type"> { [invalid]: [T, M] };

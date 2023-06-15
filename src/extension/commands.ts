@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 import { AsyncMutex } from "@esfx/async-mutex";
+import { writeFileAsync } from "#core/fs.js";
 import * as path from "path";
 import { Disposable, ExtensionContext, Location, Position, ProviderResult, Uri, window } from "vscode";
-import { writeFileAsync } from "../core/fs";
 import * as constants from "./constants";
 import { MapId } from "./model/mapEntry";
 import { log } from "./outputChannel";

@@ -2,16 +2,16 @@
 // Licensed under the MIT License.
 
 import { Comparable, Comparer, Equaler, Equatable } from "@esfx/equatable";
-import { compare, equate, every, hash, last } from "@esfx/iter-fn";
+import { compare, equate, every, hash } from "@esfx/iter-fn";
+import { Address, formatAddress, parseAddress } from "#core/address.js";
+import { MarkdownString, ToMarkdownString } from "#core/markdown.js";
+import { Sources } from "#core/sources.js";
+import { TimeTicks } from "#core/time.js";
+import { FunctionEntry } from "#deoptigate/functionEntry.js";
+import { IcEntry, IcEntryUpdate } from "#deoptigate/icEntry.js";
+import { kNullAddress } from "#v8/constants.js";
+import { MapEvent } from "#v8/enums/mapEvent.js";
 import { Location } from "vscode";
-import { Address, formatAddress, parseAddress } from "../../core/address";
-import { MarkdownString, ToMarkdownString } from "../../core/markdown";
-import { Sources } from "../../core/sources";
-import { TimeTicks } from "../../core/time";
-import { FunctionEntry } from "../../third-party-derived/deoptigate/functionEntry";
-import { IcEntry, IcEntryUpdate } from "../../third-party-derived/deoptigate/icEntry";
-import { kNullAddress } from "../../third-party-derived/v8/constants";
-import { MapEvent } from "../../third-party-derived/v8/enums/mapEvent";
 import { EntryBase } from "./entry";
 
 export class MapId implements ToMarkdownString {

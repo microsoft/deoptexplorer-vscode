@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 
 import { from, Query } from "@esfx/iter-query";
+import { compareNullable } from "#core/utils.js";
+import { CodeEntry } from "#v8/tools/codeentry.js";
+import { ProfileViewNode } from "#v8/tools/profile_view.js";
+import * as constants from "../../constants";
 import { FunctionNameComparer } from "../../model/functionName";
 import type { LogFile } from "../../model/logFile";
-import { CodeEntry } from "../../../third-party-derived/v8/tools/codeentry";
-import { ProfileViewNode } from "../../../third-party-derived/v8/tools/profile_view";
-import * as constants from "../../constants";
-import { compareNullable } from "../../../core/utils";
 import { LocationComparer } from "../../vscode/location";
 import { BaseNodeProvider } from "../common/baseNodeProvider";
 import { ProfileNode } from "./profileNode";

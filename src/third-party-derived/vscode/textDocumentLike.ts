@@ -8,13 +8,13 @@
 //  Copyright (c) Microsoft Corporation. All rights reserved.
 //  Licensed under the MIT License. See LICENSE.vscode in the project root for license information.
 
+import { assert } from "#core/assert.js";
+import { LineMap } from "#core/lineMap.js";
+import { Sources } from "#core/sources.js";
+import { isJavaScriptFile, isJsxFile, isTsxFile, isTypeScriptFile } from "#core/uri.js";
+import { pathOrUriStringToUri, UNKNOWN_URI, uriToPathOrUriString } from "#extension/vscode/uri.js";
 import * as ts from "typescript";
 import { EndOfLine, Position, Range, TextDocument, TextLine, Uri } from "vscode";
-import { assert } from "../../core/assert";
-import { Sources } from "../../core/sources";
-import { isJavaScriptFile, isJsxFile, isTsxFile, isTypeScriptFile } from "../../core/uri";
-import { LineMap } from "../../core/lineMap";
-import { pathOrUriStringToUri, UNKNOWN_URI, uriToPathOrUriString } from "../../extension/vscode/uri";
 import { getWordAtText } from "./wordHelpers";
 
 const isWindows = process.platform === "win32";

@@ -3,12 +3,12 @@
 
 import { Comparable, Comparer, Equaler, Equatable } from "@esfx/equatable";
 import { from, Query } from "@esfx/iter-query";
+import { formatAddress } from "#core/address.js";
+import { markdown, MarkdownString } from "#core/markdown.js";
+import { uriBasename, UriComparer, UriEqualer } from "#core/uri.js";
+import { compareNullable, equateNullable, getNullableComparer, getNullableEqualer, hashNullable } from "#core/utils.js";
+import { FunctionEntry } from "#deoptigate/functionEntry.js";
 import { Location, Position, SymbolKind, ThemeIcon, Uri } from "vscode";
-import { formatAddress } from "../../../core/address";
-import { markdown, MarkdownString } from "../../../core/markdown";
-import { uriBasename, UriComparer, UriEqualer } from "../../../core/uri";
-import { compareNullable, equateNullable, getNullableComparer, getNullableEqualer, hashNullable } from "../../../core/utils";
-import { FunctionEntry } from "../../../third-party-derived/deoptigate/functionEntry";
 import * as constants from "../../constants";
 import type { LogFile } from "../../model/logFile";
 import { MapId, MapReference } from "../../model/mapEntry";
@@ -18,7 +18,6 @@ import { formatUriMarkdown } from "../../vscode/uri";
 import { BaseNodeProvider } from "../common/baseNodeProvider";
 import { GroupingNode, GroupingOptions } from "../common/groupingNode";
 import { MapNode } from "./mapNode";
-import path from "path";
 
 const PAGE_SIZE = 500;
 

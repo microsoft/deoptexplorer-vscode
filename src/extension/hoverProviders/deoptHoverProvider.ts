@@ -3,19 +3,19 @@
 
 import { Disposable } from "@esfx/disposable";
 import { from } from "@esfx/iter-query";
+import { RangeMap } from "#core/collections/rangeMap.js";
+import { markdown, MarkdownString } from "#core/markdown.js";
+import { MruCache } from "#core/mruCache.js";
+import { TimeTicksComparer } from "#core/time.js";
+import { DeoptEntry, DeoptEntryUpdate } from "#deoptigate/deoptEntry.js";
+import { DeoptimizeKind, formatDeoptimizeKind } from "#v8/enums/deoptimizeKind.js";
 import { CancellationToken, Hover, HoverProvider, Position, ProviderResult, Range, TextDocument } from "vscode";
-import { markdown, MarkdownString } from "../../core/markdown";
-import { MruCache } from "../../core/mruCache";
-import { TimeTicksComparer } from "../../core/time";
-import { DeoptEntry, DeoptEntryUpdate } from "../../third-party-derived/deoptigate/deoptEntry";
-import { DeoptimizeKind, formatDeoptimizeKind } from "../../third-party-derived/v8/enums/deoptimizeKind";
+import { unwrapScriptSource } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 import { formatMillisecondsHighPrecision } from "../formatting/numbers";
 import { Entry } from "../model/entry";
 import { getCanonicalUri } from "../services/canonicalPaths";
 import { openedLog } from "../services/currentLogFile";
 import { entryContainsPosition } from "./utils";
-import { RangeMap } from "../../core/collections/rangeMap";
-import { unwrapScriptSource } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 
 const LINE_RANGE = 5;
 

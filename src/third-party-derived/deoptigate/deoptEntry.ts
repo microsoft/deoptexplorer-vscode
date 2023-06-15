@@ -9,13 +9,13 @@
 //  Use of this source code is goverened by the license that can be found
 //  in the LICENSE.deoptigate file.
 
+import { Sources } from "#core/sources.js";
+import { TimeTicks } from "#core/time.js";
+import { resolveDeoptLocations } from "#extension/components/locations.js";
+import { ReferenceableEntryBase } from "#extension/model/entry.js";
+import { DeoptimizeKind } from "#v8/enums/deoptimizeKind.js";
+import { FunctionState } from "#v8/enums/functionState.js";
 import { Location } from "vscode";
-import { resolveDeoptLocations } from "../../extension/components/locations";
-import { Sources } from "../../core/sources";
-import { DeoptimizeKind } from "../v8/enums/deoptimizeKind";
-import { ReferenceableEntryBase } from "../../extension/model/entry";
-import { FunctionState } from "../v8/enums/functionState";
-import { TimeTicks } from "../../core/time";
 import { FunctionEntry } from "./functionEntry";
 
 /**

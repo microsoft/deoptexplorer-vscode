@@ -3,17 +3,17 @@
 
 import { Comparable, Comparer, Equaler, Equatable } from "@esfx/equatable";
 import { ref } from "@esfx/ref";
+import { KnownSerializedType, RegisteredSerializer, registerKnownSerializer } from "#core/serializer.js";
+import { resolveUri, uriBasename } from "#core/uri.js";
+import { compareNullable, equateNullable, hashNullable } from "#core/utils.js";
+import { FunctionState, parseFunctionState } from "#v8/enums/functionState.js";
+import { CodeEntry } from "#v8/tools/codeentry.js";
 import * as path from "path";
 import { Location, Position, Range, Uri } from "vscode";
 import { getCanonicalUri } from "../services/canonicalPaths";
-import { compareNullable, equateNullable, hashNullable } from "../../core/utils";
 import { LocationComparer, LocationEqualer, LocationSerializer } from "../vscode/location";
 import { tryParseTrailingRange } from "../vscode/range";
 import { isPathOrUriString, pathOrUriStringToUri } from "../vscode/uri";
-import { KnownSerializedType, RegisteredSerializer, registerKnownSerializer } from "../../core/serializer";
-import { CodeEntry } from "../../third-party-derived/v8/tools/codeentry";
-import { FunctionState, parseFunctionState } from "../../third-party-derived/v8/enums/functionState";
-import { resolveUri, uriBasename } from "../../core/uri";
 
 const functionFileRegExp = /^(?:(?<type>\w+): (?<state>[~*])?)?(?<nameAndLocation>.*)$/;
 const uriOrPathStartRegExp = /(?:[\\/](?:[a-z](?:[:|]|%3a|%7c)[\\/]?)|[a-z](?:[:|]|%3a|%7c)[\\/]?)|[a-z][-+.a-z0-9]*:/iy;

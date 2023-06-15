@@ -9,8 +9,8 @@
 //  Use of this source code is governed by a BSD-style license that can be
 //  found in the LICENSE.v8 file.
 
-import { V8Version } from "../../../core/v8Version";
-import { VersionedEnum } from "../../../core/versionedEnum";
+import { V8Version } from "#core/v8Version.js";
+import { VersionedEnum } from "#core/versionedEnum.js";
 
 export const enum VmState {
     ScriptExecution = 0, // JS

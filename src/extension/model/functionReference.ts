@@ -3,11 +3,11 @@
 
 import { Comparable, Comparer, Equaler, Equatable } from "@esfx/equatable";
 import { compare, equate, hash } from "@esfx/fn";
+import { KnownSerializedType, RegisteredSerializer, registerKnownSerializer } from "#core/serializer.js";
+import { UriComparer, UriEqualer, UriSerializer } from "#core/uri.js";
+import { compareNullable, equateNullable, hashNullable } from "#core/utils.js";
+import { FunctionEntry } from "#deoptigate/functionEntry.js";
 import { Location, Range, SymbolKind, Uri } from "vscode";
-import { KnownSerializedType, RegisteredSerializer, registerKnownSerializer } from "../../core/serializer";
-import { UriComparer, UriEqualer, UriSerializer } from "../../core/uri";
-import { compareNullable, equateNullable, hashNullable } from "../../core/utils";
-import { FunctionEntry } from "../../third-party-derived/deoptigate/functionEntry";
 import { RangeComparer, RangeEqualer, RangeSerializer } from "../vscode/range";
 
 export class FunctionReference implements Equatable, Comparable {

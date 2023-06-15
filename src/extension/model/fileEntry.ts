@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { FunctionEntry } from "../../third-party-derived/deoptigate/functionEntry";
-import { IcEntry } from "../../third-party-derived/deoptigate/icEntry";
-import { DeoptEntry } from "../../third-party-derived/deoptigate/deoptEntry";
+import { DeoptEntry } from "#deoptigate/deoptEntry.js";
+import { FunctionEntry } from "#deoptigate/functionEntry.js";
+import { IcEntry } from "#deoptigate/icEntry.js";
 
 /**
  * Contains everything we know about a file (except for profile events)

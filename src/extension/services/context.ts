@@ -5,42 +5,41 @@
  * This file manages the various context values used in commands and views for `enablement` and `when` clauses.
  */
 
-import { corresponds, distinct, identity, orderBy } from "@esfx/iter-fn";
+import { ImmutableEnumSet } from "#core/collections/enumSet.js";
 import { Disposable, ExtensionContext } from "vscode";
 import {
     contextKeys,
-    kDefaultShowNativeCodeProfileNodes,
-    kDefaultShowNodeJsProfileNodes,
+    GroupDeopts,
+    GroupMaps,
+    kDefaultGroupDeopts,
+    kDefaultGroupMaps,
     kDefaultLogStatus,
-    kDefaultShowMaps,
     kDefaultMapSortMode,
     kDefaultProfileShowMode,
     kDefaultProfileSortMode,
     kDefaultShowDecorations,
+    kDefaultShowICStates,
+    kDefaultShowJustMyCode,
     kDefaultShowLineTicks,
+    kDefaultShowMaps,
+    kDefaultShowNativeCodeProfileNodes,
+    kDefaultShowNodeJsProfileNodes,
+    kDefaultShowNodeModulesProfileNodes,
+    kDefaultSortDeopts,
+    kDefaultSortICs,
     LogStatus,
-    ShowMaps as ShowMaps,
     MapSortMode,
     ProfileShowMode,
     ProfileSortMode,
     ShowDecorations,
-    kDefaultShowJustMyCode,
-    kDefaultShowNodeModulesProfileNodes,
-    GroupMaps,
-    kDefaultGroupMaps,
-    kDefaultGroupDeopts,
-    GroupDeopts,
-    kDefaultSortDeopts,
-    SortDeopts,
-    kDefaultSortICs,
-    SortICs,
-    kDefaultShowICStates,
     ShowICStates,
+    ShowMaps,
+    SortDeopts,
+    SortICs,
 } from "../constants";
-import * as storage from "./storage";
 import { typeSafeExecuteCommand } from "../vscode/commands";
 import { emitters } from "./events";
-import { ImmutableEnumSet } from "../../core/collections/enumSet";
+import * as storage from "./storage";
 
 let currentContext: ExtensionContext | undefined;
 

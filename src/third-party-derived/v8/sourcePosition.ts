@@ -9,7 +9,7 @@
 //  Use of this source code is governed by a BSD-style license that can be
 //  found in the LICENSE.v8 file.
 
-import { assert } from "../../core/assert";
+import { assert } from "#core/assert.js";
 import { kNoSourcePosition, kNotInlined } from "./constants";
 import { DeoptimizationData } from "./deoptimizationData";
 import { SourcePositionInfo } from "./sourcePositionInfo";
