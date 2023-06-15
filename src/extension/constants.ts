@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { ImmutableEnumSet } from "../core/collections/enumSet";
+import { ImmutableEnumSet } from "#core/collections/enumSet.js";
 
 export const extensionName = "deoptexplorer";
 export const extensionUIName = "Deopt Explorer";

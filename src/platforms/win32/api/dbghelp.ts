@@ -4,11 +4,11 @@
 // TODO: Most of this isn't working anymore in the latest VS Code because `ref-napi` and `ffi-napi` haven't been
 //       updated to support newer versions of electron.
 
+import { tryExec } from "#core/utils.js";
 import { randomBytes } from "crypto";
 import * as ffi from "ffi-napi";
 import * as ref from "ref-napi";
 import { Uri } from "vscode";
-import { tryExec } from "../../../core/utils";
 import { ArrayType } from "./ref-array";
 import { StructType } from "./ref-struct";
 import { BOOL, CHAR, DWORD, DWORD64, GUID, HANDLE, INT, PCSTR, PCWSTR, PDWORD, PDWORD64, PSTR, PVOID, PWSTR, ULONG, ULONG64, WCHAR } from "./win32";

@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 import { Comparer, Equaler } from "@esfx/equatable";
+import { RegisteredSerializer, registerKnownSerializer } from "#core/serializer.js";
+import { hashNullable } from "#core/utils.js";
 import { Position } from "vscode";
-import { RegisteredSerializer, registerKnownSerializer } from "../../core/serializer";
-import { hashNullable } from "../../core/utils";
 
 export interface FormatPositionOptions {
     /**

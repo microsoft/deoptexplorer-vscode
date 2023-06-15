@@ -10,15 +10,15 @@
 //  in the LICENSE.deoptigate file.
 
 import { from } from "@esfx/iter-query";
+import { Sources } from "#core/sources.js";
+import { TimeTicks } from "#core/time.js";
+import { resolveIcLocations } from "#extension/components/locations.js";
+import { ReferenceableEntryBase } from "#extension/model/entry.js";
+import type { MapEntry, MapId } from "#extension/model/mapEntry.js";
+import { FunctionState } from "#v8/enums/functionState.js";
+import { IcState } from "#v8/enums/icState.js";
+import { IcType } from "#v8/enums/icType.js";
 import { Location } from "vscode";
-import { Sources } from "../../core/sources";
-import { TimeTicks } from "../../core/time";
-import { resolveIcLocations } from "../../extension/components/locations";
-import { ReferenceableEntryBase } from "../../extension/model/entry";
-import type { MapEntry, MapId } from "../../extension/model/mapEntry";
-import { FunctionState } from "../v8/enums/functionState";
-import { IcState } from "../v8/enums/icState";
-import { IcType } from "../v8/enums/icType";
 import { FunctionEntry } from "./functionEntry";
 
 /**

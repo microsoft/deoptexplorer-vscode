@@ -1,17 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { Disposable, DisposableStack } from "@esfx/disposable";
+import { Address } from "#core/address.js";
+import { kNullAddress } from "#v8/constants.js";
+import { FuncInfo } from "#v8/tools/cppEntriesProvider.js";
 import * as fs from "fs";
+import * as path from "path";
 import * as ref from "ref-napi";
+import { CancellationError, CancellationToken, Progress, Uri } from "vscode";
 import * as dbghelp from "./api/dbghelp";
 import * as kernel32 from "./api/kernel32";
-import * as path from "path";
 import { PSTR, sizeof } from "./api/win32";
-import { Disposable, DisposableStack } from "@esfx/disposable";
-import { CancellationError, CancellationToken, Progress, Uri } from "vscode";
-import { Address } from "../../core/address";
-import { kNullAddress } from "../../third-party-derived/v8/constants";
-import { FuncInfo } from "../../third-party-derived/v8/tools/cppEntriesProvider";
 
 // Whether to download symbols from the Microsoft public symbol store, but this can be very slow...
 const USE_MS_PUBLIC_SYMBOL_STORE = false;

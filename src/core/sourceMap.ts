@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { getCanonicalUri } from "#extension/services/canonicalPaths.js";
+import { pathOrUriStringToUri } from "#extension/vscode/uri.js";
 import * as source_map from "source-map";
 import { FindPosition, MappedPosition, SourceFindPosition, SourceMapConsumer } from "source-map";
 import { Location, Position, Range, Uri } from "vscode";
 import { assert } from "./assert";
-import { getCanonicalUri } from "../extension/services/canonicalPaths";
-import { pathOrUriStringToUri } from "../extension/vscode/uri";
 import { ensureRelativePathIsDotted } from "./paths";
 import { resolveUri, UriEqualer } from "./uri";
 

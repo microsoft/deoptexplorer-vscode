@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import { Disposable, ExtensionContext, Uri } from "vscode";
-import { ImmutableEnumSet } from "../../core/collections/enumSet";
-import { deserialize, serialize } from "../../core/serializer";
+import { ImmutableEnumSet } from "#core/collections/enumSet.js";
+import { deserialize, serialize } from "#core/serializer.js";
 import * as constants from "../constants";
 
 let currentContext: ExtensionContext | undefined;

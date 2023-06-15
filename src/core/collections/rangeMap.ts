@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { SplayTree } from "#v8/tools/splaytree.js";
 import { Position, Range } from "vscode";
-import { SplayTree } from "../../third-party-derived/v8/tools/splaytree";
 
 /**
  * Maps a {@link Range} to a value.

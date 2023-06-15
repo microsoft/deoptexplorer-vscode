@@ -3,17 +3,17 @@
 
 import { Disposable } from "@esfx/disposable";
 import { from } from "@esfx/iter-query";
+import { FunctionEntry } from "#deoptigate/functionEntry.js";
+import { FunctionState, isCompiledFunctionState, isInterpretedFunctionState, isOptimizedFunctionState } from "#v8/enums/functionState.js";
 import { ExtensionContext, OverviewRulerLane, TextEditorDecorationType, window } from "vscode";
-import { FunctionEntry } from "../../third-party-derived/deoptigate/functionEntry";
-import { FunctionState, isCompiledFunctionState, isInterpretedFunctionState, isOptimizedFunctionState } from "../../third-party-derived/v8/enums/functionState";
 import { ShowDecorations } from "../constants";
+import { unwrapScriptSource } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 import { getCanonicalUri } from "../services/canonicalPaths";
 import { showDecorations } from "../services/context";
 import { openedLog } from "../services/currentLogFile";
 import { events } from "../services/events";
 import { VSDisposableStack } from "../vscode/disposable";
 import { createBaseDecorationType, getTextEditors } from "./utils";
-import { unwrapScriptSource } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 
 export class FunctionStateDecorations {
     private _showDecorations: "active" | "visible" | "none" = showDecorations.has(ShowDecorations.Functions) ? "visible" : "none";

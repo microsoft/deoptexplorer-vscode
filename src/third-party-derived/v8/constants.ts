@@ -9,7 +9,7 @@
 //  Use of this source code is governed by a BSD-style license that can be
 //  found in the LICENSE.v8 file.
 
-import { toAddress } from "../../core/address";
+import { toAddress } from "#core/address.js";
 
 export const kNoLineNumberInfo = 0;
 export const kNoColumnInfo = 0;

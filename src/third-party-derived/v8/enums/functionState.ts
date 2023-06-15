@@ -9,7 +9,7 @@
 //  Use of this source code is governed by a BSD-style license that can be
 //  found in the LICENSE.v8 file.
 
-import { assert } from "../../../core/assert";
+import { assert } from "#core/assert.js";
 
 export const enum FunctionState {
     // Corresponds to CodeKind::INTERPRETED_FUNCTION when optimization is enabled, per:

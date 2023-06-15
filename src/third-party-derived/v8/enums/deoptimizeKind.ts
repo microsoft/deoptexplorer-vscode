@@ -10,8 +10,8 @@
 //  found in the LICENSE.v8 file.
 
 import { Comparer } from "@esfx/equatable";
-import { V8Version } from "../../../core/v8Version";
-import { VersionedEnum } from "../../../core/versionedEnum";
+import { V8Version } from "#core/v8Version.js";
+import { VersionedEnum } from "#core/versionedEnum.js";
 
 // https://github.com/v8/v8/blob/537fb908eb45852505731f6d0949754180435d1b/src/common/globals.h#L503
 export const enum DeoptimizeKind {

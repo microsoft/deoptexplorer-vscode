@@ -2,18 +2,18 @@
 // Licensed under the MIT License.
 
 import { from } from "@esfx/iter-query";
+import { markdown, MarkdownString } from "#core/markdown.js";
+import { IcEntry } from "#deoptigate/icEntry.js";
+import { formatIcState, IcState } from "#v8/enums/icState.js";
+import { IcType } from "#v8/enums/icType.js";
 import { CancellationToken, ProviderResult, ThemeColor, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from "vscode";
-import { markdown, MarkdownString } from "../../../core/markdown";
-import { IcEntry } from "../../../third-party-derived/deoptigate/icEntry";
-import { formatIcState, IcState } from "../../../third-party-derived/v8/enums/icState";
-import { IcType } from "../../../third-party-derived/v8/enums/icType";
+import { getScriptSourceUri } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
 import { FunctionReference } from "../../model/functionReference";
+import { TypeSafeCommand } from "../../vscode/commands";
 import { formatLocation } from "../../vscode/location";
 import { BaseNode } from "../common/baseNode";
 import { createTreeItem } from "../createTreeItem";
 import { IcTreeDataProvider } from "./icTreeDataProvider";
-import { TypeSafeCommand } from "../../vscode/commands";
-import { getScriptSourceUri, wrapScriptSource } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
 
 export class IcNode extends BaseNode {
     private _functionReference: FunctionReference | null | undefined;

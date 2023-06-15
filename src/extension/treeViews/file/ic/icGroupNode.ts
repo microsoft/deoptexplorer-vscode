@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import { from } from "@esfx/iter-query";
-import type { IcEntry } from "../../../../third-party-derived/deoptigate/icEntry";
-import { IcState, formatIcState } from "../../../../third-party-derived/v8/enums/icState";
+import type { IcEntry } from "#deoptigate/icEntry.js";
+import { formatIcState, IcState } from "#v8/enums/icState.js";
 import { PositionComparer } from "../../../vscode/position";
 import { BaseNode } from "../../common/baseNode";
 import { GroupNode } from "../common/groupNode";

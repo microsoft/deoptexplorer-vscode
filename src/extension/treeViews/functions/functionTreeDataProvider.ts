@@ -2,11 +2,10 @@
 // Licensed under the MIT License.
 
 import { from, Query } from "@esfx/iter-query";
-import path from "path";
+import { UriComparer, UriEqualer } from "#core/uri.js";
+import { getNullableComparer, getNullableEqualer } from "#core/utils.js";
+import { formatFunctionState, FunctionState } from "#v8/enums/functionState.js";
 import { ThemeIcon } from "vscode";
-import { UriComparer, UriEqualer } from "../../../core/uri";
-import { getNullableComparer, getNullableEqualer } from "../../../core/utils";
-import { formatFunctionState, FunctionState } from "../../../third-party-derived/v8/enums/functionState";
 import type { LogFile } from "../../model/logFile";
 import { formatUriMarkdown } from "../../vscode/uri";
 import { BaseNodeProvider } from "../common/baseNodeProvider";

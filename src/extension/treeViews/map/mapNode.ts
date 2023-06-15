@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import { count } from "@esfx/iter-fn";
+import { markdown } from "#core/markdown.js";
 import { CancellationToken, MarkdownString, ProviderResult, TextDocumentShowOptions, ThemeIcon, TreeItem, TreeItemCollapsibleState } from "vscode";
-import { markdown } from "../../../core/markdown";
 import { GroupMaps } from "../../constants";
 import { MapReference } from "../../model/mapEntry";
 import { getUriForMap } from "../../textDocumentContentProviders/map";

@@ -2,18 +2,18 @@
 // Licensed under the MIT License.
 
 import { Deferred } from "@esfx/async-deferred";
+import { from } from "@esfx/iter-query";
+import { pieChart, pieChartStyleResource, Slice } from "#chromium/pieChart.js";
+import { html } from "#core/html.js";
 import * as path from "path";
 import { CancellationToken, Disposable, ExtensionContext, Uri, WebviewView, WebviewViewProvider, WebviewViewResolveContext, window } from "vscode";
-import { colors, getColor } from "../utils/colors";
-import { CommandUri } from "../vscode/commandUri";
-import { LogFile } from "../model/logFile";
 import * as constants from "../constants";
-import { html } from "../../core/html";
 import { formatMemory, formatMemoryHighPrecision, formatMillisecondsShort } from "../formatting/numbers";
-import { pieChart, pieChartStyleResource, Slice } from "../../third-party-derived/chromium/pieChart";
+import { LogFile } from "../model/logFile";
 import { events } from "../services/events";
+import { colors, getColor } from "../utils/colors";
 import { createNonce } from "../utils/csp";
-import { from } from "@esfx/iter-query";
+import { CommandUri } from "../vscode/commandUri";
 
 const SHOW_MEMORY_BREAKDOWN = false;
 

@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 import { from } from "@esfx/iter-query";
-import { html } from "../../../core/html";
-import { formatFunctionState } from "../../../third-party-derived/v8/enums/functionState";
-import { ViewBuilder } from "../../../third-party-derived/v8/tools/profile_view";
+import { html } from "#core/html.js";
+import { formatFunctionState } from "#v8/enums/functionState.js";
+import { ViewBuilder } from "#v8/tools/profile_view.js";
 import { ProfileShowMode } from "../../constants";
 import { isOpenableScriptUri } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
 import { formatMilliseconds } from "../../formatting/numbers";

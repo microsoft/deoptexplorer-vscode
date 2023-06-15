@@ -1,10 +1,10 @@
 import { from } from "@esfx/iter-query";
+import { DeoptEntry } from "#deoptigate/deoptEntry.js";
 import { Location, Position, Range, Uri } from "vscode";
+import { Entry } from "../../model/entry";
 import { CanonicalUri } from "../../services/canonicalPaths";
 import { PositionComparer } from "../../vscode/position";
 import { createFinder } from "../finder";
-import { DeoptEntry } from "../../../third-party-derived/deoptigate/deoptEntry";
-import { Entry } from "../../model/entry";
 
 it.skip("finder", () => {
     const finder = createFinder(Uri.file("C:/dev") as CanonicalUri, from<Entry>([

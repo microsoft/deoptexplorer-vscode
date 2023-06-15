@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import { empty } from "@esfx/iter-fn";
+import { assert } from "#core/assert.js";
 import { CancellationToken, ProviderResult, TreeItem } from "vscode";
-import { assert } from "../../../core/assert";
 import { ContextCommandHandler } from "../../commands";
 import { paginateNodes, PaginationOptions } from "../pagination";
 import type { BaseNodeProvider } from "./baseNodeProvider";

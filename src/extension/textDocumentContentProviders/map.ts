@@ -3,16 +3,16 @@
 
 import { isDefined } from "@esfx/fn";
 import { from } from "@esfx/iter-query";
+import { formatAddress } from "#core/address.js";
+import { RangeMap } from "#core/collections/rangeMap.js";
+import { StringSet } from "#core/collections/stringSet.js";
+import { markdown } from "#core/markdown.js";
+import { MruCache } from "#core/mruCache.js";
+import { TextWriter } from "#core/textWriter.js";
+import { TimeDelta, TimeTicks } from "#core/time.js";
+import { FunctionEntry } from "#deoptigate/functionEntry.js";
+import { MapEvent } from "#v8/enums/mapEvent.js";
 import { CancellationToken, Definition, DefinitionLink, DefinitionProvider, Disposable, DocumentLink, DocumentLinkProvider, DocumentSelector, EventEmitter, ExtensionContext, languages, Location, Position, ProviderResult, Range, ReferenceContext, ReferenceProvider, TextDocument, TextDocumentContentProvider, Uri, ViewColumn, window, workspace } from "vscode";
-import { formatAddress } from "../../core/address";
-import { RangeMap } from "../../core/collections/rangeMap";
-import { StringSet } from "../../core/collections/stringSet";
-import { markdown } from "../../core/markdown";
-import { MruCache } from "../../core/mruCache";
-import { TextWriter } from "../../core/textWriter";
-import { TimeDelta, TimeTicks } from "../../core/time";
-import { FunctionEntry } from "../../third-party-derived/deoptigate/functionEntry";
-import { MapEvent } from "../../third-party-derived/v8/enums/mapEvent";
 import * as constants from "../constants";
 import { getScriptSourceLocation, getScriptSourceUri } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 import { MapEntry, MapEntryUpdate, MapId, MapProperty, MapReference, SymbolName } from "../model/mapEntry";

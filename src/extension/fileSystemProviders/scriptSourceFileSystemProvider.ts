@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { isFileSystemLocation } from "#core/paths.js";
+import { Sources } from "#core/sources.js";
+import { resolveUri } from "#core/uri.js";
 import { TextEncoder } from "util";
 import { Disposable, EventEmitter, ExtensionContext, FileChangeEvent, FileChangeType, FilePermission, FileStat, FileSystemError, FileSystemProvider, FileType, Location, Uri, workspace } from "vscode";
 import * as constants from "../constants";
 import { openedFile, openedLog } from "../services/currentLogFile";
 import { events } from "../services/events";
 import { VSDisposableStack } from "../vscode/disposable";
-import { Sources } from "../../core/sources";
-import { isFileSystemLocation } from "../../core/paths";
-import { resolveUri } from "../../core/uri";
 
 export type ScriptSource =
     | { uri?: Uri, scriptId: number }

@@ -4,20 +4,20 @@
 import { Disposable } from "@esfx/disposable";
 import { isDefined } from "@esfx/fn";
 import { from } from "@esfx/iter-query";
+import { RangeMap } from "#core/collections/rangeMap.js";
+import { markdown, MarkdownString } from "#core/markdown.js";
+import { MruCache } from "#core/mruCache.js";
+import { IcEntry, IcEntryUpdate } from "#deoptigate/icEntry.js";
+import { formatIcState, IcState } from "#v8/enums/icState.js";
 import { CancellationToken, Hover, HoverProvider, Position, ProviderResult, Range, TextDocument, Uri } from "vscode";
-import { RangeMap } from "../../core/collections/rangeMap";
-import { markdown, MarkdownString } from "../../core/markdown";
-import { MruCache } from "../../core/mruCache";
-import { IcEntry, IcEntryUpdate } from "../../third-party-derived/deoptigate/icEntry";
-import { formatIcState, IcState } from "../../third-party-derived/v8/enums/icState";
 import { commands } from "../constants";
+import { getScriptSourceUri, unwrapScriptSource } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 import { Entry } from "../model/entry";
 import { MapEntry } from "../model/mapEntry";
 import { getCanonicalUri } from "../services/canonicalPaths";
 import { openedLog } from "../services/currentLogFile";
 import { CommandUri } from "../vscode/commandUri";
 import { entryContainsPosition } from "./utils";
-import { getScriptSourceUri, unwrapScriptSource } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 
 const LINE_RANGE = 5;
 

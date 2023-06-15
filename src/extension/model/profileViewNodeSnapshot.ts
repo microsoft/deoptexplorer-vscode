@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { SourceMapBias } from "#core/sourceMap.js";
+import { TimeDelta } from "#core/time.js";
+import { UriEqualer } from "#core/uri.js";
+import { CodeEntry } from "#v8/tools/codeentry.js";
+import { ProfileViewNode } from "#v8/tools/profile_view.js";
+import { FileLineTick, LineTick } from "#v8/tools/types.js";
 import { CancellationToken, Location, Position } from "vscode";
 import { CanonicalUri, getCanonicalUri } from "../services/canonicalPaths";
 import { isArray } from "../utils/types";
-import { SourceMapBias } from "../../core/sourceMap";
-import { CodeEntry } from "../../third-party-derived/v8/tools/codeentry";
-import { ProfileViewNode } from "../../third-party-derived/v8/tools/profile_view";
-import { FileLineTick, LineTick } from "../../third-party-derived/v8/tools/types";
 import { LogFile } from "./logFile";
-import { TimeDelta } from "../../core/time";
-import { UriEqualer } from "../../core/uri";
 
 /**
  * A snapshot of the current `ProfileViewNode` to be displayed in the UI

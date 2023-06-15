@@ -4,16 +4,16 @@
 import { Disposable } from "@esfx/disposable";
 import * as fn from "@esfx/fn";
 import { from } from "@esfx/iter-query";
+import { DeoptimizeKind } from "#v8/enums/deoptimizeKind.js";
 import { ExtensionContext, TextEditorDecorationType, window } from "vscode";
-import { DeoptimizeKind } from "../../third-party-derived/v8/enums/deoptimizeKind";
 import { ShowDecorations } from "../constants";
+import { unwrapScriptSource } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 import { getCanonicalUri } from "../services/canonicalPaths";
 import { showDecorations } from "../services/context";
 import { openedLog } from "../services/currentLogFile";
 import { events } from "../services/events";
 import { VSDisposableStack } from "../vscode/disposable";
 import { createDecorationType, getTextEditors } from "./utils";
-import { unwrapScriptSource } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 
 export class DeoptDecorations {
     private _showDecorations: "active" | "visible" | "none" = showDecorations.has(ShowDecorations.Deopts) ? "visible" : "none";

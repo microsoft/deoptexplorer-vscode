@@ -3,14 +3,14 @@
 
 import { Deferred } from "@esfx/async-deferred";
 import { delay } from "@esfx/async-delay";
+import { assert } from "#core/assert.js";
+import { ImmutableEnumSet } from "#core/collections/enumSet.js";
+import { readLines, tryStatAsync } from "#core/fs.js";
+import { UriEqualer } from "#core/uri.js";
+import { equateNullable } from "#core/utils.js";
+import { CppEntriesProvider } from "#v8/tools/cppEntriesProvider.js";
 import { CancellationError, CancellationToken, Disposable, ExtensionContext, ProgressLocation, Uri, window, workspace } from "vscode";
-import { assert } from "../../core/assert";
-import { ImmutableEnumSet } from "../../core/collections/enumSet";
-import { readLines, tryStatAsync } from "../../core/fs";
-import { UriEqualer } from "../../core/uri";
-import { equateNullable } from "../../core/utils";
 import { WindowsCppEntriesProvider } from "../../platforms/win32/windowsCppEntriesProvider";
-import { CppEntriesProvider } from "../../third-party-derived/v8/tools/cppEntriesProvider";
 import { LogProcessor } from "../components/logProcessor";
 import * as constants from "../constants";
 import { Entry } from "../model/entry";

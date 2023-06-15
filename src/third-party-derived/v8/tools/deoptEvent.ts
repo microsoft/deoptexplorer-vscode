@@ -9,7 +9,7 @@
 //  Use of this source code is governed by a BSD-style license that can be
 //  found in the LICENSE.v8 file.
 
-import { TimeTicks } from "../../../core/time";
+import { TimeTicks } from "#core/time.js";
 
 /**
  * Represents a deoptimization event in a V8 execution timeline.

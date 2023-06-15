@@ -9,10 +9,10 @@
 //  Use of this source code is governed by a BSD-style license that can be
 //  found in the LICENSE.v8 file.
 
-import { CanonicalUri } from "../../../extension/services/canonicalPaths";
-import { CallTreeNode } from "./calltree";
-import { TimeTicks } from "../../../core/time";
+import { TimeTicks } from "#core/time.js";
+import { CanonicalUri } from "#extension/services/canonicalPaths.js";
 import { Location, Position } from "vscode";
+import { CallTreeNode } from "./calltree";
 
 export class LineTick {
     constructor(

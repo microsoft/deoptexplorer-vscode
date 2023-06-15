@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { assert } from "#core/assert.js";
 import { Location } from "vscode";
-import { assert } from "../../core/assert";
 import { getCanonicalLocation } from "../services/canonicalPaths";
 import { formatLocation, parseLocation } from "../vscode/location";
 

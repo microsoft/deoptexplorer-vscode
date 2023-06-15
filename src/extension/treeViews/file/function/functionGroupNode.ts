@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import { from } from "@esfx/iter-query";
-import type { FunctionEntry } from "../../../../third-party-derived/deoptigate/functionEntry";
-import { FunctionState, formatFunctionState } from "../../../../third-party-derived/v8/enums/functionState";
+import type { FunctionEntry } from "#deoptigate/functionEntry.js";
+import { formatFunctionState, FunctionState } from "#v8/enums/functionState.js";
 import type { BaseNode } from "../../common/baseNode";
 import { GroupNode } from "../common/groupNode";
 import type { FunctionCategoryNode } from "./functionCategoryNode";

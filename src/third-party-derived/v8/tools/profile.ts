@@ -33,37 +33,36 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import { ref, Reference } from "@esfx/ref";
+import { Address } from "#core/address.js";
+import { assert, assertNever } from "#core/assert.js";
+import { tryReadFileAsync } from "#core/fs.js";
+import { Script } from "#core/script.js";
+import { Sources } from "#core/sources.js";
+import { TimeDelta, TimeTicks } from "#core/time.js";
+import { ViewFilter, ViewFilterOptions } from "#extension/components/v8/viewFilter.js";
+import { ProfileShowMode } from "#extension/constants.js";
+import { getCanonicalUri } from "#extension/services/canonicalPaths.js";
+import { formatUri } from "#extension/vscode/uri.js";
 import { EventEmitter, Location, Uri } from "vscode";
-import { assert, assertNever } from "../../../core/assert";
-import { ProfileShowMode } from "../../../extension/constants";
-import { getCanonicalUri } from "../../../extension/services/canonicalPaths";
-import { tryReadFileAsync } from "../../../core/fs";
-import { formatUri } from "../../../extension/vscode/uri";
-import { CodeKind } from "../enums/codeKind";
-import { DeoptimizeKind } from "../enums/deoptimizeKind";
-import { FunctionState } from "../enums/functionState";
-import { TimeDelta, TimeTicks } from "../../../core/time";
-import { VmState } from "../enums/vmState";
-import { Sources } from "../../../core/sources";
-import { Address } from "../../../core/address";
+import { CodeEntryAndLineNumber } from "../codeEntryAndLineNumber";
 import { kNoLineNumberInfo, kNoScriptInfo, kNoSourcePosition, kNotInlined, kNullAddress } from "../constants";
 import { DeoptimizationData } from "../deoptimizationData";
-import { Script } from "../../../core/script";
+import { DeoptimizeKind } from "../enums/deoptimizeKind";
+import { FunctionState } from "../enums/functionState";
+import { VmState } from "../enums/vmState";
+import { ProfileStackTrace } from "../profileStackTrace";
 import { SourcePosition } from "../sourcePosition";
 import { SourcePositionInfo } from "../sourcePositionInfo";
 import { SourcePositionTable } from "../sourcePositionTable";
 import { sourcePositionTableIterator } from "../sourcePositionTableIterator";
+import { SymbolizedSample } from "../symbolizedSample";
 import { TickSample } from "../tickSample";
-import { JsonProfile, JsonProfileCallFrame, JsonProfileNode, JsonProfilePositionTickInfo, SampleInfo } from "./types";
-import { ViewFilter, ViewFilterOptions } from "../../../extension/components/v8/viewFilter";
 import { CallTree, CallTreeNode } from "./calltree";
 import { CEntryNode } from "./centrynode";
 import { CodeEntry, DynamicCodeEntry, DynamicFuncCodeEntry, SharedFunctionCodeEntry } from "./codeentry";
 import { CodeMap } from "./codemap";
 import { ViewBuilder } from "./profile_view";
-import { CodeEntryAndLineNumber } from "../codeEntryAndLineNumber";
-import { ProfileStackTrace } from "../profileStackTrace";
-import { SymbolizedSample } from "../symbolizedSample";
+import { JsonProfile, JsonProfileCallFrame, JsonProfileNode, JsonProfilePositionTickInfo, SampleInfo } from "./types";
 
 export interface ProfileOptions {
     codeMap?: CodeMap;

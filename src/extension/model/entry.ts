@@ -1,15 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { assertNever } from "#core/assert.js";
+import { Sources } from "#core/sources.js";
+import { UriEqualer } from "#core/uri.js";
+import { equateNullable } from "#core/utils.js";
+import type { DeoptEntry } from "#deoptigate/deoptEntry.js";
+import type { FunctionEntry } from "#deoptigate/functionEntry.js";
+import type { IcEntry } from "#deoptigate/icEntry.js";
 import { Location, Uri } from "vscode";
-import { assertNever } from "../../core/assert";
-import { equateNullable } from "../../core/utils";
-import { Sources } from "../../core/sources";
-import * as fn from "@esfx/fn";
-import type { DeoptEntry } from "../../third-party-derived/deoptigate/deoptEntry";
-import type { FunctionEntry } from "../../third-party-derived/deoptigate/functionEntry";
-import type { IcEntry } from "../../third-party-derived/deoptigate/icEntry";
-import { UriEqualer } from "../../core/uri";
 
 export type LocationKind = "source" | "generated";
 

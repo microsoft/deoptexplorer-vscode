@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 import { lazy } from "@esfx/fn";
+import { tryExec } from "#core/utils.js";
 import * as ffi from "ffi-napi";
 import * as ref from "ref-napi";
-import { tryExec } from "../../../core/utils";
 import { BOOL, DWORD, HANDLE, HMODULE, LPCSTR, LPCVOID, LPSTR, PCSTR, PSTR, PVOID } from "./win32";
 
 export function LoadLibraryEx(

@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import { from } from "@esfx/iter-query";
-import type { FunctionEntry } from "../../../../third-party-derived/deoptigate/functionEntry";
-import { FunctionState, isOptimizedFunctionState } from "../../../../third-party-derived/v8/enums/functionState";
+import type { FunctionEntry } from "#deoptigate/functionEntry.js";
+import { FunctionState, isOptimizedFunctionState } from "#v8/enums/functionState.js";
 import { RangeComparer } from "../../../vscode/range";
 import { CategoryNode } from "../common/categoryNode";
 import type { GroupNode } from "../common/groupNode";

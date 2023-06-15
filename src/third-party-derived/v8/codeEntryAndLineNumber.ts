@@ -10,8 +10,8 @@
 //  found in the LICENSE.v8 file.
 
 import { Equaler, Equatable } from "@esfx/equatable";
-import { assert } from "../../core/assert";
-import { CodeEntry } from "../../third-party-derived/v8/tools/codeentry";
+import { assert } from "#core/assert.js";
+import { CodeEntry } from "./tools/codeentry.js";
 
 export class CodeEntryAndLineNumber {
     constructor(

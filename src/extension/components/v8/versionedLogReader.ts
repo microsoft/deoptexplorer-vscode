@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { V8Version } from "#core/v8Version.js";
+import { Dispatcher, DispatchTable, LogReader, parseInt32, parseVarArgs } from "#v8/tools/logreader.js";
 import * as semver from "semver";
 import { Event, EventEmitter } from "vscode";
-import { V8Version } from "../../../core/v8Version";
-import { Dispatcher, DispatchTable, LogReader, parseInt32, parseVarArgs } from "../../../third-party-derived/v8/tools/logreader";
 
 /**
  * A table of {@link semver.Range} strings to {@link DispatchTable} objects.

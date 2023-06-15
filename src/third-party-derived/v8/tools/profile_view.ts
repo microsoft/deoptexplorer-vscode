@@ -32,13 +32,12 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import { ConsArray } from "./consarray";
+import { assert, fail } from "#core/assert.js";
+import { ProfileShowMode } from "#extension/constants.js";
 import { CallTree, CallTreeNode } from "./calltree";
-import { ProfileShowMode } from "../../../extension/constants";
-import { assert, fail } from "../../../core/assert";
 import { CodeEntry } from "./codeentry";
+import { ConsArray } from "./consarray";
 import { LineTick } from "./types";
-import { FunctionName } from "../../../extension/model/functionName";
 
 /**
  * Creates a Profile View builder object.

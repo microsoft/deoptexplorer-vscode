@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { Disposable } from "@esfx/disposable";
+import { ImmutableEnumSet } from "#core/collections/enumSet.js";
 import { TreeView, Uri, window } from "vscode";
-import { LogFile } from "../../model/logFile";
 import * as constants from "../../constants";
+import { LogFile } from "../../model/logFile";
 import { groupMaps, showMaps, sortMaps } from "../../services/context";
 import { BaseNode } from "../common/baseNode";
 import { MapsTreeDataProvider } from "./mapsTreeDataProvider";
-import { ImmutableEnumSet } from "../../../core/collections/enumSet";
-import { Disposable } from "@esfx/disposable";
 
 export class MapsTree implements Disposable {
     private provider: MapsTreeDataProvider;

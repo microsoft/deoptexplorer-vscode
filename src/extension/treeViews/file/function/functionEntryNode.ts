@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { uriBasename } from "#core/uri.js";
+import type { FunctionEntry } from "#deoptigate/functionEntry.js";
 import { SymbolKind, ThemeIcon, Uri } from "vscode";
-import { uriBasename } from "../../../../core/uri";
-import type { FunctionEntry } from "../../../../third-party-derived/deoptigate/functionEntry";
 import { formatPosition } from "../../../vscode/position";
 import { EntryNode } from "../common/entryNode";
 import type { FunctionGroupNode } from "./functionGroupNode";

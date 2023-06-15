@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 import { Comparer, Equaler } from "@esfx/equatable";
+import { CanonicalUriString } from "#extension/services/canonicalPaths.js";
 import * as path from "path";
 import { Uri } from "vscode";
-import { CanonicalUriString } from "../extension/services/canonicalPaths";
 import { assert } from "./assert";
 import { ensureTrailingDirectorySeparator } from "./paths";
 import { RegisteredSerializer, registerKnownSerializer } from "./serializer";

@@ -2,19 +2,18 @@
 // Licensed under the MIT License.
 
 import { from, Query } from "@esfx/iter-query";
+import { UriComparer, UriEqualer } from "#core/uri.js";
+import { getNullableComparer, getNullableEqualer } from "#core/utils.js";
+import { DeoptimizeKind, DeoptimizeKindComparer, formatDeoptimizeKind } from "#v8/enums/deoptimizeKind.js";
 import { SymbolKind, ThemeIcon, Uri } from "vscode";
-import { UriComparer, UriEqualer } from "../../../core/uri";
-import { getNullableComparer, getNullableEqualer } from "../../../core/utils";
-import { DeoptimizeKind, DeoptimizeKindComparer, formatDeoptimizeKind } from "../../../third-party-derived/v8/enums/deoptimizeKind";
 import * as constants from "../../constants";
+import { getScriptSourceUri } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
 import { FunctionReference } from "../../model/functionReference";
 import type { LogFile } from "../../model/logFile";
 import { LocationComparer } from "../../vscode/location";
 import { BaseNodeProvider } from "../common/baseNodeProvider";
 import { GroupingNode, GroupingOptions } from "../common/groupingNode";
 import { DeoptNode } from "./deoptNode";
-import { getScriptSourceUri } from "../../fileSystemProviders/scriptSourceFileSystemProvider";
-import path from "path";
 
 const PAGE_SIZE = 100;
 

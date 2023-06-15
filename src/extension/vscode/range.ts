@@ -3,9 +3,9 @@
 
 import { Comparer, Equaler } from "@esfx/equatable";
 import { Reference } from "@esfx/ref";
+import { KnownSerializedType, RegisteredSerializer, registerKnownSerializer } from "#core/serializer.js";
+import { hashNullable } from "#core/utils.js";
 import { Position, Range } from "vscode";
-import { KnownSerializedType, RegisteredSerializer, registerKnownSerializer } from "../../core/serializer";
-import { hashNullable } from "../../core/utils";
 import { PositionEqualer, PositionSerializer } from "./position";
 
 const trailingRangeRegExp = /:(?<line>\d+)(?::(?<column>\d+)(?::(?<endLine>\d+)(?::(?<endColumn>\d+))?)?)?$/;

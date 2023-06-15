@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 import { from } from "@esfx/iter-query";
-import type { IcEntry } from "../../../../third-party-derived/deoptigate/icEntry";
-import { formatIcState } from "../../../../third-party-derived/v8/enums/icState";
+import type { IcEntry } from "#deoptigate/icEntry.js";
+import { formatIcState } from "#v8/enums/icState.js";
 import { EntryNode } from "../common/entryNode";
 import { IcGroupNode } from "./icGroupNode";
 

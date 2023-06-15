@@ -3,12 +3,12 @@
 
 import { Comparer, Equaler } from "@esfx/equatable";
 import { ref } from "@esfx/ref";
+import { markdown } from "#core/markdown.js";
+import { KnownSerializedType, RegisteredSerializer, registerKnownSerializer } from "#core/serializer.js";
+import { Sources } from "#core/sources.js";
+import { UriComparer, UriEqualer, uriExtname, UriSerializer } from "#core/uri.js";
+import { compareNullable, equateNullable, hashNullable } from "#core/utils.js";
 import { Location, Position, Uri } from "vscode";
-import { markdown } from "../../core/markdown";
-import { KnownSerializedType, RegisteredSerializer, registerKnownSerializer } from "../../core/serializer";
-import { Sources } from "../../core/sources";
-import { UriComparer, UriEqualer, uriExtname, UriSerializer } from "../../core/uri";
-import { compareNullable, equateNullable, hashNullable } from "../../core/utils";
 import { getScriptSourceLocation } from "../fileSystemProviders/scriptSourceFileSystemProvider";
 import { formatRange, RangeComparer, RangeEqualer, RangeSerializer, tryParseTrailingRange } from "./range";
 import { formatUri, FormatUriOptions, isPathOrUriString, pathOrUriStringToUri, UNKNOWN_URI } from "./uri";

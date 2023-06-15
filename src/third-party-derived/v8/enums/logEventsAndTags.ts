@@ -9,8 +9,8 @@
 //  Use of this source code is governed by a BSD-style license that can be
 //  found in the LICENSE.v8 file.
 
-import { V8Version } from "../../../core/v8Version";
-import { VersionedEnum } from "../../../core/versionedEnum";
+import { V8Version } from "#core/v8Version.js";
+import { VersionedEnum } from "#core/versionedEnum.js";
 
 // https://github.com/v8/v8/blob/5ecb5bd9785ae9713089826db8f8ab4f5b68172e/src/logging/log.cc#L57
 export const enum LogEventsAndTags {
