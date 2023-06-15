@@ -26,29 +26,23 @@
 	],
 	"main": "./dist/extension.js",
 	"imports": {
-		"#core/*": {
-			"ts-loader": "./src/core/*",
-			"default": "./out/core/*"
+		"#core/*.js": {
+			"default": "./src/core/*.ts"
 		},
-		"#extension/*": {
-			"ts-loader": ["./src/extension/*", "./src/extension/*.ts"],
-			"default": ["./out/extension/*", "./out/extension/*.js"]
+		"#extension/*.js": {
+			"default": "./src/extension/*.ts"
 		},
-		"#v8/*": {
-			"ts-loader": "./src/third-party-derived/v8/*",
-			"default": "./out/third-party-derived/v8/*"
+		"#v8/*.js": {
+			"default": "./src/third-party-derived/v8/*.ts"
 		},
-		"#vscode/*": {
-			"ts-loader": "./src/third-party-derived/vscode/*",
-			"default": "./out/third-party-derived/vscode/*"
+		"#vscode/*.js": {
+			"default": "./src/third-party-derived/vscode/*.ts"
 		},
-		"#chromium/*": {
-			"ts-loader": "./src/third-party-derived/chromium/*",
-			"default": "./out/third-party-derived/chromium/*"
+		"#chromium/*.js": {
+			"default": "./src/third-party-derived/chromium/*.ts"
 		},
-		"#deoptigate/*": {
-			"ts-loader": "./src/third-party-derived/deoptigate/*",
-			"default": "./out/third-party-derived/deoptigate/*"
+		"#deoptigate/*.js": {
+			"default": "./src/third-party-derived/deoptigate/*.ts"
 		}
 	},
 	"activationEvents": [

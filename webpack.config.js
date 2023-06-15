@@ -25,7 +25,6 @@ const config = {
     "ffi-napi": "commonjs ffi-napi",
   },
   resolve: {
-    conditionNames: ["require", "node", "ts-loader"],
     extensions: ['.ts', '.tsx', '.js'],
     extensionAlias: {
       '.js': ['.js', '.ts'],
