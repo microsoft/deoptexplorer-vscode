@@ -4,10 +4,12 @@
 import { TextEncoder } from "util";
 import { Disposable, EventEmitter, ExtensionContext, FileChangeEvent, FileChangeType, FilePermission, FileStat, FileSystemError, FileSystemProvider, FileType, Location, Uri, workspace } from "vscode";
 import * as constants from "../constants";
-import { openedLog } from "../services/currentLogFile";
+import { openedFile, openedLog } from "../services/currentLogFile";
 import { events } from "../services/events";
 import { VSDisposableStack } from "../vscode/disposable";
 import { Sources } from "../../core/sources";
+import { isFileSystemLocation } from "../../core/paths";
+import { resolveUri } from "../../core/uri";
 
 export type ScriptSource =
     | { uri?: Uri, scriptId: number }
@@ -15,15 +17,25 @@ export type ScriptSource =
     ;
 
 export function isOpenableScriptUri(uri: Uri, sources: Sources | undefined) {
-    if (uri.scheme === "file") return true;
+    const resolution = sources?.getExistingResolution(uri);
+    if (resolution?.result === "ok" && resolution.local) return true;
+    if (isFileSystemLocation(uri)) return true;
     return !!sources?.getScript(uri);
 }
 
+function adjustUriToRemote(uri: Uri) {
+    if (openedFile?.scheme !== "vscode-remote") return uri;
+    if (uri.scheme === "vscode-remote") return uri;
+    if (uri.scheme !== "file" || uri.authority) return uri;
+    return resolveUri(openedFile, uri.path);
+}
+
 export function getScriptSourceUri(uri: Uri, sources: Sources | undefined) {
+    const resolution = sources?.getExistingResolution(uri);
+    if (resolution?.result === "ok" && resolution.local) return adjustUriToRemote(uri);
     const script = sources?.getScript(uri);
-    return script ? wrapScriptSource(script) :
-        uri.scheme === "file" ? uri :
-        undefined;
+    if (script) return wrapScriptSource(script);
+    if (isFileSystemLocation(uri)) return adjustUriToRemote(uri);
 }
 
 export function getScriptSourceLocation(location: Location, sources: Sources | undefined) {
@@ -35,14 +47,32 @@ export function getScriptSourceLocation(location: Location, sources: Sources | u
 
 export function wrapScriptSource(source: ScriptSource) {
     if (source.scriptId && source.scriptId > 0) {
+        let path = "";
+        const query = new URLSearchParams();
+        query.set("scriptId", `${source.scriptId}`);
+        if (source.uri) {
+            query.set("uri", source.uri.toString(/*skipEncoding*/ false));
+            switch (source.uri.scheme) {
+                case "file":
+                case "vscode-remote":
+                case "https":
+                case "http":
+                case "node":
+                    path = source.uri.path;
+                    break;
+                default:
+                    path = `/${encodeURIComponent(source.uri.toString(/*skipEncoding*/ true))}`;
+                    break;
+            }
+        }
         return Uri.from({
             scheme: constants.schemes.source,
-            path: `/${source.uri ? encodeURIComponent(source.uri.toString(/*skipEncoding*/ true)) : ""}`,
-            query: `scriptId=${source.scriptId}`
+            path,
+            query: query.toString()
         });
     }
     else if (source.uri) {
-        return source.uri;
+        return adjustUriToRemote(source.uri);
     }
     else {
         throw new Error("Invalid source");
@@ -51,13 +81,12 @@ export function wrapScriptSource(source: ScriptSource) {
 
 export function unwrapScriptSource(uri: Uri): ScriptSource {
     if (uri.scheme !== constants.schemes.source) return { uri };
-
-    const scriptIdString = /^scriptId=(?<scriptIdString>\d+)$/.exec(uri.query)?.[1];
-    if (scriptIdString === undefined) throw new Error("Invalid source");
-
-    const uriString = uri.path.length > 1 ? decodeURIComponent(uri.path.slice(1)) : undefined;
+    const query = new URLSearchParams(uri.query);
+    const scriptIdString = query.get("scriptId");
+    if (scriptIdString === null) throw new Error("Invalid source");
     const scriptId = parseInt(scriptIdString, 10);
-    const scriptUri = uriString ? Uri.parse(uriString, /*strict*/ true) : undefined;
+    const scriptUriString = query.get("uri");
+    const scriptUri = scriptUriString ? Uri.parse(scriptUriString, /*strict*/ true) : undefined;
     return { uri: scriptUri, scriptId: scriptId };
 }
 

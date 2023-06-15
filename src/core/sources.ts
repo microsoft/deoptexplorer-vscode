@@ -13,8 +13,15 @@ import { LineMap } from "./lineMap";
 import { Script } from "./script";
 import { extractSourceMappingURL, getInlineSourceMapData, SourceMap } from "./sourceMap";
 import { ensureUriTrailingDirectorySeparator, relativeUriFragment, resolveUri, uriExtname } from "./uri";
+import { isFileSystemLocation } from "./paths";
 
-export type OkFileResolution = { readonly result: "ok" };
+export type OkLocalFileResolution = { readonly result: "ok", readonly local: true };
+export type OkNonlocalFileResolution = { readonly result: "ok", readonly local: false };
+export type OkFileResolution =
+    | OkLocalFileResolution
+    | OkNonlocalFileResolution
+    ;
+
 export type SkipFileResolution = { readonly result: "skip" };
 export type RedirectFileResolution = { readonly result: "redirect", readonly file: Uri };
 export type FileResolution =
@@ -31,14 +38,21 @@ export type UserFileResolution =
 export type UserFileResolver = (file: Uri) => UserFileResolution | Promise<UserFileResolution>;
 
 type MissingFileResolution = { readonly result: "missing" };
-type RedirectTargetFileResolution = { readonly result: "target", readonly from: StringSet<Uri> };
+
+type RedirectTargetLocalFileResolution = { readonly result: "target", readonly from: StringSet<Uri>, readonly local: true };
+type RedirectTargetNonlocalFileResolution = { readonly result: "target", readonly from: StringSet<Uri>, readonly local: false };
+type RedirectTargetFileResolution =
+    | RedirectTargetLocalFileResolution
+    | RedirectTargetNonlocalFileResolution
+    ;
 
 type InternalFileResolution =
     | FileResolution
     | MissingFileResolution
     | RedirectTargetFileResolution;
 
-const fileOk: OkFileResolution = Object.freeze({ result: "ok" as const });
+const localFileOk: OkLocalFileResolution = Object.freeze({ result: "ok", local: true });
+const nonlocalFileOk: OkNonlocalFileResolution = Object.freeze({ result: "ok", local: false });
 const fileSkip: SkipFileResolution = Object.freeze({ result: "skip" as const });
 const fileMissing: MissingFileResolution = Object.freeze({ result: "missing" as const });
 
@@ -62,7 +76,7 @@ export class Sources {
     private _directoryRedirections = new StringMap<Uri, DirectoryRedirection>(uriToString);
     private _ignoreMissing = false;
 
-    static readonly FILE_OK = fileOk;
+    static readonly FILE_OK = nonlocalFileOk;
     static readonly FILE_SKIP = fileSkip;
 
     constructor(scripts?: Iterable<Script>) {
@@ -173,8 +187,9 @@ export class Sources {
     }
 
     private _getExistingResolutionWorker(file: Uri): InternalFileResolution | undefined {
-        if (this._scriptUrlToScript.has(file)) return fileOk;
-        return this._resolutions.get(file);
+        const resolution = this._resolutions.get(file);
+        if (resolution) return resolution;
+        if (this._scriptUrlToScript.has(file)) return nonlocalFileOk;
     }
 
     async resolveAsync(file: Uri, onMissing?: UserFileResolver | "prompt"): Promise<FileResolution> {
@@ -194,22 +209,22 @@ export class Sources {
     }
 
     private async _tryResolveUsingFileSystem(file: Uri): Promise<FileResolution | undefined> {
-        if (file.scheme !== "file") return undefined;
+        if (!isFileSystemLocation(file)) return undefined;
         const content = await tryReadFileAsync(file);
         if (content !== undefined) {
-            return this._recordOkResolution(file, fileOk, content);
+            return this._recordOkResolution(file, localFileOk, content);
         }
     }
 
     private async _tryResolveUsingDirectoryRedirection(file: Uri): Promise<FileResolution | undefined> {
-        if (file.scheme !== "file") return undefined;
+        if (!isFileSystemLocation(file)) return undefined;
         for (const dirname of walkUpContainingDirectories(file)) {
             const directory = this._directoryRedirections.get(dirname);
             if (directory) {
                 const candidate = getCanonicalUri(resolveUri(ensureUriTrailingDirectorySeparator(directory.dirname), relativeUriFragment(dirname, file)));
                 const content = await tryReadFileAsync(candidate);
                 if (content !== undefined) {
-                    return this._recordRedirectResolution(file, candidate, content);
+                    return this._recordRedirectResolution(file, candidate, content, /*local*/ true);
                 }
             }
         }
@@ -247,7 +262,7 @@ export class Sources {
             }
 
             const redirect = getCanonicalUri(openResult[0]);
-            return this._recordRedirectResolution(file, redirect, await readFileAsync(redirect));
+            return this._recordRedirectResolution(file, redirect, await readFileAsync(redirect), /*local*/ true);
         }
     }
 
@@ -256,13 +271,13 @@ export class Sources {
             const resolution = await onMissing(file);
             return resolution.result === "skip" ?
                 this._recordSkipResolution(file, fileSkip) :
-                this._recordRedirectResolution(file, resolution.file, await readFileAsync(resolution.file));
+                this._recordRedirectResolution(file, resolution.file, await readFileAsync(resolution.file), /*local*/ false);
         }
     }
 
     private _getFileResolution(resolution: InternalFileResolution): FileResolution {
         return isSkipLike(resolution) ? fileSkip :
-            isOkLike(resolution) ? fileOk :
+            isOkLike(resolution) ? resolution.local ? localFileOk : nonlocalFileOk :
             resolution;
     }
 
@@ -279,7 +294,7 @@ export class Sources {
     private _recordOkResolution(file: Uri, resolution: OkFileResolution | RedirectTargetFileResolution, content: string) {
         const existing = this._resolutions.get(file);
         if (existing && isOkLike(existing) && isOkLike(resolution) && !(existing.result === "ok" && resolution.result === "ok")) {
-            const merged: RedirectTargetFileResolution = { result: "target", from: new StringSet(uriToString) };
+            const merged: RedirectTargetFileResolution = { result: "target", from: new StringSet(uriToString), local: existing.local && resolution.local };
             mergeResolution(merged, file, existing);
             mergeResolution(merged, file, resolution);
             this._resolvedSources.set(file, content);
@@ -290,12 +305,12 @@ export class Sources {
         return this._recordResolution(file, resolution);
     }
 
-    private _recordRedirectResolution(file: Uri, redirect: Uri, content: string) {
+    private _recordRedirectResolution(file: Uri, redirect: Uri, content: string, local: boolean) {
         if (redirect === file) {
-            return this._recordOkResolution(file, fileOk, content);
+            return this._recordOkResolution(file, local ? localFileOk : nonlocalFileOk, content);
         }
         else {
-            this._recordOkResolution(redirect, { result: "target", from: new StringSet(uriToString).add(file) }, content);
+            this._recordOkResolution(redirect, { result: "target", from: new StringSet(uriToString).add(file), local }, content);
             this.delete(file);
             const fileDirname = getCanonicalUri(resolveUri(file, "."));
             const redirectDirname = getCanonicalUri(resolveUri(redirect, "."));
@@ -334,7 +349,7 @@ export class Sources {
                 if (target?.result === "target" && target.from.delete(file)) {
                     if (target.from.size === 1 && target.from.has(resolution.file)) {
                         // The redirected file has been read explicitly, so switch the resolution to "ok"
-                        this._resolutions.set(resolution.file, fileOk);
+                        this._resolutions.set(resolution.file, nonlocalFileOk);
                     }
                     else if (target.from.size === 0) {
                         // target is no longer referenced, so we can delete it.
@@ -388,7 +403,7 @@ export class Sources {
     async getLineMapAsync(file: Uri, onMissing?: UserFileResolver | "prompt") {
         let resolved = this._resolveFile(file);
         if (resolved === undefined) {
-            if (file.scheme !== "file") {
+            if (!isFileSystemLocation(file)) {
                 return undefined;
             }
 
@@ -459,7 +474,7 @@ export class Sources {
     async getSourceMapAsync(file: Uri, onMissing?: UserFileResolver | "prompt"): Promise<SourceMap | "no-sourcemap"> {
         let resolved = this._resolveFile(file);
         if (resolved === undefined) {
-            if (file.scheme !== "file") {
+            if (!isFileSystemLocation(file)) {
                 return "no-sourcemap";
             }
 
@@ -540,7 +555,7 @@ export class Sources {
     async getSourceFileAsync(file: Uri, onMissing?: UserFileResolver | "prompt") {
         let resolved = this._resolveFile(file);
         if (resolved === undefined) {
-            if (file.scheme !== "file") {
+            if (!isFileSystemLocation(file)) {
                 return undefined;
             }
 
