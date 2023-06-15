@@ -11,10 +11,16 @@ export class LocationMap<T> {
     private _files: Map<string, Map<number, Map<number, [Location, T] | Map<number, Map<number, [Location, T]>>>>> = new Map();
     private _size: number = 0;
 
+    /**
+     * Gets the number of locations in the map.
+     */
     get size() {
         return this._size;
     }
 
+    /**
+     * Returns a value indicating whether the provided {@link Location} exists in the map.
+     */
     has(key: Location) {
         const uriString = key.uri.toString();
         const { start: { line: startLine, character: startCharacter }, end: { line: endLine, character: endCharacter } } = key.range;
@@ -28,6 +34,9 @@ export class LocationMap<T> {
         return false;
     }
 
+    /**
+     * Gets the value associated with a {@link Location}.
+     */
     get(key: Location) {
         const uriString = key.uri.toString();
         const { start: { line: startLine, character: startCharacter }, end: { line: endLine, character: endCharacter } } = key.range;
@@ -40,6 +49,9 @@ export class LocationMap<T> {
         }
     }
 
+    /**
+     * Sets the value associated with a {@link Location}.
+     */
     set(key: Location, value: T) {
         const uriString = key.uri.toString();
         const { start: { line: startLine, character: startCharacter }, end: { line: endLine, character: endCharacter } } = key.range;
@@ -100,6 +112,10 @@ export class LocationMap<T> {
         return this;
     }
 
+    /**
+     * Deletes the entry for a {@link Location}.
+     * @returns `true` if the {@link Location} was deleted; otherwise, `false`.
+     */
     delete(key: Location) {
         const uriString = key.uri.toString();
         const { start: { line: startLine, character: startCharacter }, end: { line: endLine, character: endCharacter } } = key.range;
@@ -152,12 +168,15 @@ export class LocationMap<T> {
         return false;
     }
 
+    /**
+     * Removes all entries in the map.
+     */
     clear() {
         this._files.clear();
         this._size = 0;
     }
 
-    forEach(cb: (value: T, key: Location, map: LocationMap<T>) => void, thisArg?: any) {
+    forEach(cb: (value: T, key: Location, map: LocationMap<T>) => unknown, thisArg?: unknown) {
         for (const [key, value] of this) {
             cb.call(thisArg, value, key, this);
         }
