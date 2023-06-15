@@ -253,8 +253,6 @@ export class SourceMapping {
     ) {}
 }
 
-const sourceMapDataUrlRegExp = /^data:application\/json[^,]+base64,(?<data>.*)/;
-
 export function extractSourceMappingURL(content: string, file: Uri) {
     // NOTE: copied from source-map-support, see the third party license notice above.
     const re = /(?:\/\/[@#][\s]*sourceMappingURL=([^\s'"]+)[\s]*$)|(?:\/\*[@#][\s]*sourceMappingURL=([^\s*'"]+)[\s]*(?:\*\/)[\s]*$)/mg;
@@ -264,11 +262,13 @@ export function extractSourceMappingURL(content: string, file: Uri) {
     return sourceMappingURL ? resolveUri(file, sourceMappingURL) : undefined;
 }
 
+const sourceMapDataUrlRegExp = /^application\/json(?:;charset=[uU][tT][fF]-8)?;base64,(?<data>.*)/;
+
 export function getInlineSourceMapData(sourceMappingURL: Uri): string | undefined {
-    const match = sourceMappingURL.scheme === "data" ? sourceMapDataUrlRegExp.exec(sourceMappingURL.toString()) : undefined;
-    if (match?.groups) {
-        return Buffer.from(match.groups.data, "base64").toString();
-    }
+    if (sourceMappingURL.scheme !== "data" || sourceMappingURL.authority) return undefined;
+    const match = sourceMapDataUrlRegExp.exec(sourceMappingURL.path);
+    if (!match?.groups) return undefined;
+    return Buffer.from(match.groups.data, "base64").toString();
 }
 
 interface ValidMappingItemWithoutSource {

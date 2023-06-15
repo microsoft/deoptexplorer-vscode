@@ -461,10 +461,10 @@ export class Sources {
                     throw e;
                 }
                 this._sourceMaps.set(resolved, sourceMap);
+                return sourceMap;
             }
-            else {
-                this._sourceMaps.set(resolved, url);
-            }
+
+            this._sourceMaps.set(resolved, url);
             return url;
         }
 
@@ -491,7 +491,7 @@ export class Sources {
         }
 
         if (sourceMap instanceof Uri) {
-            const data = await tryReadFileAsync(sourceMap);
+            const data = isFileSystemLocation(sourceMap) ? await tryReadFileAsync(sourceMap) : undefined;
             if (data !== undefined) {
                 try {
                     sourceMap = new SourceMap(resolved, data, sourceMap);
