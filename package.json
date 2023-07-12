@@ -1515,7 +1515,7 @@
 		"ref-array-di": "^1.2.2",
 		"ref-napi": "^3.0.2",
 		"ref-struct-di": "^1.1.1",
-		"semver": "^6.3.0",
+		"semver": "^6.3.1",
 		"source-map": "^0.6.1",
 		"source-map-support": "^0.5.13",
 		"timeago.js": "^4.0.1",
