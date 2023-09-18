@@ -7,12 +7,6 @@ import path from "path";
 import semver from "semver";
 import { Options } from "./args.js";
 import { HostFlags } from "./hostFlags.js";
-import { canAppend } from "./util.js";
-
-const NULL_DEVICE =
-    process.platform === "win32" ? "\\\\.\\NUL" :
-    canAppend("/dev/null") ? "/dev/null" :
-    null;
 
 export type CleanupCallback = () => Promise<void> | void;
 
@@ -31,18 +25,13 @@ function prepareDeopts(argv: Options, version: V8Version, flags: string[], clean
 
     if (!argv._.includes("--redirect-code-traces")) {
         flags.push("--redirect-code-traces");
-        if (NULL_DEVICE) {
-            flags.push(`--redirect-code-traces-to=${NULL_DEVICE}`);
+        try {
+            const tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), "dexnode-"));
+            const asmfile = path.join(tmpdir, "code.asm");
+            flags.push(`--redirect-code-traces-to=${asmfile}`);
+            cleanupSteps.push(() => fs.promises.rm(tmpdir, { recursive: true, force: true }));
         }
-        else {
-            try {
-                const tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), "dexnode-"));
-                const asmfile = path.join(tmpdir, "code.asm");
-                flags.push(`--redirect-code-traces-to=${asmfile}`);
-                cleanupSteps.push(() => fs.promises.rm(tmpdir, { recursive: true, force: true }));
-            }
-            catch {
-            }
+        catch {
         }
     }
 }
