@@ -1,6 +1,6 @@
 {
   "name": "dexnode",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Run NodeJS with logging options needed by Deopt Explorer",
   "type": "module",
   "bin": {
