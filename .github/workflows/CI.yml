@@ -56,6 +56,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
+    - run: pip install setuptools
     - uses: actions/setup-node@v3
       with:
         node-version: 16.x
