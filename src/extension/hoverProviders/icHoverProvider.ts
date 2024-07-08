@@ -33,7 +33,7 @@ export class ICHoverProvider implements HoverProvider {
 
         let hoverCache = this._perFileHoverCache.get(document.uri);
         if (hoverCache) {
-            const entry = from(hoverCache.findAll(position)).first();
+            const entry = from(hoverCache.findAllContaining(position)).first();
             if (entry) return entry[1];
         }
 

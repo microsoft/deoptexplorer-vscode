@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { Location } from "vscode";
-import { RangeMap } from "./rangeMap";
+import { RangeMap } from "../rangeMap/rangeMapUsingSplayTreeWithComparer";
 
 /**
  * Maps a {@link Location} to a value based on its uri and range.

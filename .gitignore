@@ -1,6 +1,7 @@
 dist
 out
 node_modules
+benchmarks
 .vscode-test/
 .archive/
 *.vsix

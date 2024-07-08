@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { SplayTree } from "#v8/tools/splaytree.js";
+import { SplayTree } from "#v8/tools/__benchmarks__/splaytree/splaytreeWithComparer.js";
 import { Position, Range } from "vscode";
 
 /**
