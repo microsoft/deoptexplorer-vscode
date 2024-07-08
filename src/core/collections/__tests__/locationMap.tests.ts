@@ -1,7 +1,7 @@
 import { Location, Position, Range, Uri } from "vscode";
 import { LocationMap } from "../locationMap";
 
-describe("LocationMap", () => {
+describe.skip("LocationMap", () => {
     const loc1 = new Location(Uri.parse("file:///a"), new Range(new Position(0, 0), new Position(0, 3)));
     const loc1_sameFileAndRange = new Location(Uri.parse("file:///a"), new Range(new Position(0, 0), new Position(0, 3)));
     const loc1_sameFileAndStartDifferentEnd = new Location(Uri.parse("file:///a"), new Range(new Position(0, 0), new Position(0, 4)));

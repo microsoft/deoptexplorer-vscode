@@ -1,15 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import { SplayTree } from "#v8/tools/__benchmarks__/splaytree/splaytreeNoComparer.js";
 import { Location } from "vscode";
-import { RangeMap } from "./rangeMap";
+import { RangeMap } from "../rangeMap/rangeMapUsingSplayTreesLessPolymorphism";
 
 /**
  * Maps a {@link Location} to a value based on its uri and range.
  */
 export class LocationMap<T> {
     // uri -> startLine -> startCharacter -> endLine -> endCharacter -> T
-    private _files = new Map<string, RangeMap<[Location, T]>>();
+    private _files = new SplayTree<string, RangeMap<[Location, T]>>();
     private _size: number = 0;
 
     /**
@@ -23,14 +24,14 @@ export class LocationMap<T> {
      * Returns a value indicating whether the provided {@link Location} exists in the map.
      */
     has(key: Location) {
-        return !!this._files.get(key.uri.toString())?.has(key.range);
+        return !!this._files.find(key.uri.toString())?.value?.has(key.range);
     }
 
     /**
      * Gets the value associated with a {@link Location}.
      */
     get(key: Location) {
-        return this._files.get(key.uri.toString())?.get(key.range)?.[1];
+        return this._files.find(key.uri.toString())?.value?.get(key.range)?.[1];
     }
 
     /**
@@ -38,8 +39,8 @@ export class LocationMap<T> {
      */
     set(key: Location, value: T) {
         const uriString = key.uri.toString();
-        let ranges = this._files.get(uriString);
-        if (!ranges) this._files.set(uriString, ranges = new RangeMap());
+        let ranges = this._files.find(uriString)?.value;
+        if (!ranges) this._files.insert(uriString, ranges = new RangeMap());
         const initialSize = ranges.size;
         ranges.set(key.range, [key, value]);
         if (initialSize > ranges.size) {
@@ -54,11 +55,11 @@ export class LocationMap<T> {
      */
     delete(key: Location) {
         const uriString = key.uri.toString();
-        const ranges = this._files.get(uriString);
+        const ranges = this._files.find(uriString)?.value;
         if (ranges?.delete(key.range)) {
             this._size--;
             if (ranges.size === 0) {
-                this._files.delete(uriString);
+                this._files.remove(uriString);
             }
             return true;
         }
@@ -69,7 +70,7 @@ export class LocationMap<T> {
      * Removes all entries in the map.
      */
     clear() {
-        this._files.clear();
+        this._files = new SplayTree();
         this._size = 0;
     }
 
@@ -80,19 +81,19 @@ export class LocationMap<T> {
     }
 
     * keys() {
-        for (const ranges of this._files.values())
+        for (const ranges of this._files.exportValues())
             for (const [key, ] of ranges.values())
                 yield key;
     }
 
     * values(): Generator<T, void> {
-        for (const ranges of this._files.values())
+        for (const ranges of this._files.exportValues())
             for (const [, value] of ranges.values())
                 yield value;
     }
 
     * entries(): Generator<[Location, T], void> {
-        for (const ranges of this._files.values())
+        for (const ranges of this._files.exportValues())
             for (const [key, value] of ranges.values())
                 yield [key, value];
     }

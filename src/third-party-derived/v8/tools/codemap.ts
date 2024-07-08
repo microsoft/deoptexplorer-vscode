@@ -96,6 +96,7 @@ export class CodeMap {
      */
     moveCode(from: Address, to: Address) {
         let removedNode = this.dynamics_.remove(from);
+        if (!removedNode) throw new Error("Key not found");
         this.deleteAllCoveredNodes_(this.dynamics_, to, to + toAddress(removedNode.value.size));
         this.dynamics_.insert(to, removedNode.value);
     }

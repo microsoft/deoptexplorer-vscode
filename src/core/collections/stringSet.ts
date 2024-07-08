@@ -53,3 +53,13 @@ export class StringSet<T> {
 
     [Symbol.iterator]() { return this.values(); }
 }
+
+export interface ReadonlyStringSet<T> {
+    get size(): number;
+    has(value: T): boolean;
+    forEach(cb: (value: T, key: T, map: ReadonlyStringSet<T>) => void, thisArg?: any): void;
+    keys(): IterableIterator<T>;
+    values(): IterableIterator<T>;
+    entries(): IterableIterator<[T, T]>;
+    [Symbol.iterator](): IterableIterator<T>;
+}

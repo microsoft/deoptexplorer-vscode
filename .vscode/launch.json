@@ -12,7 +12,8 @@
 			"smartStep": true,
 			"outFiles": ["${workspaceRoot}/dist/**/*.js"],
 			"skipFiles": ["<node_internals>/**","${workspaceFolder}/node_modules/tslib/**"],
-			"preLaunchTask": "npm: webpack"
+			"preLaunchTask": "npm: webpack",
+			"resolveSourceMapLocations": null
 		},
 		{
 			"type": "extensionHost",

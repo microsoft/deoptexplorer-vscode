@@ -227,23 +227,23 @@ class MapDocumentContentProvider implements TextDocumentContentProvider, Definit
 
     provideDefinition(document: TextDocument, position: Position, token: CancellationToken): ProviderResult<Definition | DefinitionLink[]> {
         const { references, declarations } = this.getDocumentContentAndLinks(document.uri) ?? {};
-        const referencedEntries = references?.findAll(position);
+        const referencedEntries = references?.findAllContaining(position);
         if (referencedEntries) {
-            return referencedEntries.map(([range, value]) =>
+            return from(referencedEntries).map(([range, value]) =>
                 value instanceof MapId ? new Location(getUriForMap(value), new Range(0, 0, 0, 0)) :
                 value instanceof MapReference ? new Location(getUriForMap(value.mapId), new Range(0, 0, 0, 0)) :
                 undefined
-            ).filter(isDefined);
+            ).filter(isDefined).toArray();
         }
 
-        const declarationEntries = declarations?.findAll(position);
+        const declarationEntries = declarations?.findAllContaining(position);
         if (declarationEntries) {
-            return declarationEntries.map(([range, value]) =>
+            return from(declarationEntries).map(([range, value]) =>
                 value instanceof MapId ? new Location(getUriForMap(value), new Range(0, 0, 0, 0)) :
                 value instanceof MapReference ? new Location(getUriForMap(value.mapId), new Range(0, 0, 0, 0)) :
                 value instanceof MapProperty && value.map ? new Location(getUriForMap(value.map.mapId), new Range(0, 0, 0, 0)) :
                 undefined
-            ).filter(isDefined);
+            ).filter(isDefined).toArray();
         }
 
         const mapReference = this.getMapReferenceAtLocation(document, position);

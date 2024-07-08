@@ -19,6 +19,7 @@ import { MapEntry, MapId } from "./mapEntry";
 import { computeCommonBaseDirectory, relativeUriFragment, uriBasename } from "#core/uri.js";
 import { V8Version } from "#core/v8Version.js";
 import { MemoryOverview } from "./memoryOverview";
+import { ReadonlyStringSet } from "#core/collections/stringSet.js";
 
 export class LogFile {
     private _fileEntryFinders = new StringMap<Uri, Record<Entry["kind"], (position: Position) => Iterable<Entry>>>(uriToString);
@@ -32,8 +33,8 @@ export class LogFile {
         readonly profile: Profile,
         readonly memory: MemoryOverview,
         // readonly timerInfo: TimerInfo,
-        readonly sourcePaths: ReadonlySet<Uri>,
-        readonly generatedPaths: ReadonlySet<Uri>,
+        readonly sourcePaths: ReadonlyStringSet<Uri>,
+        readonly generatedPaths: ReadonlyStringSet<Uri>,
         readonly sources: Sources,
     ) {
     }
