@@ -44,14 +44,14 @@ jobs:
           target: alpine-x64
           target_option: --target alpine-x64
           npm_config_arch: x64
-        # - os: macos-latest
-        #   target: darwin-x64
-        #   target_option: --target darwin-x64
-        #   npm_config_arch: x64
-        # - os: macos-latest
-        #   target: darwin-arm64
-        #   target_option: --target darwin-arm64
-        #   npm_config_arch: arm64
+        - os: macos-latest
+          target: darwin-x64
+          target_option: --target darwin-x64
+          npm_config_arch: x64
+        - os: macos-latest
+          target: darwin-arm64
+          target_option: --target darwin-arm64
+          npm_config_arch: arm64
 
     runs-on: ${{ matrix.os }}
     steps:
