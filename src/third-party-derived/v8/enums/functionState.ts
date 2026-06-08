@@ -59,7 +59,8 @@ export function isOptimizedFunctionState(value: FunctionState): value is Functio
 }
 
 export function parseFunctionState(text: string) {
-    switch (text.toLowerCase()) {
+    const normalizedText = text.replace(/^'+|'+$/g, "");
+    switch (normalizedText.toLowerCase()) {
         case "":
         case "compiled":
             return FunctionState.Compiled;
